@@ -1,9 +1,13 @@
-
-import { useSelectSearchableContext } from "./SelectSearchableContext";
+import { useSelectSearchableStoreContext, useSelectSearchableStore } from "./SelectSearchableStoreContext";
 import { useSelectNavigationKeyDown } from "./useSelectNavigationKeyDown";
 
 export function useComboboxOwnerProps() {
-  const { listboxId, open, activeDescendantId, disabled } = useSelectSearchableContext();
+  const store = useSelectSearchableStoreContext();
+  const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
+  const open = useSelectSearchableStore(store, (s) => s.open);
+  const activeDescendantId = useSelectSearchableStore(store, (s) => s.activeDescendantId);
+  const disabled = useSelectSearchableStore(store, (s) => s.disabled);
+
   const onNavKeyDown = useSelectNavigationKeyDown();
 
   return {

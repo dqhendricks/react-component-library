@@ -1,7 +1,9 @@
-// SelectSearchableSearch.tsx
 import React, { useEffect, useMemo, useRef } from "react";
 import styles from "./SelectSearchable.module.css";
-import { useSelectSearchableContext } from "./SelectSearchableContext";
+import {
+  useSelectSearchableStoreContext,
+  useSelectSearchableStore,
+} from "./SelectSearchableStoreContext";
 import { useComboboxOwnerProps } from "./useComboboxOwnerProps";
 import { mergeProps } from "./mergeProps";
 
@@ -18,23 +20,26 @@ export function SelectSearchableSearch({
   placeholder = "Search…",
   ...rest
 }: SelectSearchableSearchProps) {
-  const {
-    open,
-    disabled,
-    searchQuery,
-    setSearchQuery,
-    getOptions,
-    setActiveDescendantId,
-    setHasSearch,
-  } = useSelectSearchableContext();
+  const store = useSelectSearchableStoreContext();
+
+  const open = useSelectSearchableStore(store, (s) => s.open);
+  const disabled = useSelectSearchableStore(store, (s) => s.disabled);
+  const searchQuery = useSelectSearchableStore(store, (s) => s.searchQuery);
+
+  // Derived visibility is computed once per query in the store;
+  // we just use it here to pick the first visible option.
+  const orderedIds = useSelectSearchableStore(store, (s) => s.orderedIds);
+  const visibleIds = useSelectSearchableStore(store, (s) => s.visibleIds);
+  const options = useSelectSearchableStore(store, (s) => s.options);
 
   const comboboxOwnerProps = useComboboxOwnerProps();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // Mark that the search input is the combobox "owner" while mounted.
   useEffect(() => {
-    setHasSearch?.(true);
-    return () => setHasSearch?.(false);
-  }, [setHasSearch]);
+    store.setHasSearch(true);
+    return () => store.setHasSearch(false);
+  }, [store]);
 
   useEffect(() => {
     if (!autoFocus) return;
@@ -42,20 +47,22 @@ export function SelectSearchableSearch({
     inputRef.current?.focus();
   }, [open, disabled, autoFocus]);
 
-  // Set active descendant to first match on query change
+  // Set active descendant to first visible match when query changes
   const firstMatchId = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return null;
-    for (const opt of getOptions()) {
-      if (opt.disabled) continue;
-      if (String(opt.label).toLowerCase().includes(q)) return opt.id;
+    // If query is empty, don't force an active option.
+    if (!searchQuery.trim()) return null;
+
+    for (const id of orderedIds) {
+      if (!visibleIds.has(id)) continue;
+      if (options.get(id)?.disabled) continue;
+      return id;
     }
     return null;
-  }, [searchQuery, getOptions]);
+  }, [searchQuery, orderedIds, visibleIds, options]);
 
   useEffect(() => {
-    if (firstMatchId) setActiveDescendantId(firstMatchId);
-  }, [firstMatchId, setActiveDescendantId]);
+    if (firstMatchId) store.setActiveDescendantId(firstMatchId);
+  }, [firstMatchId, store]);
 
   const ourInputProps: React.ComponentPropsWithoutRef<"input"> = {
     className: [styles.searchInput, className].filter(Boolean).join(" "),
@@ -63,13 +70,10 @@ export function SelectSearchableSearch({
     disabled,
     placeholder,
     value: searchQuery,
-    onChange: (e) => setSearchQuery(e.currentTarget.value),
+    onChange: (e) => store.setSearchQuery(e.currentTarget.value),
   };
 
-  const merged = mergeProps(
-    rest as any,
-    { ...ourInputProps, ...comboboxOwnerProps } as any,
-  );
+  const merged = mergeProps(rest as any, { ...ourInputProps, ...comboboxOwnerProps } as any);
 
   return <input ref={inputRef} {...merged} />;
 }

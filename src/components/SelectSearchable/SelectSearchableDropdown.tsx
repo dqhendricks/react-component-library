@@ -1,7 +1,10 @@
-import React, { useLayoutEffect, useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import styles from "./SelectSearchable.module.css";
-import { useSelectSearchableContext } from "./SelectSearchableContext";
+import {
+  useSelectSearchableStoreContext,
+  useSelectSearchableStore,
+} from "./SelectSearchableStoreContext";
 
 type Placement = "down" | "up";
 
@@ -15,11 +18,26 @@ type FloatingStyle = {
 };
 
 export function SelectSearchableDropdown({ children }: React.PropsWithChildren) {
-  const { open, disabled, listboxId, triggerEl, setListboxEl } = useSelectSearchableContext();
+  const store = useSelectSearchableStoreContext();
+
+  const open = useSelectSearchableStore(store, (s) => s.open);
+  const disabled = useSelectSearchableStore(store, (s) => s.disabled);
+  const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
+  const triggerEl = useSelectSearchableStore(store, (s) => s.triggerEl);
+
   const [floating, setFloating] = useState<FloatingStyle | null>(null);
+
   const hidden = !open || disabled;
 
+  const setListboxRef = useCallback(
+    (el: HTMLUListElement | null) => {
+      store.setListboxEl(el);
+    },
+    [store],
+  );
+
   useLayoutEffect(() => {
+    // Only compute position when interactive/open
     if (!open || disabled) return;
     if (!triggerEl) return;
 
@@ -31,20 +49,12 @@ export function SelectSearchableDropdown({ children }: React.PropsWithChildren) 
       const spaceBelow = window.innerHeight - r.bottom - margin;
       const spaceAbove = r.top - margin;
 
-      const placement: Placement =
-        spaceBelow >= 160 || spaceBelow >= spaceAbove ? "down" : "up";
+      const placement: Placement = spaceBelow >= 160 || spaceBelow >= spaceAbove ? "down" : "up";
 
-      const maxHeight = Math.max(
-        80,
-        (placement === "down" ? spaceBelow : spaceAbove) - gap,
-      );
-
+      const maxHeight = Math.max(80, (placement === "down" ? spaceBelow : spaceAbove) - gap);
       const top = placement === "down" ? r.bottom + gap : r.top - gap;
-
       const maxWidth = window.innerWidth - margin * 2;
 
-      // Clamp left so dropdown stays within viewport margins.
-      // Also ensure there's room for at least minWidth.
       const minWidth = Math.round(r.width);
       const left = Math.round(
         Math.min(
@@ -76,10 +86,11 @@ export function SelectSearchableDropdown({ children }: React.PropsWithChildren) 
 
   const node = useMemo(() => {
     if (!triggerEl) return null;
-    if (!floating) return null;
 
-    const style: React.CSSProperties =
-      floating.placement === "down"
+    // If we haven't computed floating yet (e.g., first render while closed),
+    // park it offscreen but KEEP IT MOUNTED so options can register.
+    const style: React.CSSProperties = floating
+      ? floating.placement === "down"
         ? {
             position: "fixed",
             top: floating.top,
@@ -96,27 +107,36 @@ export function SelectSearchableDropdown({ children }: React.PropsWithChildren) 
             maxWidth: floating.maxWidth,
             maxHeight: floating.maxHeight,
             transform: "translateY(-100%)",
-          };
+          }
+      : {
+          position: "fixed",
+          top: -9999,
+          left: -9999,
+          maxHeight: 0,
+        };
 
     return (
       <ul
         id={listboxId}
-        ref={setListboxEl}
+        ref={setListboxRef}
         role="listbox"
         aria-hidden={hidden || undefined}
         className={[
           styles.dropdown,
-          floating.placement === "up" ? styles.dropdownUp : styles.dropdownDown,
+          floating?.placement === "up" ? styles.dropdownUp : styles.dropdownDown,
           hidden ? styles.dropdownClosed : null,
         ]
           .filter(Boolean)
           .join(" ")}
-        style={style}
+        style={{
+          ...style,
+          ...(hidden ? { visibility: "hidden", pointerEvents: "none" } : {}),
+        }}
       >
         {children}
       </ul>
     );
-  }, [open, disabled, triggerEl, floating, listboxId, children]);
+  }, [triggerEl, floating, hidden, listboxId, children, setListboxRef]);
 
   if (!node) return null;
   return createPortal(node, document.body);

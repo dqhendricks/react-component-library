@@ -2,29 +2,25 @@ import React, {
   useCallback,
   useEffect,
   useId,
-  useMemo,
   useRef,
   useState,
   type PropsWithChildren,
   type ComponentPropsWithoutRef,
 } from "react";
-import type {
-  SelectSearchableOptionRecord,
-} from './types';
-import {
-  SelectSearchableContext,
-  type SelectSearchableContextValue,
- } from "./SelectSearchableContext";
-
 import styles from "./SelectSearchable.module.css";
+import {
+  SelectSearchableStoreContext,
+  createSelectSearchableStore,
+  type SelectSearchableValue,
+  useSelectSearchableStore,
+} from "./SelectSearchableStoreContext";
 
 type NativeSelectProps = ComponentPropsWithoutRef<"select">;
-type SelectValue = NonNullable<NativeSelectProps["value"]>; // string | number | readonly string[]
+type SelectValue = NonNullable<NativeSelectProps["value"]>;
 
-// Using native select's props with the below exceptions
 export type SelectSearchableRootProps = PropsWithChildren<
-  Omit<NativeSelectProps, 'children' | 'onBlur' | 'size' | 'autocomplete'> & {
-    rootId?: string; // 'id' is passed to trigger for label's htmlFor prop
+  Omit<NativeSelectProps, "children" | "onBlur" | "size" | "autocomplete"> & {
+    rootId?: string;
     onBlur?: React.FocusEventHandler<HTMLElement>;
     onValueChange?: (value: SelectValue) => void;
   }
@@ -37,7 +33,7 @@ export function SelectSearchableRoot({
   style,
   children,
   onValueChange,
-  onBlur, // keep; we’ll pass via context next
+  onBlur,
   value: controlledValue,
   defaultValue,
   onChange,
@@ -55,68 +51,80 @@ export function SelectSearchableRoot({
   const [uncontrolledValue, setUncontrolledValue] = useState<NativeSelectProps["value"]>(defaultValue);
   const value = (isControlled ? controlledValue : uncontrolledValue) as NativeSelectProps["value"];
 
-  const [open, setOpen] = useState(false);
-  const [activeDescendantId, setActiveDescendantId] = useState<string | null>(null);
-  const [hasSearch, setHasSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const storeRef = useRef<ReturnType<typeof createSelectSearchableStore> | null>(null);
+  if (!storeRef.current) storeRef.current = createSelectSearchableStore();
+  const store = storeRef.current;
 
-  const optionsRef = useRef<Map<string, SelectSearchableOptionRecord>>(new Map());
-  const nativeSelectRef = useRef<HTMLSelectElement>(null);
-  const [triggerEl, setTriggerEl] = useState<HTMLElement | null>(null);
-  const [listboxEl, setListboxEl] = useState<HTMLElement | null>(null);
+  // Subscribe ONLY to open so we can attach/detach outside-click listeners at the right time.
+  // Everything else can use store.getSnapshot() in handlers/effects.
+  const open = useSelectSearchableStore(store, (s) => s.open);
 
-  const registerOption = useCallback((opt: SelectSearchableOptionRecord) => {
-    optionsRef.current.set(opt.id, opt);
-  }, []);
+  // identity
+  useEffect(() => {
+    store.setIdentity({ controlId, rootId, listboxId, nativeSelectId });
+  }, [store, controlId, rootId, listboxId, nativeSelectId]);
 
-  const unregisterOption = useCallback((optId: string) => {
-    optionsRef.current.delete(optId);
-  }, []);
+  // flags
+  useEffect(() => {
+    store.setFlags({ disabled, multiple });
+  }, [store, disabled, multiple]);
 
-  const getOptions = useCallback(() => Array.from(optionsRef.current.values()), []);
+  // injected callbacks
+  useEffect(() => {
+    store.setOnTriggerBlur(onBlur);
+  }, [store, onBlur]);
 
-  const getOptionByValue = useCallback((v: string) => {
-    for (const opt of optionsRef.current.values()) if (opt.value === v) return opt;
-    return undefined;
-  }, []);
+  // keep store value in sync
+  useEffect(() => {
+    store.setValue(value);
+  }, [store, value]);
 
+  // Root controls commit (controlled/uncontrolled) and close+focus behavior
   const commitValue = useCallback(
-    (next: SelectValue) => {
+    (next: SelectSearchableValue) => {
       if (disabled) return;
 
       if (!isControlled) setUncontrolledValue(next);
       onValueChange?.(next);
 
       if (!multiple) {
-        setOpen(false);
-        triggerEl?.focus();
+        store.setOpen(false);
+        store.getSnapshot().triggerEl?.focus();
       }
     },
-    [disabled, isControlled, multiple, onValueChange, triggerEl],
+    [disabled, isControlled, multiple, onValueChange, store],
   );
 
-  // Dispatch change event
   useEffect(() => {
-    const el = nativeSelectRef.current;
-    if (!el) return;
-    el.dispatchEvent(new Event("change", { bubbles: true }));
-  }, [value]);
+    store.setCommitValue(commitValue);
+    return () => store.setCommitValue(null);
+  }, [store, commitValue]);
 
-  // Set active descendent effect
+  // Dispatch native change event (keeps external onChange listeners happy)
   useEffect(() => {
-    if (Array.isArray(value)) {
-      const first = value[0];
-      setActiveDescendantId(first != null ? getOptionByValue(String(first))?.id ?? null : null);
+    store.dispatchNativeChange();
+  }, [store, value]);
+
+  // active descendant from selected value
+  useEffect(() => {
+    const snap = store.getSnapshot();
+    const v = snap.value;
+
+    if (Array.isArray(v)) {
+      const first = v[0];
+      store.setActiveDescendantId(first != null ? snap.valueToId.get(String(first)) ?? null : null);
       return;
     }
-    if (value == null || value === "") {
-      setActiveDescendantId(null);
+
+    if (v == null || v === "") {
+      store.setActiveDescendantId(null);
       return;
     }
-    setActiveDescendantId(getOptionByValue(String(value))?.id ?? null);
-  }, [getOptionByValue, value]);
 
-  // Close listbox on outside click
+    store.setActiveDescendantId(snap.valueToId.get(String(v)) ?? null);
+  }, [store, value]);
+
+  // Close on outside click (works with portaled listbox)
   useEffect(() => {
     if (!open) return;
 
@@ -124,75 +132,29 @@ export function SelectSearchableRoot({
       const t = ev.target as Node | null;
       if (!t) return;
 
-      // if click is within trigger or within listbox, ignore
+      const { triggerEl, listboxEl } = store.getSnapshot();
+
       if (triggerEl?.contains(t)) return;
       if (listboxEl?.contains(t)) return;
 
-      setOpen(false);
+      store.setOpen(false);
+      triggerEl?.focus();
     };
 
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [open, triggerEl, listboxEl, setOpen]);
-
-  const ctx: SelectSearchableContextValue = useMemo(
-    () => ({
-      controlId,
-      rootId,
-      listboxId,
-      nativeSelectId,
-      disabled,
-      multiple,
-      value,
-      commitValue,
-      open,
-      setOpen,
-      activeDescendantId,
-      setActiveDescendantId,
-      hasSearch,
-      setHasSearch,
-      searchQuery,
-      setSearchQuery,
-      listboxEl,
-      setListboxEl,
-      onTriggerBlur: onBlur,
-      triggerEl,
-      setTriggerEl,
-      registerOption,
-      unregisterOption,
-      getOptions,
-      getOptionByValue,
-      nativeSelectRef,
-    }),
-    [
-      controlId,
-      rootId,
-      listboxId,
-      nativeSelectId,
-      disabled,
-      multiple,
-      value,
-      commitValue,
-      open,
-      activeDescendantId,
-      hasSearch,
-      searchQuery,
-      listboxEl,
-      onBlur,
-      triggerEl,
-      registerOption,
-      unregisterOption,
-      getOptions,
-      getOptionByValue,
-    ],
-  );
+  }, [store, open]);
 
   return (
-    <SelectSearchableContext.Provider value={ctx}>
-      <div id={rootId} className={[styles.root, disabled ? styles.disabled : "", className].filter(Boolean).join(" ")} style={style}>
+    <SelectSearchableStoreContext.Provider value={store}>
+      <div
+        id={rootId}
+        className={[styles.root, disabled ? styles.disabled : "", className].filter(Boolean).join(" ")}
+        style={style}
+      >
         <select
           {...selectProps}
-          ref={nativeSelectRef}
+          ref={(el) => store.setNativeSelectEl(el)}
           id={nativeSelectId}
           value={value}
           onChange={onChange}
@@ -202,15 +164,17 @@ export function SelectSearchableRoot({
         >
           {Array.isArray(value) && value.length ? (
             value.map((val) => (
-              <option key={val} value={val}>{val}</option>
+              <option key={String(val)} value={val}>
+                {String(val)}
+              </option>
             ))
           ) : (
-            <option value={value}>{value}</option>
+            <option value={value}>{String(value ?? "")}</option>
           )}
         </select>
 
         {children}
       </div>
-    </SelectSearchableContext.Provider>
+    </SelectSearchableStoreContext.Provider>
   );
 }

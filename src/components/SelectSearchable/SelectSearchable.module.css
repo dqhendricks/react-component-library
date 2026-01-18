@@ -1,0 +1,124 @@
+.root {
+  position: relative;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Visually hidden but still participates in form submit + validation */
+.hiddenSelect {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Trigger */
+
+.trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  /* basic button reset-ish */
+  appearance: none;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+
+  cursor: pointer;
+}
+
+.trigger:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.triggerDisabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.triggerValue {
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.triggerChevron {
+  margin-left: 0.5rem;
+  flex: 0 0 auto;
+}
+
+/* Dropdown */
+
+.dropdown {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  background: white;
+
+  overflow: auto;
+  z-index: 1000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.dropdownClosed {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dropdownDown {}
+
+.dropdownUp {}
+
+/* Search */
+
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+
+/* Options */
+
+.option {
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.optionActive {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.optionSelected {
+  font-weight: 600;
+}
+
+.optionDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

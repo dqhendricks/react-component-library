@@ -105,7 +105,7 @@ export function SelectSearchableRoot({
     store.dispatchNativeChange();
   }, [store, value]);
 
-  // active descendant from selected value
+  // Active descendant from selected value
   useEffect(() => {
     const snap = store.getSnapshot();
     const v = snap.value;
@@ -124,7 +124,7 @@ export function SelectSearchableRoot({
     store.setActiveDescendantId(snap.valueToId.get(String(v)) ?? null);
   }, [store, value]);
 
-  // Close on outside click (works with portaled listbox)
+  // Close on outside click (works with portaled dropdown)
   useEffect(() => {
     if (!open) return;
 
@@ -132,10 +132,10 @@ export function SelectSearchableRoot({
       const t = ev.target as Node | null;
       if (!t) return;
 
-      const { triggerEl, listboxEl } = store.getSnapshot();
+      const { triggerEl, dropdownEl } = store.getSnapshot();
 
       if (triggerEl?.contains(t)) return;
-      if (listboxEl?.contains(t)) return;
+      if (dropdownEl?.contains(t)) return;
 
       store.setOpen(false);
       triggerEl?.focus();

@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback } from "react";
+import React, { forwardRef, useCallback, useMemo } from "react";
 import styles from "./SelectSearchable.module.css";
 import {
   useSelectSearchableStoreContext,
@@ -7,11 +7,16 @@ import {
 import { useComboboxOwnerProps } from "./useComboboxOwnerProps";
 import { mergeProps } from "./mergeProps";
 
+export type SelectSearchableTriggerRenderArgs = {
+  value: React.ComponentPropsWithoutRef<"select">["value"];
+  isOpen: boolean;
+};
+
 export type SelectSearchableTriggerProps = Omit<
   React.ComponentPropsWithoutRef<"button">,
   "type" | "aria-haspopup" | "aria-controls" | "aria-expanded" | "aria-activedescendant" | "disabled" | "role"
 > & {
-  placeholder?: string;
+  children: React.ReactNode | ((args: SelectSearchableTriggerRenderArgs) => React.ReactNode);
 };
 
 function assignRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
@@ -20,20 +25,14 @@ function assignRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
 }
 
 export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearchableTriggerProps>(
-  function SelectSearchableTrigger(
-    { className, onClick, onBlur, placeholder = "Select…", children, ...rest },
-    ref,
-  ) {
+  function SelectSearchableTrigger({ children, ...rest }, ref) {
     const store = useSelectSearchableStoreContext();
 
     const controlId = useSelectSearchableStore(store, (s) => s.controlId);
     const disabled = useSelectSearchableStore(store, (s) => s.disabled);
-    const multiple = useSelectSearchableStore(store, (s) => s.multiple);
     const open = useSelectSearchableStore(store, (s) => s.open);
-    const activeDescendantId = useSelectSearchableStore(store, (s) => s.activeDescendantId);
     const value = useSelectSearchableStore(store, (s) => s.value);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
-    const nativeSelectEl = useSelectSearchableStore(store, (s) => s.nativeSelectEl);
     const onTriggerBlurInjected = useSelectSearchableStore(store, (s) => s.onTriggerBlur);
 
     const comboboxOwnerProps = useComboboxOwnerProps();
@@ -47,33 +46,11 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       [store, ref],
     );
 
-    let display: React.ReactNode = children;
-    if (display == null) {
-      if (Array.isArray(value)) {
-        display = value.length ? `${value.length} selected` : placeholder;
-      } else if (value != null && value !== "") {
-        const v = String(value);
-        const fromRegistry = store.getOptionByValue(v)?.label;
-
-        if (fromRegistry) {
-          display = fromRegistry;
-        } else {
-          const idx = nativeSelectEl?.selectedIndex ?? -1;
-          display = (idx >= 0 ? nativeSelectEl?.options[idx]?.text : undefined) ?? v;
-        }
-      } else {
-        display = placeholder;
-      }
-    }
-
     const ourButtonProps: React.ComponentPropsWithoutRef<"button"> = {
       id: controlId,
       type: "button",
-      className: [styles.trigger, disabled ? styles.triggerDisabled : "", className].filter(Boolean).join(" "),
+      className: [styles.trigger, disabled ? styles.triggerDisabled : ""].filter(Boolean).join(" "),
       disabled,
-      "aria-disabled": disabled || undefined,
-      "aria-multiselectable": multiple || undefined,
-      "aria-activedescendant": triggerOwnsCombobox ? (activeDescendantId ?? undefined) : undefined,
       onClick: () => {
         if (disabled) return;
         store.setOpen(!open);
@@ -84,18 +61,19 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     };
 
     const ownerProps = triggerOwnsCombobox ? comboboxOwnerProps : {};
+    const merged = mergeProps(rest as any, { ...ourButtonProps, ...ownerProps } as any);
 
-    const merged = mergeProps(
-      { ...rest, onClick, onBlur, ref: mergedRef } as any,
-      { ...ourButtonProps, ...ownerProps, ref: mergedRef } as any,
+    const renderArgs = useMemo(
+      () => ({ value, isOpen: open }),
+      [value, open],
     );
 
+    const content =
+      typeof children === "function" ? children(renderArgs) : children;
+
     return (
-      <button {...merged}>
-        <span className={styles.triggerValue}>{display}</span>
-        <span className={styles.triggerChevron} aria-hidden="true">
-          ▾
-        </span>
+      <button {...merged} ref={mergedRef}>
+        {content}
       </button>
     );
   },

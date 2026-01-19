@@ -1,9 +1,15 @@
 import * as React from 'react';
 import { observeListboxMutations } from './observeListboxMutations';
-import type { SelectSearchableOptionRecord } from './types';
 
 type NativeSelectProps = React.ComponentPropsWithoutRef<'select'>;
 export type SelectSearchableValue = NonNullable<NativeSelectProps['value']>; // string | number | readonly string[]
+
+type SelectSearchableOptionRecord = {
+  id: string; // stable DOM id for aria-activedescendant, etc.
+  value: string;
+  label: string; // display / search string
+  disabled?: boolean;
+};
 
 type OptionRuntime = SelectSearchableOptionRecord & {
   node: HTMLElement | null;
@@ -35,6 +41,7 @@ type State = {
 
   // Elements
   triggerEl: HTMLElement | null;
+  dropdownEl: HTMLElement | null
   listboxEl: HTMLElement | null;
 
   // Option registry
@@ -72,6 +79,7 @@ export type SelectSearchableStore = {
   setSearchQuery: (q: string) => void;
 
   setTriggerEl: (el: HTMLElement | null) => void;
+  setDropdownEl(el: HTMLElement | null): void
   setListboxEl: (el: HTMLElement | null) => void;
 
   setNativeSelectEl: (el: HTMLSelectElement | null) => void;
@@ -144,6 +152,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     orderedIds: [],
 
     triggerEl: null,
+    dropdownEl: null,
     listboxEl: null,
 
     options: new Map(),
@@ -296,6 +305,12 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setTriggerEl(el) {
       setState(() => {
         state.triggerEl = el;
+      });
+    },
+
+    setDropdownEl(el) {
+      setState(() => {
+        state.dropdownEl = el;
       });
     },
 

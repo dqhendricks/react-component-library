@@ -1,10 +1,11 @@
-import React, { useLayoutEffect, useMemo, useState, useCallback } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./SelectSearchable.module.css";
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
 } from "./SelectSearchableStoreContext";
+import { mergeProps } from "./mergeProps";
 
 type Placement = "down" | "up";
 
@@ -17,27 +18,30 @@ type FloatingStyle = {
   placement: Placement;
 };
 
-export function SelectSearchableDropdown({ children }: React.PropsWithChildren) {
+type DivProps = React.ComponentPropsWithoutRef<"div">;
+
+export type SelectSearchableDropdownProps = React.PropsWithChildren<
+  Omit<DivProps, "ref">
+> & {
+  maxHeightWithClamp?: number; // Max height, in pixels, and clamped to viewport.
+};
+
+export function SelectSearchableDropdown({
+  maxHeightWithClamp = 280,
+  children,
+  ...userProps
+}: SelectSearchableDropdownProps) {
   const store = useSelectSearchableStoreContext();
 
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
-  const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
   const triggerEl = useSelectSearchableStore(store, (s) => s.triggerEl);
 
   const [floating, setFloating] = useState<FloatingStyle | null>(null);
 
   const hidden = !open || disabled;
 
-  const setListboxRef = useCallback(
-    (el: HTMLUListElement | null) => {
-      store.setListboxEl(el);
-    },
-    [store],
-  );
-
   useLayoutEffect(() => {
-    // Only compute position when interactive/open
     if (!open || disabled) return;
     if (!triggerEl) return;
 
@@ -49,9 +53,17 @@ export function SelectSearchableDropdown({ children }: React.PropsWithChildren) 
       const spaceBelow = window.innerHeight - r.bottom - margin;
       const spaceAbove = r.top - margin;
 
-      const placement: Placement = spaceBelow >= 160 || spaceBelow >= spaceAbove ? "down" : "up";
+      const placement: Placement =
+        spaceBelow >= 160 || spaceBelow >= spaceAbove ? "down" : "up";
 
-      const maxHeight = Math.max(80, (placement === "down" ? spaceBelow : spaceAbove) - gap);
+      const viewportMaxHeight = Math.max(
+        80,
+        (placement === "down" ? spaceBelow : spaceAbove) - gap,
+      );
+
+      // "sane" default, clamped by viewport
+      const maxHeight = Math.min(maxHeightWithClamp, viewportMaxHeight);
+
       const top = placement === "down" ? r.bottom + gap : r.top - gap;
       const maxWidth = window.innerWidth - margin * 2;
 
@@ -82,62 +94,54 @@ export function SelectSearchableDropdown({ children }: React.PropsWithChildren) 
       window.removeEventListener("resize", compute);
       window.removeEventListener("scroll", compute, true);
     };
-  }, [open, disabled, triggerEl]);
+  }, [open, disabled, triggerEl, maxHeightWithClamp]);
 
-  const node = useMemo(() => {
-    if (!triggerEl) return null;
+  if (!triggerEl) return null;
 
-    // If we haven't computed floating yet (e.g., first render while closed),
-    // park it offscreen but KEEP IT MOUNTED so options can register.
-    const style: React.CSSProperties = floating
-      ? floating.placement === "down"
-        ? {
-            position: "fixed",
-            top: floating.top,
-            left: floating.left,
-            minWidth: floating.minWidth,
-            maxWidth: floating.maxWidth,
-            maxHeight: floating.maxHeight,
-          }
-        : {
-            position: "fixed",
-            top: floating.top,
-            left: floating.left,
-            minWidth: floating.minWidth,
-            maxWidth: floating.maxWidth,
-            maxHeight: floating.maxHeight,
-            transform: "translateY(-100%)",
-          }
+  // Keep mounted even before we've computed position (so options can register)
+  const baseStyle: React.CSSProperties = floating
+    ? floating.placement === "down"
+      ? {
+          position: "fixed",
+          top: floating.top,
+          left: floating.left,
+          minWidth: floating.minWidth,
+          maxWidth: floating.maxWidth,
+          maxHeight: floating.maxHeight,
+        }
       : {
           position: "fixed",
-          top: -9999,
-          left: -9999,
-          maxHeight: 0,
-        };
+          top: floating.top,
+          left: floating.left,
+          minWidth: floating.minWidth,
+          maxWidth: floating.maxWidth,
+          maxHeight: floating.maxHeight,
+          transform: "translateY(-100%)",
+        }
+    : {
+        position: "fixed",
+        top: -9999,
+        left: -9999,
+        maxHeight: 0,
+      };
 
-    return (
-      <ul
-        id={listboxId}
-        ref={setListboxRef}
-        role="listbox"
-        aria-hidden={hidden || undefined}
-        className={[
-          styles.dropdown,
-          floating?.placement === "up" ? styles.dropdownUp : styles.dropdownDown,
-          hidden ? styles.dropdownClosed : null,
-        ]
-          .filter(Boolean)
-          .join(" ")}
-        style={{
-          ...style,
-          ...(hidden ? { visibility: "hidden", pointerEvents: "none" } : {}),
-        }}
-      >
-        {children}
-      </ul>
-    );
-  }, [triggerEl, floating, hidden, listboxId, children, setListboxRef]);
+  const hiddenStyle: React.CSSProperties = hidden
+    ? { visibility: "hidden", pointerEvents: "none" }
+    : {};
 
-  if (!node) return null;
-  return createPortal(node, document.body);
+  const ourProps: DivProps = {
+    className: [
+      styles.dropdown, // reuse your existing dropdown styling hook-point
+      floating?.placement === "up" ? styles.dropdownUp : styles.dropdownDown,
+      hidden ? styles.dropdownClosed : null,
+    ].filter(Boolean).join(" "),
+    style: {
+      ...baseStyle,
+      ...hiddenStyle,
+    },
+  };
+
+  const merged = mergeProps(userProps as any, ourProps as any);
+
+  return createPortal(<div {...merged} ref={store.setDropdownEl}>{children}</div>, document.body);
 }

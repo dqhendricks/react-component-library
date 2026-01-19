@@ -4,11 +4,24 @@ import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
 } from "./SelectSearchableStoreContext";
+import { mergeProps } from "./mergeProps";
 
-export type SelectSearchableOptionProps = React.PropsWithChildren<{
-  value: string;
-  disabled?: boolean;
-}>;
+type LiProps = React.ComponentPropsWithoutRef<"li">;
+
+export type SelectSearchableOptionProps = React.PropsWithChildren<
+  Omit<
+    LiProps,
+    | "role"
+    | "aria-selected"
+    | "aria-disabled"
+    | "aria-hidden"
+    | "hidden"
+    | "ref"
+  > & {
+    value: string;
+    disabled?: boolean;
+  }
+>;
 
 function asArray(v: unknown): string[] {
   if (v == null) return [];
@@ -20,33 +33,26 @@ export function SelectSearchableOption({
   value,
   disabled = false,
   children,
+  id: userId,
+  ...userProps
 }: SelectSearchableOptionProps) {
   const reactId = useId();
-  const optionId = `cs-opt-${reactId}`;
+  const optionId = userId ?? `cs-opt-${reactId}`;
 
   const store = useSelectSearchableStoreContext();
 
   const selectedValue = useSelectSearchableStore(store, (s) => s.value);
   const isActive = useSelectSearchableStore(store, (s) => s.activeDescendantId === optionId);
-
-  // Visibility is derived once per search term in the store:
   const isVisible = useSelectSearchableStore(store, (s) => s.visibleIds.has(optionId));
 
-  const label = useMemo(() => {
-    return typeof children === "string" ? children : value;
-  }, [children, value]);
+  const label = useMemo(() => (typeof children === "string" ? children : value), [children, value]);
 
-  // Register/unregister (data only; node is wired via ref callback)
   useEffect(() => {
-    return store.registerOption({
-      id: optionId,
-      value,
-      label,
-      disabled,
-    });
+    // IMPORTANT: this assumes store keys == DOM ids (optionId).
+    // This is true as long as optionId is stable+unique.
+    return store.registerOption({ id: optionId, value, label, disabled });
   }, [store, optionId, value, label, disabled]);
 
-  // Let the store know our DOM node for scrollIntoView, etc.
   const setNodeRef = useCallback(
     (el: HTMLLIElement | null) => {
       store.updateOptionNode(optionId, el);
@@ -54,10 +60,7 @@ export function SelectSearchableOption({
     [store, optionId],
   );
 
-  const isSelected = useMemo(() => {
-    const current = asArray(selectedValue);
-    return current.includes(value);
-  }, [selectedValue, value]);
+  const isSelected = useMemo(() => asArray(selectedValue).includes(value), [selectedValue, value]);
 
   const commit = useCallback(() => {
     if (disabled) return;
@@ -79,31 +82,40 @@ export function SelectSearchableOption({
 
   const hidden = !isVisible;
 
-  return (
-    <li
-      ref={setNodeRef}
-      id={optionId}
-      data-option-id={optionId}
-      role="option"
-      aria-selected={isSelected}
-      aria-disabled={disabled || undefined}
-      hidden={hidden}
-      aria-hidden={hidden || undefined}
-      className={[
-        styles.option,
-        isSelected ? styles.optionSelected : "",
-        isActive ? styles.optionActive : "",
-        disabled ? styles.optionDisabled : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-      onMouseEnter={() => {
-        if (!disabled) store.setActiveDescendantId(optionId);
-      }}
-      onMouseDown={(e) => e.preventDefault()}
-      onClick={() => commit()}
-    >
-      {children}
-    </li>
-  );
+  const ourProps: LiProps = {
+    id: optionId,
+    role: "option",
+    "aria-selected": isSelected,
+    "aria-disabled": disabled || undefined,
+    hidden,
+    "aria-hidden": hidden || undefined,
+    className: [
+      styles.option,
+      isSelected ? styles.optionSelected : "",
+      isActive ? styles.optionActive : "",
+      disabled ? styles.optionDisabled : "",
+    ]
+      .filter(Boolean)
+      .join(" "),
+    onMouseEnter: () => {
+      if (!disabled) store.setActiveDescendantId(optionId);
+    },
+    onMouseDown: (e) => {
+      // Default: keep focus on trigger/search
+      e.preventDefault();
+    },
+    onClick: () => {
+      commit();
+    },
+  };
+
+  const merged = mergeProps(userProps as any, ourProps as any);
+
+  return <li
+    {...merged}
+    data-option-id={optionId}
+    ref={setNodeRef}
+  >
+    {children}
+  </li>;
 }

@@ -23,15 +23,15 @@ function mergeStyle(a: unknown, b: unknown) {
   if (!ao) return bo as any;
   if (!bo) return ao as any;
 
-  // ours wins by default
-  return { ...ao, ...bo } as any;
+  // User's wins by default
+  return { ...bo, ...ao } as any;
 }
 
 /**
  * Merges props:
  * - overlapping function props are composed (user first; if event.defaultPrevented, ours won't run)
  * - className is concatenated
- * - style objects are shallow-merged (ours wins)
+ * - style objects are shallow-merged (theirs wins)
  */
 export function mergeProps<T extends AnyRecord, U extends AnyRecord>(user: T, ours: U): T & U {
   const out: AnyRecord = { ...user, ...ours };

@@ -23,6 +23,7 @@ type State = {
 
   // State
   value: NativeSelectProps["value"];
+  selectedValueSet: ReadonlySet<string>; // Fast lookup for option's isSelected check
   open: boolean;
   onTriggerBlur?: React.FocusEventHandler<HTMLElement>;
   activeDescendantId: string | null;
@@ -94,6 +95,18 @@ export type SelectSearchableStore = {
 
 const normalize = (s: string) => s.trim().toLowerCase();
 
+function toSelectedSet(value: NativeSelectProps["value"]): ReadonlySet<string> {
+  if (value == null) return new Set();
+
+  if (Array.isArray(value)) {
+    const s = new Set<string>();
+    for (const v of value) s.add(String(v));
+    return s;
+  }
+
+  return new Set([String(value)]);
+}
+
 function matchesSearch(query: string, label: string) {
   const q = normalize(query);
   if (!q) return true;
@@ -130,6 +143,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     multiple: false,
 
     value: undefined,
+    selectedValueSet: new Set(),
     open: false,
     activeDescendantId: null,
 
@@ -249,6 +263,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setValue(value) {
       setState(() => {
         state.value = value;
+        state.selectedValueSet = toSelectedSet(value);
       });
     },
 

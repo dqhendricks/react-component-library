@@ -7,7 +7,7 @@ function App() {
       <h1>Component Library</h1>
       <div>
         <p>SelectSearchable</p>
-        <SelectSearchable.Root style={{ maxWidth: 200 }} onValueChange={(val) => console.log(val)}>
+        <SelectSearchable.Root style={{ maxWidth: 200 }} onValueChange={(val) => console.log(val)} multiple>
           <SelectSearchable.Trigger>
             <SelectSearchable.TriggerValue
               placeholder="Choose..."

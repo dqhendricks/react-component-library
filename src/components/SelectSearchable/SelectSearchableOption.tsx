@@ -43,7 +43,7 @@ export function SelectSearchableOption({
 
   const store = useSelectSearchableStoreContext();
 
-  const selectedValue = useSelectSearchableStore(store, (s) => s.value);
+  const isSelected = useSelectSearchableStore(store, (s) => s.selectedValueSet.has(value));
   const isActive = useSelectSearchableStore(store, (s) => s.activeDescendantId === optionId);
   const isVisible = useSelectSearchableStore(store, (s) => s.visibleIds.has(optionId));
 
@@ -52,8 +52,6 @@ export function SelectSearchableOption({
   useEffect(() => {
     return store.registerOption({ id: optionId, value, label, disabled, node: nodeRef.current });
   }, [store, optionId, value, label, disabled]);
-
-  const isSelected = useMemo(() => asArray(selectedValue).includes(value), [selectedValue, value]);
 
   const commit = useCallback(() => {
     if (disabled) return;

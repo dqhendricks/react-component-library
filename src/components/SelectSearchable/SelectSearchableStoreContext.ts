@@ -15,9 +15,7 @@ type SelectSearchableOptionRecord = {
 type State = {
   // Identity / wiring
   controlId: string;
-  rootId?: string;
   listboxId: string;
-  nativeSelectId: string;
 
   // Native-ish flags
   disabled: boolean;
@@ -39,7 +37,7 @@ type State = {
   // Elements
   triggerEl: HTMLElement | null;
   dropdownEl: HTMLElement | null
-  listboxEl: HTMLElement | null;
+  optionListEl: HTMLElement | null;
 
   // Option registry
   options: Map<string, SelectSearchableOptionRecord>;
@@ -59,9 +57,7 @@ export type SelectSearchableStore = {
   // config/identity
   setIdentity: (p: {
     controlId: string;
-    rootId?: string;
     listboxId: string;
-    nativeSelectId: string;
   }) => void;
   setFlags: (p: { disabled: boolean; multiple: boolean }) => void;
 
@@ -77,7 +73,7 @@ export type SelectSearchableStore = {
 
   setTriggerEl: (el: HTMLElement | null) => void;
   setDropdownEl(el: HTMLElement | null): void
-  setListboxEl: (el: HTMLElement | null) => void;
+  setOptionListEl: (el: HTMLElement | null) => void;
 
   setNativeSelectEl: (el: HTMLSelectElement | null) => void;
   dispatchNativeChange: () => void;
@@ -87,10 +83,8 @@ export type SelectSearchableStore = {
 
   // queries/helpers
   getOptionByValue: (value: string) => SelectSearchableOptionRecord | undefined;
-  isVisible: (id: string) => boolean;
 
   // order + navigation helpers
-  recomputeOrderFromDOM: () => void;
   moveActive: (dir: 1 | -1) => void;
 
   // value commit (injected by Root so it can handle controlled/uncontrolled)
@@ -130,9 +124,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
   const state: State = {
     controlId: "",
-    rootId: undefined,
     listboxId: "",
-    nativeSelectId: "",
 
     disabled: false,
     multiple: false,
@@ -149,7 +141,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     triggerEl: null,
     dropdownEl: null,
-    listboxEl: null,
+    optionListEl: null,
 
     options: new Map(),
     valueToId: new Map(),
@@ -167,7 +159,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   }
 
   function recomputeOrderFromDOM() {
-    const root = state.listboxEl;
+    const root = state.optionListEl;
     if (!root) {
       state.orderedIds = [];
       return;
@@ -243,9 +235,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setIdentity(p) {
       setState(() => {
         state.controlId = p.controlId;
-        state.rootId = p.rootId;
         state.listboxId = p.listboxId;
-        state.nativeSelectId = p.nativeSelectId;
       });
     },
 
@@ -310,9 +300,9 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       });
     },
 
-    setListboxEl(el) {
+    setOptionListEl(el) {
       setState(() => {
-        state.listboxEl = el;
+        state.optionListEl = el;
       });
       startObservingListbox(el);
     },
@@ -353,16 +343,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       const r = state.options.get(id);
       if (!r) return undefined;
       return r;
-    },
-
-    isVisible(id) {
-      return state.visibleIds.has(id);
-    },
-
-    recomputeOrderFromDOM() {
-      setState(() => {
-        recomputeOrderFromDOM();
-      });
     },
 
     moveActive,

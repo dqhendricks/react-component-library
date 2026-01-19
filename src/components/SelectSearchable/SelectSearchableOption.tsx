@@ -33,7 +33,7 @@ export function SelectSearchableOption({
   value,
   disabled = false,
   children,
-  id: userId,
+  id: userId, // If id is set, it must be unique and stable
   ...userProps
 }: SelectSearchableOptionProps) {
   const reactId = useId();
@@ -50,8 +50,6 @@ export function SelectSearchableOption({
   const label = useMemo(() => (typeof children === "string" ? children : value), [children, value]);
 
   useEffect(() => {
-    // IMPORTANT: this assumes store keys == DOM ids (optionId).
-    // This is true as long as optionId is stable+unique.
     return store.registerOption({ id: optionId, value, label, disabled, node: nodeRef.current });
   }, [store, optionId, value, label, disabled]);
 

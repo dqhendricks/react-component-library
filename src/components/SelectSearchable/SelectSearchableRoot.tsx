@@ -61,8 +61,8 @@ export function SelectSearchableRoot({
 
   // identity
   useEffect(() => {
-    store.setIdentity({ controlId, rootId, listboxId, nativeSelectId });
-  }, [store, controlId, rootId, listboxId, nativeSelectId]);
+    store.setIdentity({ controlId, listboxId });
+  }, [store, controlId, listboxId]);
 
   // flags
   useEffect(() => {

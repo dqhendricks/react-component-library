@@ -39,7 +39,7 @@ export function SelectSearchableOptionList({
   const merged = mergeProps(userProps as any, ourProps as any);
 
   return (
-    <ul {...merged} ref={store.setListboxEl}>
+    <ul {...merged} ref={store.setOptionListEl}>
       {children}
     </ul>
   );

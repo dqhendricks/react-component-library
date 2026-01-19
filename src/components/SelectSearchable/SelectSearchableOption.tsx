@@ -110,5 +110,3 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
     {children}
   </li>;
 });
-
-SelectSearchableOption.displayName = "SelectSearchableOption";

@@ -39,6 +39,8 @@ export function SelectSearchableOption({
   const reactId = useId();
   const optionId = userId ?? `cs-opt-${reactId}`;
 
+  const nodeRef = React.useRef<HTMLLIElement | null>(null);
+
   const store = useSelectSearchableStoreContext();
 
   const selectedValue = useSelectSearchableStore(store, (s) => s.value);
@@ -50,15 +52,8 @@ export function SelectSearchableOption({
   useEffect(() => {
     // IMPORTANT: this assumes store keys == DOM ids (optionId).
     // This is true as long as optionId is stable+unique.
-    return store.registerOption({ id: optionId, value, label, disabled });
+    return store.registerOption({ id: optionId, value, label, disabled, node: nodeRef.current });
   }, [store, optionId, value, label, disabled]);
-
-  const setNodeRef = useCallback(
-    (el: HTMLLIElement | null) => {
-      store.updateOptionNode(optionId, el);
-    },
-    [store, optionId],
-  );
 
   const isSelected = useMemo(() => asArray(selectedValue).includes(value), [selectedValue, value]);
 
@@ -114,7 +109,7 @@ export function SelectSearchableOption({
   return <li
     {...merged}
     data-option-id={optionId}
-    ref={setNodeRef}
+    ref={nodeRef}
   >
     {children}
   </li>;

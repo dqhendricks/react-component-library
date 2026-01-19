@@ -9,9 +9,6 @@ type SelectSearchableOptionRecord = {
   value: string;
   label: string; // display / search string
   disabled?: boolean;
-};
-
-type OptionRuntime = SelectSearchableOptionRecord & {
   node: HTMLElement | null;
 };
 
@@ -45,7 +42,7 @@ type State = {
   listboxEl: HTMLElement | null;
 
   // Option registry
-  options: Map<string, OptionRuntime>;
+  options: Map<string, SelectSearchableOptionRecord>;
   valueToId: Map<string, string>; // helps fast lookup by value
 
   // For native change dispatch (optional)
@@ -87,7 +84,6 @@ export type SelectSearchableStore = {
 
   // option registry
   registerOption: (opt: SelectSearchableOptionRecord) => () => void;
-  updateOptionNode: (id: string, node: HTMLElement | null) => void;
 
   // queries/helpers
   getOptionByValue: (value: string) => SelectSearchableOptionRecord | undefined;
@@ -335,7 +331,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     registerOption(opt) {
       setState(() => {
-        state.options.set(opt.id, { ...opt, node: null });
+        state.options.set(opt.id, opt);
         state.valueToId.set(opt.value, opt.id);
         recomputeVisibleIds(state);
       });
@@ -351,21 +347,12 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       };
     },
 
-    updateOptionNode(id, node) {
-      setState(() => {
-        const r = state.options.get(id);
-        if (r) r.node = node;
-      });
-    },
-
     getOptionByValue(value) {
       const id = state.valueToId.get(value);
       if (!id) return undefined;
       const r = state.options.get(id);
       if (!r) return undefined;
-      // strip runtime fields
-      const { node: _node, ...record } = r;
-      return record;
+      return r;
     },
 
     isVisible(id) {

@@ -24,10 +24,12 @@ export type SelectSearchableDropdownProps = React.PropsWithChildren<
   Omit<DivProps, "ref">
 > & {
   maxHeightWithClamp?: number; // Max height, in pixels, and clamped to viewport.
+  gap?: number; // Gap between dropdown and trigger element in px.
 };
 
 export function SelectSearchableDropdown({
   maxHeightWithClamp = 280,
+  gap = 6,
   children,
   ...userProps
 }: SelectSearchableDropdownProps) {
@@ -47,7 +49,6 @@ export function SelectSearchableDropdown({
 
     const compute = () => {
       const r = triggerEl.getBoundingClientRect();
-      const gap = 6;
       const margin = 8;
 
       const spaceBelow = window.innerHeight - r.bottom - margin;

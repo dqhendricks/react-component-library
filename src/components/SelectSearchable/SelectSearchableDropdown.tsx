@@ -125,23 +125,16 @@ export function SelectSearchableDropdown({
         maxHeight: 0,
       };
 
-  const hiddenStyle: React.CSSProperties = hidden
-    ? { visibility: "hidden", pointerEvents: "none" }
-    : {};
-
   const ourProps: DivProps = {
     className: [
       styles.dropdown, // reuse your existing dropdown styling hook-point
       floating?.placement === "up" ? styles.dropdownUp : styles.dropdownDown,
       hidden ? styles.dropdownClosed : null,
     ].filter(Boolean).join(" "),
-    style: {
-      ...baseStyle,
-      ...hiddenStyle,
-    },
+    style: baseStyle,
   };
 
-  const merged = mergeProps(userProps as any, ourProps as any);
+  const merged = mergeProps(userProps, ourProps);
 
   return createPortal(<div {...merged} ref={store.setDropdownEl}>{children}</div>, document.body);
 }

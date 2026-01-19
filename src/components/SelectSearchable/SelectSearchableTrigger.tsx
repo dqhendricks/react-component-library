@@ -61,15 +61,14 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     };
 
     const ownerProps = triggerOwnsCombobox ? comboboxOwnerProps : {};
-    const merged = mergeProps(rest as any, { ...ourButtonProps, ...ownerProps } as any);
+    const merged = mergeProps(rest, { ...ourButtonProps, ...ownerProps });
 
     const renderArgs = useMemo(
       () => ({ value, isOpen: open }),
       [value, open],
     );
 
-    const content =
-      typeof children === "function" ? children(renderArgs) : children;
+    const content = typeof children === "function" ? children(renderArgs) : children;
 
     return (
       <button {...merged} ref={mergedRef}>

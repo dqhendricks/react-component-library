@@ -36,7 +36,7 @@ export function SelectSearchableOptionList({
     className: styles.optionList,
   };
 
-  const merged = mergeProps(userProps as any, ourProps as any);
+  const merged = mergeProps(userProps, ourProps);
 
   return (
     <ul {...merged} ref={store.setOptionListEl}>

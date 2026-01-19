@@ -15,7 +15,6 @@ export type SelectSearchableSearchProps = Omit<
 };
 
 export function SelectSearchableSearch({
-  className,
   autoFocus = true,
   placeholder = "Search…",
   ...rest
@@ -65,7 +64,7 @@ export function SelectSearchableSearch({
   }, [firstMatchId, store]);
 
   const ourInputProps: React.ComponentPropsWithoutRef<"input"> = {
-    className: [styles.searchInput, className].filter(Boolean).join(" "),
+    className: styles.searchInput,
     type: "text",
     disabled,
     placeholder,
@@ -73,7 +72,7 @@ export function SelectSearchableSearch({
     onChange: (e) => store.setSearchQuery(e.currentTarget.value),
   };
 
-  const merged = mergeProps(rest as any, { ...ourInputProps, ...comboboxOwnerProps } as any);
+  const merged = mergeProps(rest, { ...ourInputProps, ...comboboxOwnerProps });
 
   return <input ref={inputRef} {...merged} />;
 }

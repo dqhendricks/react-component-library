@@ -11,12 +11,10 @@ export type SelectSearchableTriggerValueProps = Omit<
   "children"
 > & {
   placeholder?: string;
-  multiValueLabel?: (count: number) => React.ReactNode; // optional customization
 };
 
 export function SelectSearchableTriggerValue({
   placeholder = "Select…",
-  multiValueLabel,
   ...rest
 }: SelectSearchableTriggerValueProps) {
   const store = useSelectSearchableStoreContext();
@@ -27,7 +25,7 @@ export function SelectSearchableTriggerValue({
   const display = useMemo<React.ReactNode>(() => {
     if (Array.isArray(value)) {
       if (!value.length) return placeholder;
-      return multiValueLabel ? multiValueLabel(value.length) : `${value.length} selected`;
+      return `${value.length} selected`;
     }
 
     if (value == null || value === "") return placeholder;
@@ -38,13 +36,13 @@ export function SelectSearchableTriggerValue({
 
     const idx = nativeSelectEl?.selectedIndex ?? -1;
     return (idx >= 0 ? nativeSelectEl?.options[idx]?.text : undefined) ?? v;
-  }, [value, placeholder, multiValueLabel, store, nativeSelectEl]);
+  }, [value, placeholder, store, nativeSelectEl]);
 
   const ourProps: React.ComponentPropsWithoutRef<"span"> = {
     className: styles.triggerValue,
   };
 
-  const merged = mergeProps(rest as any, ourProps as any);
+  const merged = mergeProps(rest, ourProps);
 
   return <span {...merged}>{display}</span>;
 }

@@ -61,7 +61,7 @@ export function SelectSearchableOption({
     const s = store.getSnapshot();
 
     if (!s.multiple) {
-      store.commitValue(value as any);
+      store.commitValue(value);
       return;
     }
 
@@ -70,7 +70,7 @@ export function SelectSearchableOption({
     if (set.has(value)) set.delete(value);
     else set.add(value);
 
-    store.commitValue(Array.from(set) as any);
+    store.commitValue(Array.from(set));
   }, [store, disabled, value]);
 
   const hidden = !isVisible;
@@ -102,7 +102,7 @@ export function SelectSearchableOption({
     },
   };
 
-  const merged = mergeProps(userProps as any, ourProps as any);
+  const merged = mergeProps(userProps, ourProps);
 
   return <li
     {...merged}

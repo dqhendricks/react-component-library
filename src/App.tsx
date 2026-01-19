@@ -7,24 +7,10 @@ function App() {
       <h1>Component Library</h1>
       <div>
         <p>SelectSearchable</p>
-        <SelectSearchable.Root style={{maxWidth: '175px'}} onValueChange={(val) => console.log(val)}>
-          <SelectSearchable.Trigger
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 8,
-            }}
-          >
+        <SelectSearchable.Root style={{ maxWidth: 200 }} onValueChange={(val) => console.log(val)}>
+          <SelectSearchable.Trigger>
             <SelectSearchable.TriggerValue
               placeholder="Choose..."
-              style={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                minWidth: 0,
-                flex: "1 1 auto",
-              }}
             />
 
             {/* Custom chevron (no libs) */}
@@ -42,7 +28,7 @@ function App() {
             />
           </SelectSearchable.Trigger>
 
-          <SelectSearchable.Dropdown style={{ maxHeight: '200px' }}>
+          <SelectSearchable.Dropdown>
             <SelectSearchable.Search placeholder="Search…" />
 
             <SelectSearchable.OptionList>

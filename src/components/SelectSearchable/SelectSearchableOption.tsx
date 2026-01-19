@@ -29,7 +29,7 @@ function asArray(v: unknown): string[] {
   return [String(v)];
 }
 
-export function SelectSearchableOption({
+export const SelectSearchableOption = React.memo(function SelectSearchableOption({
   value,
   disabled = false,
   children,
@@ -109,4 +109,6 @@ export function SelectSearchableOption({
   >
     {children}
   </li>;
-}
+});
+
+SelectSearchableOption.displayName = "SelectSearchableOption";

@@ -105,24 +105,56 @@ export function SelectSearchableRoot({
     store.dispatchNativeChange();
   }, [store, value]);
 
-  // Active descendant from selected value
+  // Set active descendant on programmatic value changes.
   useEffect(() => {
     const snap = store.getSnapshot();
-    const v = snap.value;
 
-    if (Array.isArray(v)) {
-      const first = v[0];
-      store.setActiveDescendantId(first != null ? snap.valueToId.get(String(first)) ?? null : null);
+    const currentActive = snap.activeDescendantId;
+
+    // Helper: set active only if it changes
+    const setActiveIfChanged = (next: string | null) => {
+      if (next !== currentActive) store.setActiveDescendantId(next);
+    };
+
+    // Helper: find first visible + enabled option (DOM order)
+    const findFirstVisible = (): string | null => {
+      for (const id of snap.orderedIds) {
+        if (!snap.visibleIds.has(id)) continue;
+        const opt = snap.options.get(id);
+        if (!opt || opt.disabled) continue;
+        return id;
+      }
+      return null;
+    };
+
+    // Multi-select: keep active if still navigable (exists, enabled, visible).
+    if (multiple) {
+      if (currentActive) {
+        const opt = snap.options.get(currentActive);
+        const stillNavigable =
+          !!opt && !opt.disabled && snap.visibleIds.has(currentActive);
+
+        if (stillNavigable) return;
+      }
+
+      // Otherwise fall back to first visible option
+      setActiveIfChanged(findFirstVisible());
       return;
     }
 
-    if (v == null || v === "") {
-      store.setActiveDescendantId(null);
+    // Single-select: active should match the selected value
+    const selectedValue = snap.value == null || Array.isArray(snap.value)
+      ? null
+      : String(snap.value);
+
+    if (!selectedValue) {
+      setActiveIfChanged(null);
       return;
     }
 
-    store.setActiveDescendantId(snap.valueToId.get(String(v)) ?? null);
-  }, [store, value]);
+    const selectedId = snap.valueToId.get(selectedValue) ?? null;
+    setActiveIfChanged(selectedId);
+  }, [store, value, multiple]);
 
   // Close on outside click (works with portaled dropdown)
   useEffect(() => {

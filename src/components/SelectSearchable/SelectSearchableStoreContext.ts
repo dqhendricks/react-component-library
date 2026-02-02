@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { observeListboxMutations } from './observeListboxMutations';
 
-type NativeSelectProps = React.ComponentPropsWithoutRef<'select'>;
-export type SelectSearchableValue = NonNullable<NativeSelectProps['value']>; // string | number | readonly string[]
+export type SelectSearchableValue = string | string[];
 
 type SelectSearchableOptionRecord = {
   id: string; // stable DOM id for aria-activedescendant, etc.
@@ -17,12 +16,16 @@ type State = {
   controlId: string;
   listboxId: string;
 
+  // A11y
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
+
   // Native-ish flags
   disabled: boolean;
   multiple: boolean;
 
   // State
-  value: NativeSelectProps["value"];
+  value: SelectSearchableValue;
   selectedValueSet: ReadonlySet<string>; // Fast lookup for option's isSelected check
   open: boolean;
   onTriggerBlur?: React.FocusEventHandler<HTMLElement>;
@@ -60,10 +63,11 @@ export type SelectSearchableStore = {
     controlId: string;
     listboxId: string;
   }) => void;
+  setA11y: (p: { ariaLabel?: string; ariaLabelledBy?: string }) => void;
   setFlags: (p: { disabled: boolean; multiple: boolean }) => void;
 
   // state setters
-  setValue: (value: NativeSelectProps["value"]) => void;
+  setValue: (value: SelectSearchableValue) => void;
   setOpen: (open: boolean) => void;
   setOnTriggerBlur: (fn: React.FocusEventHandler<HTMLElement> | undefined) => void;
 
@@ -95,16 +99,10 @@ export type SelectSearchableStore = {
 
 const normalize = (s: string) => s.trim().toLowerCase();
 
-function toSelectedSet(value: NativeSelectProps["value"]): ReadonlySet<string> {
+function toSelectedSet(value: SelectSearchableValue): ReadonlySet<string> {
   if (value == null) return new Set();
 
-  if (Array.isArray(value)) {
-    const s = new Set<string>();
-    for (const v of value) s.add(String(v));
-    return s;
-  }
-
-  return new Set([String(value)]);
+  return Array.isArray(value) ? new Set(value) : new Set([value]);
 }
 
 function matchesSearch(query: string, label: string) {
@@ -136,19 +134,22 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   let cleanupObserve: (() => void) | null = null;
 
   const state: State = {
-    controlId: "",
-    listboxId: "",
+    controlId: '',
+    listboxId: '',
+
+    ariaLabel: undefined,
+    ariaLabelledBy: undefined,
 
     disabled: false,
     multiple: false,
 
-    value: undefined,
+    value: '',
     selectedValueSet: new Set(),
     open: false,
     activeDescendantId: null,
 
     hasSearch: false,
-    searchQuery: "",
+    searchQuery: '',
 
     visibleIds: new Set(),
     orderedIds: [],
@@ -250,6 +251,13 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.controlId = p.controlId;
         state.listboxId = p.listboxId;
+      });
+    },
+
+    setA11y(p) {
+      setState(() => {
+        state.ariaLabel = p.ariaLabel;
+        state.ariaLabelledBy = p.ariaLabelledBy;
       });
     },
 

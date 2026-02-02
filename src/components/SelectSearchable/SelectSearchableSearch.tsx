@@ -9,18 +9,28 @@ import { mergeProps } from "./mergeProps";
 
 export type SelectSearchableSearchProps = Omit<
   React.ComponentPropsWithoutRef<"input">,
-  "role" | "value" | "defaultValue" | "onChange"
+  | "role"
+  | "value"
+  | "defaultValue"
+  | "onChange"
+  | "aria-label" // controlled by Root
+  | "aria-labeledby" // controlled by Root
+  | "aria-describedby" // controlled by Search
+  | "aria-description" // Search uses aria-describedby
 > & {
   autoFocus?: boolean;
+  searchFieldDescription?: string; // Screen readers will use Root label + this search field description
 };
 
 export function SelectSearchableSearch({
   autoFocus = true,
+  searchFieldDescription = "Search field",
   placeholder = "Search…",
   ...rest
 }: SelectSearchableSearchProps) {
   const store = useSelectSearchableStoreContext();
 
+  const controlId = useSelectSearchableStore(store, (s) => s.controlId);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const searchQuery = useSelectSearchableStore(store, (s) => s.searchQuery);
@@ -63,6 +73,8 @@ export function SelectSearchableSearch({
     if (firstMatchId) store.setActiveDescendantId(firstMatchId);
   }, [firstMatchId, store]);
 
+  const searchHintId = `${controlId}--search-hint`;
+
   const ourInputProps: React.ComponentPropsWithoutRef<"input"> = {
     className: styles.searchInput,
     type: "text",
@@ -70,9 +82,22 @@ export function SelectSearchableSearch({
     placeholder,
     value: searchQuery,
     onChange: (e) => store.setSearchQuery(e.currentTarget.value),
+    "aria-describedby": searchHintId,
   };
 
   const merged = mergeProps(rest, { ...ourInputProps, ...comboboxOwnerProps });
 
-  return <input ref={inputRef} {...merged} />;
+  return (
+    <>
+      <input
+        ref={inputRef}
+        {...merged}
+        // Consumer styling hooks
+        data-part='search'
+      />
+      <span id={searchHintId} className={styles.srOnly}>
+        { searchFieldDescription }
+      </span>
+    </>
+  );
 }

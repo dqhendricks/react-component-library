@@ -15,20 +15,50 @@ import {
   useSelectSearchableStore,
 } from "./SelectSearchableStoreContext";
 
-type NativeSelectProps = ComponentPropsWithoutRef<"select">;
-type SelectValue = NonNullable<NativeSelectProps["value"]>;
-
-export type SelectSearchableRootProps = PropsWithChildren<
-  Omit<NativeSelectProps, "children" | "onBlur" | "size" | "autocomplete"> & {
-    rootId?: string;
+type CommonRootProps = PropsWithChildren<
+  Omit<
+    ComponentPropsWithoutRef<"select">,
+    | "children"
+    | "onBlur"
+    | "size"
+    | "autoComplete"
+    | "value"
+    | "defaultValue"
+    | "multiple"
+    | "onChange"
+  > & {
     onBlur?: React.FocusEventHandler<HTMLElement>;
-    onValueChange?: (value: SelectValue) => void;
+    onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   }
 >;
 
+type SelectSearchableRootPropsSingle = CommonRootProps & {
+  multiple?: false | undefined;
+  value?: string;
+  defaultValue?: string;
+  onValueChange?: (value: string) => void;
+};
+
+type SelectSearchableRootPropsMultiple = CommonRootProps & {
+  multiple: true;
+  value?: string[];
+  defaultValue?: string[];
+  onValueChange?: (value: string[]) => void;
+};
+
+export type SelectSearchableRootProps =
+  | SelectSearchableRootPropsSingle
+  | SelectSearchableRootPropsMultiple;
+
+/**
+ * Root container for the SelectSearchable composite component.
+ *
+ * Renders a visually-custom select while maintaining an underlying native `select`
+ * for form compatibility and accessibility.
+ */
 export function SelectSearchableRoot({
   id,
-  rootId,
+  multiple = false,
   className,
   style,
   children,
@@ -37,19 +67,22 @@ export function SelectSearchableRoot({
   value: controlledValue,
   defaultValue,
   onChange,
+  "aria-label": ariaLabel,
+  "aria-labelledby": ariaLabelledBy,
   ...selectProps
 }: SelectSearchableRootProps) {
   const reactId = useId();
-  const controlId = id ?? `cs-${reactId}`;
+  const controlId = id ?? `ss-${reactId}`;
+  const rootId = `${controlId}--root`;
   const listboxId = `${controlId}--listbox`;
   const nativeSelectId = `${controlId}--native`;
 
   const disabled = !!selectProps.disabled;
-  const multiple = !!selectProps.multiple;
 
   const isControlled = controlledValue != null;
-  const [uncontrolledValue, setUncontrolledValue] = useState<NativeSelectProps["value"]>(defaultValue);
-  const value = (isControlled ? controlledValue : uncontrolledValue) as NativeSelectProps["value"];
+  const normalizedDefaultValue = defaultValue || (multiple ? [] : '');
+  const [uncontrolledValue, setUncontrolledValue] = useState<SelectSearchableValue>(normalizedDefaultValue);
+  const value = (isControlled ? controlledValue : uncontrolledValue) as SelectSearchableValue;
 
   const storeRef = useRef<ReturnType<typeof createSelectSearchableStore> | null>(null);
   if (!storeRef.current) storeRef.current = createSelectSearchableStore();
@@ -63,6 +96,11 @@ export function SelectSearchableRoot({
   useEffect(() => {
     store.setIdentity({ controlId, listboxId });
   }, [store, controlId, listboxId]);
+
+  // A11y
+  useEffect(() => {
+    store.setA11y({ ariaLabel, ariaLabelledBy });
+  }, [store, ariaLabel, ariaLabelledBy]);
 
   // flags
   useEffect(() => {
@@ -84,8 +122,22 @@ export function SelectSearchableRoot({
     (next: SelectSearchableValue) => {
       if (disabled) return;
 
-      if (!isControlled) setUncontrolledValue(next);
-      onValueChange?.(next);
+      // Normalize to correct shape for the current mode
+      const normalized = multiple
+        ? (Array.isArray(next) ? next : ([next]))
+        : (Array.isArray(next) ? (next[0] ?? "") : next);
+
+      if (!isControlled) setUncontrolledValue(normalized);
+
+      if (multiple) {
+        (onValueChange as ((v: string[]) => void) | undefined)?.(
+          normalized as string[]
+        );
+      } else {
+        (onValueChange as ((v: string) => void) | undefined)?.(
+          normalized as string
+        );
+      }
 
       if (!multiple) {
         store.setOpen(false);
@@ -156,7 +208,7 @@ export function SelectSearchableRoot({
     setActiveIfChanged(selectedId);
   }, [store, value, multiple]);
 
-  // Close on outside click (works with portaled dropdown)
+  // Close on outside click
   useEffect(() => {
     if (!open) return;
 
@@ -183,13 +235,16 @@ export function SelectSearchableRoot({
         id={rootId}
         className={[styles.root, disabled ? styles.disabled : "", className].filter(Boolean).join(" ")}
         style={style}
+        // Consumer styling hooks
+        data-part='root'
       >
         <select
           {...selectProps}
           ref={(el) => store.setNativeSelectEl(el)}
           id={nativeSelectId}
           value={value}
-          onChange={onChange}
+          multiple={multiple}
+          onChange={onChange || (() => {})}
           className={styles.hiddenSelect}
           tabIndex={-1}
           aria-hidden="true"

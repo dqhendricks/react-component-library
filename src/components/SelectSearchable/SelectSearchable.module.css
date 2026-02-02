@@ -7,6 +7,18 @@
   pointer-events: none;
 }
 
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Visually hidden but still participates in form submit + validation */
 .hiddenSelect {
   position: absolute;
@@ -66,6 +78,7 @@
   background-color: white;
   overflow: hidden;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  z-index: 9999;
 
   /* Allows for dropdown to handle max height */
   display: flex;

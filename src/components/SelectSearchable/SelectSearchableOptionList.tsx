@@ -39,7 +39,12 @@ export function SelectSearchableOptionList({
   const merged = mergeProps(userProps, ourProps);
 
   return (
-    <ul {...merged} ref={store.setOptionListEl}>
+    <ul
+      {...merged}
+      ref={store.setOptionListEl}
+      // Consumer styling hooks
+      data-part='list'
+    >
       {children}
     </ul>
   );

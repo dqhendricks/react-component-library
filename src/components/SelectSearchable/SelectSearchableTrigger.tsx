@@ -1,27 +1,44 @@
-import React, { forwardRef, useCallback, useMemo } from "react";
-import styles from "./SelectSearchable.module.css";
+import React, { forwardRef, useCallback, useMemo } from 'react';
+import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
-} from "./SelectSearchableStoreContext";
-import { useComboboxOwnerProps } from "./useComboboxOwnerProps";
-import { mergeProps } from "./mergeProps";
+  type SelectSearchableValue,
+} from './SelectSearchableStoreContext';
+import { useComboboxOwnerProps } from './useComboboxOwnerProps';
+import { mergeProps } from './mergeProps';
 
 export type SelectSearchableTriggerRenderArgs = {
-  value: React.ComponentPropsWithoutRef<"select">["value"];
+  value: string; // Use if not multiple
+  values: string[]; // Use if multiple
   isOpen: boolean;
+  multiple: boolean;
 };
 
 export type SelectSearchableTriggerProps = Omit<
-  React.ComponentPropsWithoutRef<"button">,
-  "type" | "aria-haspopup" | "aria-controls" | "aria-expanded" | "aria-activedescendant" | "disabled" | "role"
+  React.ComponentPropsWithoutRef<'button'>,
+  | 'id' 
+  | 'children'
+  | 'type'
+  | 'aria-haspopup'
+  | 'aria-controls'
+  | 'aria-expanded'
+  | 'aria-activedescendant'
+  | 'aria-label' // controlled by Root
+  | 'aria-labeledby' // controlled by Root
+  | 'disabled'
+  | 'role'
 > & {
   children: React.ReactNode | ((args: SelectSearchableTriggerRenderArgs) => React.ReactNode);
 };
 
 function assignRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
-  if (typeof ref === "function") ref(value);
+  if (typeof ref === 'function') ref(value);
   else if (ref) (ref as React.RefObject<T | null>).current = value;
+}
+
+function toValues(v: SelectSearchableValue): string[] {
+  return Array.isArray(v) ? v : v ? [v] : [];
 }
 
 export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearchableTriggerProps>(
@@ -31,7 +48,8 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const controlId = useSelectSearchableStore(store, (s) => s.controlId);
     const disabled = useSelectSearchableStore(store, (s) => s.disabled);
     const open = useSelectSearchableStore(store, (s) => s.open);
-    const value = useSelectSearchableStore(store, (s) => s.value);
+    const valueUnion = useSelectSearchableStore(store, (s) => s.value);
+    const multiple = useSelectSearchableStore(store, (s) => s.multiple);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
     const onTriggerBlurInjected = useSelectSearchableStore(store, (s) => s.onTriggerBlur);
 
@@ -46,9 +64,9 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       [store, ref],
     );
 
-    const ourButtonProps: React.ComponentPropsWithoutRef<"button"> = {
+    const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
       id: controlId,
-      type: "button",
+      type: 'button',
       className: [styles.trigger, disabled ? styles.triggerDisabled : ""].filter(Boolean).join(" "),
       disabled,
       onClick: () => {
@@ -63,15 +81,28 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const ownerProps = triggerOwnsCombobox ? comboboxOwnerProps : {};
     const merged = mergeProps(rest, { ...ourButtonProps, ...ownerProps });
 
+    const values = useMemo(() => toValues(valueUnion), [valueUnion]);
+
     const renderArgs = useMemo(
-      () => ({ value, isOpen: open }),
-      [value, open],
+      () => ({
+        value: values[0] ?? "",
+        values,
+        isOpen: open,
+        multiple,
+      }),
+      [values, open, multiple],
     );
 
-    const content = typeof children === "function" ? children(renderArgs) : children;
+    const content = typeof children === 'function' ? children(renderArgs) : children;
 
     return (
-      <button {...merged} ref={mergedRef}>
+      <button
+        {...merged}
+        ref={mergedRef}
+        // Consumer styling hooks
+        data-part='trigger'
+        data-state={open ? 'open' : 'closed'}
+      >
         {content}
       </button>
     );

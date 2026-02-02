@@ -35,6 +35,7 @@ export function SelectSearchableDropdown({
 }: SelectSearchableDropdownProps) {
   const store = useSelectSearchableStoreContext();
 
+  const controlId = useSelectSearchableStore(store, (s) => s.controlId);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const triggerEl = useSelectSearchableStore(store, (s) => s.triggerEl);
@@ -62,7 +63,7 @@ export function SelectSearchableDropdown({
         (placement === "down" ? spaceBelow : spaceAbove) - gap,
       );
 
-      // "sane" default, clamped by viewport
+      // Default, clamped by viewport
       const maxHeight = Math.min(maxHeightWithClamp, viewportMaxHeight);
 
       const top = placement === "down" ? r.bottom + gap : r.top - gap;
@@ -86,16 +87,36 @@ export function SelectSearchableDropdown({
       });
     };
 
+    // Compute on open
     compute();
 
+    // Recompute on resize
     window.addEventListener("resize", compute);
-    window.addEventListener("scroll", compute, true);
+
+    // Close on scroll
+    const onScrollCapture = (ev: Event) => {
+      const t = ev.target as Node | null;
+      if (!t) return;
+
+      const { dropdownEl, nativeSelectEl } = store.getSnapshot();
+
+      // If the scroll originated from inside the dropdown itself, keep it open.
+      if (dropdownEl?.contains(t)) return;
+      // Hidden select sometimes scrolls, ignore this as well
+      if (nativeSelectEl?.contains(t)) return;
+
+      console.log('close on scroll', t);
+      store.setOpen(false);
+      triggerEl?.focus();
+    };
+
+    window.addEventListener("scroll", onScrollCapture, true);
 
     return () => {
       window.removeEventListener("resize", compute);
-      window.removeEventListener("scroll", compute, true);
+      window.removeEventListener("scroll", onScrollCapture, true);
     };
-  }, [open, disabled, triggerEl, maxHeightWithClamp]);
+  }, [open, disabled, triggerEl, maxHeightWithClamp, gap, store]);
 
   if (!triggerEl) return null;
 
@@ -128,14 +149,28 @@ export function SelectSearchableDropdown({
 
   const ourProps: DivProps = {
     className: [
-      styles.dropdown, // reuse your existing dropdown styling hook-point
-      floating?.placement === "up" ? styles.dropdownUp : styles.dropdownDown,
+      styles.dropdown,
       hidden ? styles.dropdownClosed : null,
-    ].filter(Boolean).join(" "),
+    ]
+      .filter(Boolean)
+      .join(" "),
     style: baseStyle,
   };
 
   const merged = mergeProps(userProps, ourProps);
 
-  return createPortal(<div {...merged} ref={store.setDropdownEl}>{children}</div>, document.body);
+  return createPortal(
+    <div
+      {...merged}
+      ref={store.setDropdownEl}
+      // Consumer styling hooks
+      data-part='dropdown'
+      data-owner={controlId}
+      data-state={hidden ? "closed" : "open"}
+      data-placement={floating?.placement ?? "down"}
+    >
+      {children}
+    </div>,
+    document.body,
+  );
 }

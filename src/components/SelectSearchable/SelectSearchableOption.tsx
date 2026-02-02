@@ -106,6 +106,12 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
     {...merged}
     data-option-id={optionId}
     ref={nodeRef}
+    // Consumer styling hooks
+    data-part='option'
+    data-selected={isSelected || undefined}
+    data-active={isActive || undefined}
+    data-disabled={disabled || undefined}
+    data-hidden={hidden || undefined}
   >
     {children}
   </li>;

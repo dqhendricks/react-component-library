@@ -1,20 +1,20 @@
-import React, { useMemo } from "react";
-import styles from "./SelectSearchable.module.css";
+import React, { useMemo } from 'react';
+import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
-} from "./SelectSearchableStoreContext";
-import { mergeProps } from "./mergeProps";
+} from './SelectSearchableStoreContext';
+import { mergeProps } from './mergeProps';
 
 export type SelectSearchableTriggerValueProps = Omit<
-  React.ComponentPropsWithoutRef<"span">,
-  "children"
+  React.ComponentPropsWithoutRef<'span'>,
+  'children'
 > & {
   placeholder?: string;
 };
 
 export function SelectSearchableTriggerValue({
-  placeholder = "Select…",
+  placeholder = 'Select…',
   ...rest
 }: SelectSearchableTriggerValueProps) {
   const store = useSelectSearchableStoreContext();
@@ -28,7 +28,7 @@ export function SelectSearchableTriggerValue({
       return `${value.length} selected`;
     }
 
-    if (value == null || value === "") return placeholder;
+    if (value == null || value === '') return placeholder;
 
     const v = String(value);
     const fromRegistry = store.getOptionByValue(v)?.label;
@@ -38,11 +38,19 @@ export function SelectSearchableTriggerValue({
     return (idx >= 0 ? nativeSelectEl?.options[idx]?.text : undefined) ?? v;
   }, [value, placeholder, store, nativeSelectEl]);
 
-  const ourProps: React.ComponentPropsWithoutRef<"span"> = {
+  const ourProps: React.ComponentPropsWithoutRef<'span'> = {
     className: styles.triggerValue,
   };
 
   const merged = mergeProps(rest, ourProps);
 
-  return <span {...merged}>{display}</span>;
+  return (
+    <span
+      {...merged}
+      // Consumer styling hooks
+      data-part='value'
+    >
+      {display}
+    </span>
+  );;
 }

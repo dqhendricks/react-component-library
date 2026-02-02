@@ -1,0 +1,69 @@
+import { Canvas, Meta, Story, Title, Description, Primary, Controls } from '@storybook/addon-docs/blocks';
+import * as RootStories from './SelectSearchable.Root.stories';
+import * as TriggerStories from './SelectSearchable.Trigger.stories';
+
+<Meta of={RootStories} />
+
+# SelectSearchable
+
+A composable, searchable, and accessible select component that supports single and multiple
+selection, custom triggers, and large option sets.
+
+<Canvas of={RootStories.Playground} />
+
+## SelectSearchable.Root
+
+**SelectSearchable.Root** is the top-level component that manages state, focus, and accessibility for the select.
+
+<details>
+  It wraps a native `<select>` element and forwards most standard `<select>` attributes (such as `name`, `onChange`, and `value`). The following attributes are **not supported**:
+
+  - `size`
+  - `autoComplete`
+
+  **Accessibility**
+
+  SelectSearchable.Root requires an accessible name. Provide one via `aria-label`, `aria-labelledby`, wrapping it in a `<label>` element, or using an associated `<label htmlFor>` pointing to the same `id` given to Root props.
+
+  **IDs**
+
+  The `id` prop set in the Root is applied to the Trigger element so it can be referenced by a `<label htmlFor>` for accessible labeling.
+  The internal Root element uses the same base `id` with a '--root' suffix to avoid collisions.
+  If no `id` is provided, a stable one is automatically generated to ensure accessibility compliance.
+
+  **Styling**
+
+  Exposes `data-part="root"` for easy custom styling.
+</details>
+
+<Controls of={RootStories.Playground} />
+
+## SelectSearchable.Trigger
+
+**SelectSearchable.Trigger** renders the interactive control that opens and closes the dropdown.
+
+<details>
+  It wraps a native `<button>` element and forwards all standard `<button>` attributes **except** those managed by the Root context.
+
+  **Controlled props (cannot be overridden):**
+
+  - `id`
+  - `type`
+  - `disabled`
+  - `role`
+  - `aria-...`
+
+  The Trigger’s `id` is stable and derived from the Root `id`, using the suffix `--control`.
+
+  **Children**
+
+  `children` may be either:
+  - A `ReactNode`, or
+  - A render function receiving: `value`, `values`, `isOpen`, `multiple`.
+
+  **Styling**
+
+  Exposes `data-part="trigger"` and `data-state="open | closed"` for easy custom styling.
+</details>
+
+<Controls of={TriggerStories.Default} />

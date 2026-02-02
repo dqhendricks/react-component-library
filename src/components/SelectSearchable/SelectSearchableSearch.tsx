@@ -13,17 +13,16 @@ export type SelectSearchableSearchProps = Omit<
   | "value"
   | "defaultValue"
   | "onChange"
+  | "autoFocus" // controlled by Root
   | "aria-label" // controlled by Root
   | "aria-labeledby" // controlled by Root
   | "aria-describedby" // controlled by Search
   | "aria-description" // Search uses aria-describedby
 > & {
-  autoFocus?: boolean;
   searchFieldDescription?: string; // Screen readers will use Root label + this search field description
 };
 
 export function SelectSearchableSearch({
-  autoFocus = true,
   searchFieldDescription = "Search field",
   placeholder = "Search…",
   ...rest
@@ -51,10 +50,9 @@ export function SelectSearchableSearch({
   }, [store]);
 
   useEffect(() => {
-    if (!autoFocus) return;
     if (!open || disabled) return;
     inputRef.current?.focus();
-  }, [open, disabled, autoFocus]);
+  }, [open, disabled]);
 
   // Set active descendant to first visible match when query changes
   const firstMatchId = useMemo(() => {

@@ -83,10 +83,11 @@ import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron'; // Not included
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProps) => {
+export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelectSearchableProps) => {
   <SelectSearchable.Root
     multiple={multiple}
     style={{ maxWidth: 240 }}
+    onValueChange={onValueChange}
     aria-label="Select Person" // You can use a <label> instead
   >
     <SelectSearchable.Trigger>
@@ -132,7 +133,12 @@ export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProp
     }
   },
   render: (args) => (
-    <SelectSearchable.Root {...args} style={{ maxWidth: 240 }} aria-label="Select Person">
+    <SelectSearchable.Root
+      {...args}
+      onValueChange={(val: string | string[]) => console.log(val)}
+      style={{ maxWidth: 240 }}
+      aria-label="Select Person"
+    >
       <SelectSearchable.Trigger>
         <SelectSearchable.TriggerValue placeholder="Choose..." />
         <Chevron />
@@ -626,7 +632,7 @@ import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchableProps) => {
+export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   return (
     <>
       <style>
@@ -653,7 +659,6 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
 
       <SelectSearchable.Root
         style={{ maxWidth: 240 }}
-        onValueChange={onValueChange}
         aria-label="Select Person" // You can use a <label> instead
       >
         <SelectSearchable.Trigger>
@@ -698,7 +703,6 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
 
       <SelectSearchable.Root
         style={{ maxWidth: 240 }}
-        onValueChange={(val) => console.log(val)}
         aria-label="Select Person"
       >
         <SelectSearchable.Trigger>

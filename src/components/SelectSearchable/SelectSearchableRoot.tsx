@@ -15,6 +15,15 @@ import {
   useSelectSearchableStore,
 } from "./SelectSearchableStoreContext";
 
+function normalizeByMode(
+  next: SelectSearchableValue,
+  multiple: boolean,
+): SelectSearchableValue {
+  return multiple
+    ? (Array.isArray(next) ? next : next === undefined ? [] : [next])
+    : (Array.isArray(next) ? (next[0] ?? undefined) : next);
+}
+
 type CommonRootProps = PropsWithChildren<
   Omit<
     ComponentPropsWithoutRef<"select">,
@@ -80,8 +89,7 @@ export function SelectSearchableRoot({
   const disabled = !!selectProps.disabled;
 
   const isControlled = controlledValue != null;
-  const normalizedDefaultValue = defaultValue || (multiple ? [] : '');
-  const [uncontrolledValue, setUncontrolledValue] = useState<SelectSearchableValue>(normalizedDefaultValue);
+  const [uncontrolledValue, setUncontrolledValue] = useState<SelectSearchableValue>(defaultValue);
   const value = (isControlled ? controlledValue : uncontrolledValue) as SelectSearchableValue;
 
   const storeRef = useRef<ReturnType<typeof createSelectSearchableStore> | null>(null);
@@ -112,40 +120,39 @@ export function SelectSearchableRoot({
     store.setOnTriggerBlur(onBlur);
   }, [store, onBlur]);
 
+  // normalize value on `multiple` mode change
+  useEffect(() => {
+    if (isControlled) return;
+    setUncontrolledValue((prev) => normalizeByMode(prev, multiple));
+  }, [multiple, isControlled]);
+
   // keep store value in sync
   useEffect(() => {
     store.setValue(value);
   }, [store, value]);
 
   // Root controls commit (controlled/uncontrolled) and close+focus behavior
-  const commitValue = useCallback(
-    (next: SelectSearchableValue) => {
-      if (disabled) return;
+  const commitValue = useCallback((next: SelectSearchableValue) => {
+    if (disabled) return;
 
-      // Normalize to correct shape for the current mode
-      const normalized = multiple
-        ? (Array.isArray(next) ? next : ([next]))
-        : (Array.isArray(next) ? (next[0] ?? "") : next);
+    const normalized = normalizeByMode(next, multiple);
+    if (!isControlled) setUncontrolledValue(normalized);
 
-      if (!isControlled) setUncontrolledValue(normalized);
+    if (multiple) {
+      (onValueChange as ((v: string[] | undefined) => void) | undefined)?.(
+        (normalized as string[]).length ? (normalized as string[]) : undefined
+      );
+    } else {
+      (onValueChange as ((v: string | undefined) => void) | undefined)?.(
+        normalized as string | undefined
+      );
+    }
 
-      if (multiple) {
-        (onValueChange as ((v: string[]) => void) | undefined)?.(
-          normalized as string[]
-        );
-      } else {
-        (onValueChange as ((v: string) => void) | undefined)?.(
-          normalized as string
-        );
-      }
-
-      if (!multiple) {
-        store.setOpen(false);
-        store.getSnapshot().triggerEl?.focus();
-      }
-    },
-    [disabled, isControlled, multiple, onValueChange, store],
-  );
+    if (!multiple) {
+      store.setOpen(false);
+      store.getSnapshot().triggerEl?.focus();
+    }
+  }, [disabled, isControlled, multiple, onValueChange, store]);
 
   useEffect(() => {
     store.setCommitValue(commitValue);
@@ -242,22 +249,22 @@ export function SelectSearchableRoot({
           {...selectProps}
           ref={(el) => store.setNativeSelectEl(el)}
           id={nativeSelectId}
-          value={value}
+          value={value === undefined ? (multiple ? [] : "") : value}
           multiple={multiple}
           onChange={onChange || (() => {})}
           className={styles.hiddenSelect}
           tabIndex={-1}
           aria-hidden="true"
         >
-          {Array.isArray(value) && value.length ? (
+          {Array.isArray(value) ? (
             value.map((val) => (
               <option key={String(val)} value={val}>
                 {String(val)}
               </option>
             ))
-          ) : (
-            <option value={value}>{String(value ?? "")}</option>
-          )}
+          ) : value !== undefined ? (
+            <option value={value}>{String(value)}</option>
+          ) : null }
         </select>
 
         {children}

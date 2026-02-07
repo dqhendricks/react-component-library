@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { observeListboxMutations } from './observeListboxMutations';
 
-export type SelectSearchableValue = string | string[];
+export type SelectSearchableValue = string | string[] | undefined;
 
 type SelectSearchableOptionRecord = {
   id: string; // stable DOM id for aria-activedescendant, etc.
@@ -100,8 +100,7 @@ export type SelectSearchableStore = {
 const normalize = (s: string) => s.trim().toLowerCase();
 
 function toSelectedSet(value: SelectSearchableValue): ReadonlySet<string> {
-  if (value == null) return new Set();
-
+  if (value === undefined) return new Set();
   return Array.isArray(value) ? new Set(value) : new Set([value]);
 }
 

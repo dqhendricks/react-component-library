@@ -6,14 +6,16 @@ import React, {
   useState,
   type PropsWithChildren,
   type ComponentPropsWithoutRef,
-} from "react";
-import styles from "./SelectSearchable.module.css";
+} from 'react';
+import styles from './SelectSearchable.module.css';
 import {
   SelectSearchableStoreContext,
   createSelectSearchableStore,
   type SelectSearchableValue,
   useSelectSearchableStore,
-} from "./SelectSearchableStoreContext";
+} from './SelectSearchableStoreContext';
+import { assignRef } from '../utils/assignRef';
+import { proxyToNativeSelect, type FocusLikeEvent } from './proxyToNativeSelect';
 
 function normalizeByMode(
   next: SelectSearchableValue,
@@ -24,19 +26,23 @@ function normalizeByMode(
     : (Array.isArray(next) ? (next[0] ?? undefined) : next);
 }
 
+type FocusLikeEventHandler = (e: FocusLikeEvent) => void;
+
 type CommonRootProps = PropsWithChildren<
   Omit<
-    ComponentPropsWithoutRef<"select">,
-    | "children"
-    | "onBlur"
-    | "size"
-    | "autoComplete"
-    | "value"
-    | "defaultValue"
-    | "multiple"
-    | "onChange"
+    ComponentPropsWithoutRef<'select'>,
+    | 'children'
+    | 'onFocus'
+    | 'onBlur'
+    | 'size'
+    | 'autoComplete'
+    | 'value'
+    | 'defaultValue'
+    | 'multiple'
+    | 'onChange'
   > & {
-    onBlur?: React.FocusEventHandler<HTMLElement>;
+    onFocus?: FocusLikeEventHandler;
+    onBlur?: FocusLikeEventHandler;
     onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   }
 >;
@@ -65,21 +71,30 @@ export type SelectSearchableRootProps =
  * Renders a visually-custom select while maintaining an underlying native `select`
  * for form compatibility and accessibility.
  */
-export function SelectSearchableRoot({
-  id,
-  multiple = false,
-  className,
-  style,
-  children,
-  onValueChange,
-  onBlur,
-  value: controlledValue,
-  defaultValue,
-  onChange,
-  "aria-label": ariaLabel,
-  "aria-labelledby": ariaLabelledBy,
-  ...selectProps
-}: SelectSearchableRootProps) {
+export const SelectSearchableRoot = React.forwardRef<
+  HTMLSelectElement,
+  SelectSearchableRootProps
+>(function SelectSearchableRoot(
+  {
+    id,
+    multiple = false,
+    className,
+    style,
+    children,
+    onValueChange,
+    onFocus,
+    onBlur,
+    value: controlledValue,
+    defaultValue,
+    onChange,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-description': ariaDescription,
+    'aria-describedby': ariaDescribedBy,
+    ...selectProps
+  },
+  forwardedRef,
+) {
   const reactId = useId();
   const controlId = id ?? `ss-${reactId}`;
   const rootId = `${controlId}--root`;
@@ -100,36 +115,23 @@ export function SelectSearchableRoot({
   // Everything else can use store.getSnapshot() in handlers/effects.
   const open = useSelectSearchableStore(store, (s) => s.open);
 
-  // identity
+  // prop sync
   useEffect(() => {
     store.setIdentity({ controlId, listboxId });
-  }, [store, controlId, listboxId]);
-
-  // A11y
-  useEffect(() => {
-    store.setA11y({ ariaLabel, ariaLabelledBy });
-  }, [store, ariaLabel, ariaLabelledBy]);
-
-  // flags
-  useEffect(() => {
+    store.setA11y({ ariaLabel, ariaLabelledBy, ariaDescription, ariaDescribedBy });
     store.setFlags({ disabled, multiple });
-  }, [store, disabled, multiple]);
+  }, [store, controlId, listboxId, ariaLabel, ariaLabelledBy, disabled, multiple]);
 
-  // injected callbacks
+  // value sync
   useEffect(() => {
-    store.setOnTriggerBlur(onBlur);
-  }, [store, onBlur]);
+    store.setValue(value);
+  }, [store, value]);
 
   // normalize value on `multiple` mode change
   useEffect(() => {
     if (isControlled) return;
     setUncontrolledValue((prev) => normalizeByMode(prev, multiple));
   }, [multiple, isControlled]);
-
-  // keep store value in sync
-  useEffect(() => {
-    store.setValue(value);
-  }, [store, value]);
 
   // Root controls commit (controlled/uncontrolled) and close+focus behavior
   const commitValue = useCallback((next: SelectSearchableValue) => {
@@ -164,57 +166,6 @@ export function SelectSearchableRoot({
     store.dispatchNativeChange();
   }, [store, value]);
 
-  // Set active descendant on programmatic value changes.
-  useEffect(() => {
-    const snap = store.getSnapshot();
-
-    const currentActive = snap.activeDescendantId;
-
-    // Helper: set active only if it changes
-    const setActiveIfChanged = (next: string | null) => {
-      if (next !== currentActive) store.setActiveDescendantId(next);
-    };
-
-    // Helper: find first visible + enabled option (DOM order)
-    const findFirstVisible = (): string | null => {
-      for (const id of snap.orderedIds) {
-        if (!snap.visibleIds.has(id)) continue;
-        const opt = snap.options.get(id);
-        if (!opt || opt.disabled) continue;
-        return id;
-      }
-      return null;
-    };
-
-    // Multi-select: keep active if still navigable (exists, enabled, visible).
-    if (multiple) {
-      if (currentActive) {
-        const opt = snap.options.get(currentActive);
-        const stillNavigable =
-          !!opt && !opt.disabled && snap.visibleIds.has(currentActive);
-
-        if (stillNavigable) return;
-      }
-
-      // Otherwise fall back to first visible option
-      setActiveIfChanged(findFirstVisible());
-      return;
-    }
-
-    // Single-select: active should match the selected value
-    const selectedValue = snap.value == null || Array.isArray(snap.value)
-      ? null
-      : String(snap.value);
-
-    if (!selectedValue) {
-      setActiveIfChanged(null);
-      return;
-    }
-
-    const selectedId = snap.valueToId.get(selectedValue) ?? null;
-    setActiveIfChanged(selectedId);
-  }, [store, value, multiple]);
-
   // Close on outside click
   useEffect(() => {
     if (!open) return;
@@ -232,29 +183,68 @@ export function SelectSearchableRoot({
       triggerEl?.focus();
     };
 
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener('pointerdown', onPointerDown, true);
+    return () => document.removeEventListener('pointerdown', onPointerDown, true);
   }, [store, open]);
+
+  // Handle onFocus/onBlur universally for the control
+  useEffect(() => {
+    const isInside = (node: EventTarget | null) => {
+      if (!(node instanceof Node)) return false;
+
+      const snap = store.getSnapshot();
+      if (snap.triggerEl?.contains(node)) return true;
+      if (snap.dropdownEl?.contains(node)) return true;
+      return false;
+    };
+
+    const onFocusIn = (e: FocusEvent) => {
+      // entered from outside?
+      if (isInside(e.target) && !isInside(e.relatedTarget)) {
+        const snap = store.getSnapshot();
+        onFocus?.(proxyToNativeSelect(e, snap.nativeSelectEl, 'focus'));
+      }
+    };
+
+    const onFocusOut = (e: FocusEvent) => {
+      // leaving to outside?
+      if (isInside(e.target) && !isInside(e.relatedTarget)) {
+        const snap = store.getSnapshot();
+        onBlur?.(proxyToNativeSelect(e, snap.nativeSelectEl, 'blur'));
+      }
+    };
+
+    document.addEventListener('focusin', onFocusIn, true);
+    document.addEventListener('focusout', onFocusOut, true);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn, true);
+      document.removeEventListener('focusout', onFocusOut, true);
+    };
+  }, [store, onFocus, onBlur]);
+
 
   return (
     <SelectSearchableStoreContext.Provider value={store}>
       <div
         id={rootId}
-        className={[styles.root, disabled ? styles.disabled : "", className].filter(Boolean).join(" ")}
+        className={[styles.root, disabled ? styles.disabled : '', className].filter(Boolean).join(' ')}
         style={style}
         // Consumer styling hooks
         data-part='root'
       >
         <select
           {...selectProps}
-          ref={(el) => store.setNativeSelectEl(el)}
+          ref={(el) => {
+            store.setNativeSelectEl(el);
+            assignRef(forwardedRef, el);
+          }}
           id={nativeSelectId}
-          value={value === undefined ? (multiple ? [] : "") : value}
+          value={value === undefined ? (multiple ? [] : '') : value}
           multiple={multiple}
           onChange={onChange || (() => {})}
           className={styles.hiddenSelect}
           tabIndex={-1}
-          aria-hidden="true"
+          aria-hidden={true}
         >
           {Array.isArray(value) ? (
             value.map((val) => (
@@ -271,4 +261,4 @@ export function SelectSearchableRoot({
       </div>
     </SelectSearchableStoreContext.Provider>
   );
-}
+});

@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SelectSearchable } from "../";
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { SelectSearchable } from '../';
 
 const meta = {
-  title: "Components/SelectSearchable/Trigger",
+  title: 'Components/SelectSearchable/Trigger',
   component: SelectSearchable.Trigger,
   parameters: {
     docsOnly: true,

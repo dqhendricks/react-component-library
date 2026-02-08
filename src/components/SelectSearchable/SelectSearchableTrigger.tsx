@@ -6,7 +6,8 @@ import {
   type SelectSearchableValue,
 } from './SelectSearchableStoreContext';
 import { useComboboxOwnerProps } from './useComboboxOwnerProps';
-import { mergeProps } from './mergeProps';
+import { mergeProps } from '../utils/mergeProps';
+import { assignRef } from '../utils/assignRef';
 
 export type SelectSearchableTriggerRenderArgs = {
   value: string; // Use if not multiple
@@ -26,16 +27,13 @@ export type SelectSearchableTriggerProps = Omit<
   | 'aria-activedescendant'
   | 'aria-label' // controlled by Root
   | 'aria-labeledby' // controlled by Root
+  | 'aria-description' // controlled by Root
+  | 'aria-describedby' // controlled by Root
   | 'disabled'
   | 'role'
 > & {
   children: React.ReactNode | ((args: SelectSearchableTriggerRenderArgs) => React.ReactNode);
 };
-
-function assignRef<T>(ref: React.ForwardedRef<T>, value: T | null) {
-  if (typeof ref === 'function') ref(value);
-  else if (ref) (ref as React.RefObject<T | null>).current = value;
-}
 
 function toValues(v: SelectSearchableValue): string[] {
   return Array.isArray(v) ? v : v ? [v] : [];
@@ -51,7 +49,8 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const valueUnion = useSelectSearchableStore(store, (s) => s.value);
     const multiple = useSelectSearchableStore(store, (s) => s.multiple);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
-    const onTriggerBlurInjected = useSelectSearchableStore(store, (s) => s.onTriggerBlur);
+    const ariaDescription = useSelectSearchableStore(store, s => s.ariaDescription);
+    const ariaDescribedBy = useSelectSearchableStore(store, s => s.ariaDescribedBy);
 
     const comboboxOwnerProps = useComboboxOwnerProps();
     const triggerOwnsCombobox = !hasSearch;
@@ -67,15 +66,14 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
       id: controlId,
       type: 'button',
-      className: [styles.trigger, disabled ? styles.triggerDisabled : ""].filter(Boolean).join(" "),
+      className: [styles.trigger, disabled ? styles.triggerDisabled : ''].filter(Boolean).join(' '),
       disabled,
       onClick: () => {
         if (disabled) return;
         store.setOpen(!open);
       },
-      onBlur: (e) => {
-        onTriggerBlurInjected?.(e);
-      },
+      'aria-description': ariaDescription,
+      'aria-describedby': ariaDescribedBy,
     };
 
     const ownerProps = triggerOwnsCombobox ? comboboxOwnerProps : {};
@@ -85,7 +83,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
 
     const renderArgs = useMemo(
       () => ({
-        value: values[0] ?? "",
+        value: values[0] ?? '',
         values,
         isOpen: open,
         multiple,

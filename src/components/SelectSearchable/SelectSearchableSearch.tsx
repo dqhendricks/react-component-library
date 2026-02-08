@@ -1,30 +1,30 @@
-import React, { useEffect, useMemo, useRef } from "react";
-import styles from "./SelectSearchable.module.css";
+import React, { useEffect, useMemo, useRef } from 'react';
+import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
-} from "./SelectSearchableStoreContext";
-import { useComboboxOwnerProps } from "./useComboboxOwnerProps";
-import { mergeProps } from "./mergeProps";
+} from './SelectSearchableStoreContext';
+import { useComboboxOwnerProps } from './useComboboxOwnerProps';
+import { mergeProps } from '../utils/mergeProps';
 
 export type SelectSearchableSearchProps = Omit<
-  React.ComponentPropsWithoutRef<"input">,
-  | "role"
-  | "value"
-  | "defaultValue"
-  | "onChange"
-  | "autoFocus" // controlled by Root
-  | "aria-label" // controlled by Root
-  | "aria-labeledby" // controlled by Root
-  | "aria-describedby" // controlled by Search
-  | "aria-description" // Search uses aria-describedby
+  React.ComponentPropsWithoutRef<'input'>,
+  | 'role'
+  | 'value'
+  | 'defaultValue'
+  | 'onChange'
+  | 'autoFocus' // controlled by Root
+  | 'aria-label' // controlled by Root
+  | 'aria-labeledby' // controlled by Root
+  | 'aria-description' // controlled by Search
+  | 'aria-describedby' // controlled by Search
 > & {
   searchFieldDescription?: string; // Screen readers will use Root label + this search field description
 };
 
 export function SelectSearchableSearch({
-  searchFieldDescription = "Search field",
-  placeholder = "Search…",
+  placeholder = 'Search…',
+  searchFieldDescription = 'Search field.',
   ...rest
 }: SelectSearchableSearchProps) {
   const store = useSelectSearchableStoreContext();
@@ -43,7 +43,7 @@ export function SelectSearchableSearch({
   const comboboxOwnerProps = useComboboxOwnerProps();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Mark that the search input is the combobox "owner" while mounted.
+  // Mark that the search input is the combobox 'owner' while mounted.
   useEffect(() => {
     store.setHasSearch(true);
     return () => store.setHasSearch(false);
@@ -73,14 +73,14 @@ export function SelectSearchableSearch({
 
   const searchHintId = `${controlId}--search-hint`;
 
-  const ourInputProps: React.ComponentPropsWithoutRef<"input"> = {
+  const ourInputProps: React.ComponentPropsWithoutRef<'input'> = {
     className: styles.searchInput,
-    type: "text",
+    type: 'text',
     disabled,
     placeholder,
     value: searchQuery,
     onChange: (e) => store.setSearchQuery(e.currentTarget.value),
-    "aria-describedby": searchHintId,
+    'aria-describedby': searchHintId,
   };
 
   const merged = mergeProps(rest, { ...ourInputProps, ...comboboxOwnerProps });

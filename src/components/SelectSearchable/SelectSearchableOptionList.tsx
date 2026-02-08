@@ -1,17 +1,17 @@
-import React from "react";
-import styles from "./SelectSearchable.module.css";
+import React from 'react';
+import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
-} from "./SelectSearchableStoreContext";
-import { mergeProps } from "./mergeProps";
+} from './SelectSearchableStoreContext';
+import { mergeProps } from '../utils/mergeProps';
 
-type UlProps = React.ComponentPropsWithoutRef<"ul">;
+type UlProps = React.ComponentPropsWithoutRef<'ul'>;
 
 export type SelectSearchableOptionListProps = React.PropsWithChildren<
   Omit<
     UlProps,
-    "id" | "role" | "ref" | "aria-hidden" | "aria-multiselectable"
+    'id' | 'role' | 'ref' | 'aria-hidden' | 'aria-multiselectable'
   >
 >;
 
@@ -30,9 +30,9 @@ export function SelectSearchableOptionList({
 
   const ourProps: UlProps = {
     id: listboxId,
-    role: "listbox",
-    "aria-hidden": hidden || undefined,
-    "aria-multiselectable": multiple || undefined,
+    role: 'listbox',
+    'aria-hidden': hidden || undefined,
+    'aria-multiselectable': multiple || undefined,
     className: styles.optionList,
   };
 

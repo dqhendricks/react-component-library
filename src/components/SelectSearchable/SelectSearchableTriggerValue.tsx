@@ -4,7 +4,7 @@ import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
 } from './SelectSearchableStoreContext';
-import { mergeProps } from './mergeProps';
+import { mergeProps } from '../utils/mergeProps';
 
 export type SelectSearchableTriggerValueProps = Omit<
   React.ComponentPropsWithoutRef<'span'>,

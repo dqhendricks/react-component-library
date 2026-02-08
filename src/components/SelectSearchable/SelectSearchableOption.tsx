@@ -1,22 +1,22 @@
-import React, { useCallback, useEffect, useId, useMemo } from "react";
-import styles from "./SelectSearchable.module.css";
+import React, { useCallback, useEffect, useId, useMemo } from 'react';
+import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
-} from "./SelectSearchableStoreContext";
-import { mergeProps } from "./mergeProps";
+} from './SelectSearchableStoreContext';
+import { mergeProps } from '../utils/mergeProps';
 
-type LiProps = React.ComponentPropsWithoutRef<"li">;
+type LiProps = React.ComponentPropsWithoutRef<'li'>;
 
 export type SelectSearchableOptionProps = React.PropsWithChildren<
   Omit<
     LiProps,
-    | "role"
-    | "aria-selected"
-    | "aria-disabled"
-    | "aria-hidden"
-    | "hidden"
-    | "ref"
+    | 'role'
+    | 'aria-selected'
+    | 'aria-disabled'
+    | 'aria-hidden'
+    | 'hidden'
+    | 'ref'
   > & {
     value: string;
     disabled?: boolean;
@@ -47,7 +47,7 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
   const isActive = useSelectSearchableStore(store, (s) => s.activeDescendantId === optionId);
   const isVisible = useSelectSearchableStore(store, (s) => s.visibleIds.has(optionId));
 
-  const label = useMemo(() => (typeof children === "string" ? children : value), [children, value]);
+  const label = useMemo(() => (typeof children === 'string' ? children : value), [children, value]);
 
   useEffect(() => {
     return store.registerOption({ id: optionId, value, label, disabled, node: nodeRef.current });
@@ -75,19 +75,19 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
 
   const ourProps: LiProps = {
     id: optionId,
-    role: "option",
-    "aria-selected": isSelected,
-    "aria-disabled": disabled || undefined,
+    role: 'option',
+    'aria-selected': isSelected,
+    'aria-disabled': disabled || undefined,
     hidden,
-    "aria-hidden": hidden || undefined,
+    'aria-hidden': hidden || undefined,
     className: [
       styles.option,
-      isSelected ? styles.optionSelected : "",
-      isActive ? styles.optionActive : "",
-      disabled ? styles.optionDisabled : "",
+      isSelected ? styles.optionSelected : '',
+      isActive ? styles.optionActive : '',
+      disabled ? styles.optionDisabled : '',
     ]
       .filter(Boolean)
-      .join(" "),
+      .join(' '),
     onMouseEnter: () => {
       if (!disabled) store.setActiveDescendantId(optionId);
     },

@@ -1,9 +1,8 @@
-import { useCallback } from "react";
-import type React from "react";
+import React, { useCallback } from 'react';
 import {
   useSelectSearchableStoreContext,
   type SelectSearchableValue,
-} from "./SelectSearchableStoreContext";
+} from './SelectSearchableStoreContext';
 
 function isEventComposing(e: React.KeyboardEvent<HTMLElement>) {
   return Boolean((e.nativeEvent as any)?.isComposing);
@@ -62,7 +61,7 @@ export function useSelectNavigationKeyDown() {
       };
 
       switch (e.key) {
-        case "ArrowDown": {
+        case 'ArrowDown': {
           e.preventDefault();
           if (!s.open) store.setOpen(true);
 
@@ -77,7 +76,7 @@ export function useSelectNavigationKeyDown() {
           return;
         }
 
-        case "ArrowUp": {
+        case 'ArrowUp': {
           e.preventDefault();
           if (!s.open) store.setOpen(true);
 
@@ -92,35 +91,35 @@ export function useSelectNavigationKeyDown() {
           return;
         }
 
-        case "Home": {
+        case 'Home': {
           e.preventDefault();
           if (!s.open) store.setOpen(true);
           store.setActiveDescendantId(findFirstVisible());
           return;
         }
 
-        case "End": {
+        case 'End': {
           e.preventDefault();
           if (!s.open) store.setOpen(true);
           store.setActiveDescendantId(findLastVisible());
           return;
         }
 
-        case "PageDown": {
+        case 'PageDown': {
           e.preventDefault();
           if (!s.open) store.setOpen(true);
           for (let i = 0; i < 10; i++) store.moveActive(1);
           return;
         }
 
-        case "PageUp": {
+        case 'PageUp': {
           e.preventDefault();
           if (!s.open) store.setOpen(true);
           for (let i = 0; i < 10; i++) store.moveActive(-1);
           return;
         }
 
-        case "Enter": {
+        case 'Enter': {
           if (!s.open) return;
           e.preventDefault();
 
@@ -142,7 +141,7 @@ export function useSelectNavigationKeyDown() {
           return;
         }
 
-        case "Escape": {
+        case 'Escape': {
           if (!s.open) return;
           e.preventDefault();
           store.setOpen(false);
@@ -150,7 +149,7 @@ export function useSelectNavigationKeyDown() {
           return;
         }
 
-        case "Tab": {
+        case 'Tab': {
           if (!s.open) return;
           e.preventDefault();
           store.setOpen(false);

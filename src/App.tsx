@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { SelectSearchable } from "./components/SelectSearchable";
+import { useMemo } from 'react';
+import { SelectSearchable } from './components/SelectSearchable';
 
 type PersonOption = { value: string; label: string };
 
@@ -19,17 +19,17 @@ function pick<T>(rng: () => number, arr: readonly T[]): T {
 function generatePeople(count: number, seed = 12345): PersonOption[] {
   // Keep these lists small-ish; mixing them gives tons of combinations.
   const firstNames = [
-    "Alice", "Benjamin", "Charlotte", "Daniel", "Emily", "Frederick", "Grace", "Henry", "Isabella", "James",
-    "Katherine", "Liam", "Maya", "Noah", "Olivia", "Patrick", "Quinn", "Rachel", "Samuel", "Tanya",
-    "Uma", "Victor", "William", "Xavier", "Yara", "Zachary", "Aiden", "Bianca", "Caleb", "Diana",
-    "Ethan", "Fatima", "Gavin", "Hana", "Ibrahim", "Jade", "Kai", "Leila", "Mateo", "Nina",
+    'Alice', 'Benjamin', 'Charlotte', 'Daniel', 'Emily', 'Frederick', 'Grace', 'Henry', 'Isabella', 'James',
+    'Katherine', 'Liam', 'Maya', 'Noah', 'Olivia', 'Patrick', 'Quinn', 'Rachel', 'Samuel', 'Tanya',
+    'Uma', 'Victor', 'William', 'Xavier', 'Yara', 'Zachary', 'Aiden', 'Bianca', 'Caleb', 'Diana',
+    'Ethan', 'Fatima', 'Gavin', 'Hana', 'Ibrahim', 'Jade', 'Kai', 'Leila', 'Mateo', 'Nina',
   ] as const;
 
   const lastNames = [
-    "Johnson", "Wright", "Nguyen", "Alvarez", "Thompson", "Moore", "Kim", "Patel", "Rossi", "Anderson",
-    "Lee", "O’Connor", "Fernandez", "Stein", "Brooks", "Doyle", "Matthews", "Cohen", "Park", "Ivanova",
-    "Srinivasan", "Chen", "Turner", "Morales", "Haddad", "Phillips", "Foster", "Silva", "Young", "Kowalski",
-    "Khan", "Garcia", "Martinez", "Brown", "Taylor", "Clark", "Lopez", "Walker", "Hall", "Rivera",
+    'Johnson', 'Wright', 'Nguyen', 'Alvarez', 'Thompson', 'Moore', 'Kim', 'Patel', 'Rossi', 'Anderson',
+    'Lee', 'O’Connor', 'Fernandez', 'Stein', 'Brooks', 'Doyle', 'Matthews', 'Cohen', 'Park', 'Ivanova',
+    'Srinivasan', 'Chen', 'Turner', 'Morales', 'Haddad', 'Phillips', 'Foster', 'Silva', 'Young', 'Kowalski',
+    'Khan', 'Garcia', 'Martinez', 'Brown', 'Taylor', 'Clark', 'Lopez', 'Walker', 'Hall', 'Rivera',
   ] as const;
 
   const rng = mulberry32(seed);
@@ -65,25 +65,25 @@ function App() {
           multiple
         >
           <SelectSearchable.Trigger>
-            <SelectSearchable.TriggerValue placeholder="Choose..." />
+            <SelectSearchable.TriggerValue placeholder='Choose…' />
 
             {/* Custom chevron (no libs) */}
             <span
-              aria-hidden="true"
+              aria-hidden='true'
               style={{
                 width: 0,
                 height: 0,
-                borderLeft: "5px solid transparent",
-                borderRight: "5px solid transparent",
-                borderTop: "6px solid currentColor",
+                borderLeft: '5px solid transparent',
+                borderRight: '5px solid transparent',
+                borderTop: '6px solid currentColor',
                 opacity: 0.85,
-                flex: "0 0 auto",
+                flex: '0 0 auto',
               }}
             />
           </SelectSearchable.Trigger>
 
           <SelectSearchable.Dropdown>
-            <SelectSearchable.Search placeholder="Search…" />
+            <SelectSearchable.Search placeholder='Search…' />
 
             <SelectSearchable.OptionList>
               {options.map((o, i) => (

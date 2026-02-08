@@ -2,24 +2,24 @@ type AnyRecord = Record<string, unknown>;
 type AnyFn = (...args: unknown[]) => unknown;
 
 function isFn(v: unknown): v is AnyFn {
-  return typeof v === "function";
+  return typeof v === 'function';
 }
 
 function isEventLike(v: unknown): v is { defaultPrevented?: boolean } {
-  if (!v || typeof v !== "object") return false;
-  return "defaultPrevented" in (v as Record<string, unknown>);
+  if (!v || typeof v !== 'object') return false;
+  return 'defaultPrevented' in (v as Record<string, unknown>);
 }
 
 function joinClassNames(a: unknown, b: unknown): string | undefined {
-  const as = typeof a === "string" ? a : "";
-  const bs = typeof b === "string" ? b : "";
+  const as = typeof a === 'string' ? a : '';
+  const bs = typeof b === 'string' ? b : '';
   const joined = `${as} ${bs}`.trim();
   return joined || undefined;
 }
 
 function mergeStyle(a: unknown, b: unknown): unknown | undefined {
-  const ao = a && typeof a === "object" ? (a as Record<string, unknown>) : null;
-  const bo = b && typeof b === "object" ? (b as Record<string, unknown>) : null;
+  const ao = a && typeof a === 'object' ? (a as Record<string, unknown>) : null;
+  const bo = b && typeof b === 'object' ? (b as Record<string, unknown>) : null;
   if (!ao && !bo) return undefined;
   if (!ao) return bo;
   if (!bo) return ao;
@@ -53,11 +53,11 @@ export function mergeProps<T extends AnyRecord, U extends AnyRecord>(user: T, ou
     }
   }
 
-  if ("className" in user || "className" in ours) {
+  if ('className' in user || 'className' in ours) {
     out.className = joinClassNames(user.className, ours.className);
   }
 
-  if ("style" in user || "style" in ours) {
+  if ('style' in user || 'style' in ours) {
     out.style = mergeStyle(user.style, ours.style);
   }
 

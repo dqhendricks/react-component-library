@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "@storybook/react-vite";
-import { SelectSearchable } from "..";
-import { generatePeople } from "../../../storybook/utils/generatePeople";
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { SelectSearchable } from '..';
+import { generatePeople } from '../../../storybook/utils/generatePeople';
 
 const peopleOptions = generatePeople(50);
 
@@ -9,15 +9,15 @@ const peopleOptions = generatePeople(50);
 function Chevron() {
   return (
     <span
-      aria-hidden="true"
+      aria-hidden={true}
       style={{
         width: 0,
         height: 0,
-        borderLeft: "5px solid transparent",
-        borderRight: "5px solid transparent",
-        borderTop: "6px solid currentColor",
+        borderLeft: '5px solid transparent',
+        borderRight: '5px solid transparent',
+        borderTop: '6px solid currentColor',
         opacity: 0.85,
-        flex: "0 0 auto",
+        flex: '0 0 auto',
       }}
     />
   );
@@ -26,17 +26,17 @@ function Chevron() {
 function UpDownChevron({ isOpen }: { isOpen: boolean }) {
   return (
     <span
-      aria-hidden="true"
+      aria-hidden='true'
       style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         width: 20,
         height: 20,
         borderRadius: 6,
-        flex: "0 0 auto",
-        transition: "transform 140ms ease, opacity 140ms ease",
-        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+        flex: '0 0 auto',
+        transition: 'transform 140ms ease, opacity 140ms ease',
+        transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
         opacity: 0.85,
       }}
     >
@@ -44,9 +44,9 @@ function UpDownChevron({ isOpen }: { isOpen: boolean }) {
         style={{
           width: 0,
           height: 0,
-          borderLeft: "6px solid transparent",
-          borderRight: "6px solid transparent",
-          borderTop: "7px solid currentColor",
+          borderLeft: '6px solid transparent',
+          borderRight: '6px solid transparent',
+          borderTop: '7px solid currentColor',
         }}
       />
     </span>
@@ -56,7 +56,7 @@ function UpDownChevron({ isOpen }: { isOpen: boolean }) {
 /* Meta */
 
 const meta = {
-  title: "Components/SelectSearchable",
+  title: 'Components/SelectSearchable',
   component: SelectSearchable.Root,
   parameters: {
     controls: { disable: true },
@@ -88,15 +88,15 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
     multiple={multiple}
     style={{ maxWidth: 240 }}
     onValueChange={onValueChange}
-    aria-label="Select Person" // You can use a <label> instead
+    aria-label='Select Person' // You can use a <label> instead
   >
     <SelectSearchable.Trigger>
-      <SelectSearchable.TriggerValue placeholder="Choose..." />
+      <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder="Search…" />
+      <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -137,15 +137,15 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
       {...args}
       onValueChange={(val: string | string[]) => console.log(val)}
       style={{ maxWidth: 240 }}
-      aria-label="Select Person"
+      aria-label='Select Person'
     >
       <SelectSearchable.Trigger>
-        <SelectSearchable.TriggerValue placeholder="Choose..." />
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder="Search…" />
+        <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -171,15 +171,15 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
   <SelectSearchable.Root
     style={{ maxWidth: 240 }}
     onValueChange={onValueChange}
-    aria-label="Select Person" // You can use a <label> instead
+    aria-label='Select Person' // You can use a <label> instead
   >
     <SelectSearchable.Trigger>
-      <SelectSearchable.TriggerValue placeholder="Choose..." />
+      <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder="Search…" />
+      <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -198,15 +198,15 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
     <SelectSearchable.Root
       style={{ maxWidth: 240 }}
       onValueChange={(val) => console.log(val)}
-      aria-label="Select Person"
+      aria-label='Select Person'
     >
       <SelectSearchable.Trigger>
-        <SelectSearchable.TriggerValue placeholder="Choose..." />
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder="Search…" />
+        <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -233,15 +233,15 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
     multiple
     style={{ maxWidth: 240 }}
     onValueChange={onValueChange}
-    aria-label="Select Person" // You can use a <label> instead
+    aria-label='Select Person' // You can use a <label> instead
   >
     <SelectSearchable.Trigger>
-      <SelectSearchable.TriggerValue placeholder="Choose..." />
+      <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder="Search…" />
+      <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -261,15 +261,15 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
       multiple
       style={{ maxWidth: 240 }}
       onValueChange={(val) => console.log(val)}
-      aria-label="Select Person"
+      aria-label='Select Person'
     >
       <SelectSearchable.Trigger>
-        <SelectSearchable.TriggerValue placeholder="Choose..." />
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder="Search…" />
+        <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -294,10 +294,10 @@ import type { MySelectSearchableProps } from './types';
 export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   <SelectSearchable.Root
     style={{ maxWidth: 240 }}
-    aria-label="Select Person" // You can use a <label> instead
+    aria-label='Select Person' // You can use a <label> instead
   >
     <SelectSearchable.Trigger>
-      <SelectSearchable.TriggerValue placeholder="Choose..." />
+      <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
 
@@ -319,10 +319,10 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   render: () => (
     <SelectSearchable.Root
       style={{ maxWidth: 240 }}
-      aria-label="Select Person"
+      aria-label='Select Person'
     >
       <SelectSearchable.Trigger>
-        <SelectSearchable.TriggerValue placeholder="Choose..." />
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
 
@@ -352,24 +352,24 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   <SelectSearchable.Root
     multiple
     style={{ maxWidth: 240 }}
-    aria-label="Select Person" // You can use a <label> instead
+    aria-label='Select Person' // You can use a <label> instead
   >
     <SelectSearchable.Trigger>
       {({ values, isOpen }) => {
         // You should use value or values, depending on whether multiple is true
-        const display = values.join(", ");
+        const display = values.join(', ');
 
         return (
           <>
             <div
               style={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
                 opacity: display ? 1 : 0.7,
               }}
             >
-              {display || "Choose…"}
+              {display || 'Choose…'}
             </div>
 
             <UpDownChevron isOpen={isOpen} />
@@ -379,7 +379,7 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder="Search…" />
+      <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -401,19 +401,19 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
     >
       <SelectSearchable.Trigger>
         {({ values, isOpen }) => {
-          const display = values.join(", ");
+          const display = values.join(', ');
 
           return (
             <>
               <div
                 style={{
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                   opacity: display ? 1 : 0.7,
                 }}
               >
-                {display || "Choose…"}
+                {display || 'Choose…'}
               </div>
 
               <UpDownChevron isOpen={isOpen} />
@@ -423,7 +423,7 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder="Search…" />
+        <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -455,7 +455,7 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
         }
 
         /* Styling with part styling hooks */
-        .demoSelect [data-part="trigger"] {
+        .demoSelect [data-part='trigger'] {
           width: 100%;
           display: flex;
           align-items: center;
@@ -466,26 +466,26 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
         }
 
         /* Styling with state styling hooks */
-        .demoSelect [data-part="trigger"][data-state="closed"] {
+        .demoSelect [data-part='trigger'][data-state='closed'] {
           background: rgba(0,0,0,0.02);
         }
-        .demoSelect [data-part="trigger"][data-state="open"] {
+        .demoSelect [data-part='trigger'][data-state='open'] {
           background: rgba(0,0,0,0.06);
           border-color: rgba(0,0,0,0.5);
         }
 
         /* Styling within the portalled dropdown using styling hooks */
         /* Due to portalling, these will not be children of the Root element */
-        .demoSelectDropdown [data-part="option"] {
+        .demoSelectDropdown [data-part='option'] {
           cursor: crosshair;
         }
 
-        .demoSelectDropdown [data-part="option"][data-active] {
+        .demoSelectDropdown [data-part='option'][data-active] {
           outline: 2px solid rgba(0,0,0,0.35);
           background: rgba(0,0,255,0.06);
         }
 
-        .demoSelectDropdown [data-part="option"][data-selected] {
+        .demoSelectDropdown [data-part='option'][data-selected] {
           background: rgba(0,0,255,0.08);
         }
 
@@ -505,22 +505,22 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
     </style>
 
     <SelectSearchable.Root
-      className="demoSelect"
-      aria-label="Select Person" // You can use a <label> instead
+      className='demoSelect'
+      aria-label='Select Person' // You can use a <label> instead
     >
       <SelectSearchable.Trigger>
         <SelectSearchable.TriggerValue
           // Inline styling of a sub component
           style={{ fontFamily: '"Courier New", monospace' }}
-          placeholder="Choose..."
+          placeholder='Choose…'
         />
         <Chevron />
       </SelectSearchable.Trigger>
 
-      <SelectSearchable.Dropdown className="demoSelectDropdown">
+      <SelectSearchable.Dropdown className='demoSelectDropdown'>
         <SelectSearchable.Search
-          className="demoSelectSearchInput"
-          placeholder="Search…"
+          className='demoSelectSearchInput'
+          placeholder='Search…'
         />
         <SelectSearchable.OptionList>
           {options.map((option) => (
@@ -547,7 +547,7 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
           }
 
           /* Styling with part styling hooks */
-          .demoSelect [data-part="trigger"] {
+          .demoSelect [data-part='trigger'] {
             width: 100%;
             display: flex;
             align-items: center;
@@ -558,26 +558,26 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
           }
 
           /* Styling with state styling hooks */
-          .demoSelect [data-part="trigger"][data-state="closed"] {
+          .demoSelect [data-part='trigger'][data-state='closed'] {
             background: rgba(0,0,0,0.02);
           }
-          .demoSelect [data-part="trigger"][data-state="open"] {
+          .demoSelect [data-part='trigger'][data-state='open'] {
             background: rgba(0,0,0,0.06);
             border-color: rgba(0,0,0,0.5);
           }
 
           /* Styling within the portalled dropdown using styling hooks */
           /* Due to portalling, these will not be children of the Root element */
-          .demoSelectDropdown [data-part="option"] {
+          .demoSelectDropdown [data-part='option'] {
             cursor: crosshair;
           }
 
-          .demoSelectDropdown [data-part="option"][data-active] {
+          .demoSelectDropdown [data-part='option'][data-active] {
             outline: 2px solid rgba(0,0,0,0.35);
             background: rgba(0,0,255,0.06);
           }
 
-          .demoSelectDropdown [data-part="option"][data-selected] {
+          .demoSelectDropdown [data-part='option'][data-selected] {
             background: rgba(0,0,255,0.08);
           }
 
@@ -596,20 +596,20 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
         `}
       </style>
       <SelectSearchable.Root
-        className="demoSelect"
-        aria-label="Select Person"
+        className='demoSelect'
+        aria-label='Select Person'
       >
         <SelectSearchable.Trigger>
           <SelectSearchable.TriggerValue
             // Inline styling of a sub component
             style={{ fontFamily: '"Courier New", monospace' }}
-            placeholder="Choose..."
+            placeholder='Choose…'
           />
           <Chevron />
         </SelectSearchable.Trigger>
 
-        <SelectSearchable.Dropdown className="demoSelectDropdown">
-          <SelectSearchable.Search className="demoSelectSearchInput" placeholder="Search…" />
+        <SelectSearchable.Dropdown className='demoSelectDropdown'>
+          <SelectSearchable.Search className='demoSelectSearchInput' placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
               <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -642,16 +642,16 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
             animate opacity using state hooks.
           */
 
-          [data-part="dropdown"] {
+          [data-part='dropdown'] {
             visibility: visible;
             transition: opacity 200ms ease;
           }
 
-          [data-part="dropdown"][data-state="closed"] {
+          [data-part='dropdown'][data-state='closed'] {
             opacity: 0;
           }
 
-          [data-part="dropdown"][data-state="open"] {
+          [data-part='dropdown'][data-state='open'] {
             opacity: 1;
           }
         \`}
@@ -659,15 +659,15 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
 
       <SelectSearchable.Root
         style={{ maxWidth: 240 }}
-        aria-label="Select Person" // You can use a <label> instead
+        aria-label='Select Person' // You can use a <label> instead
       >
         <SelectSearchable.Trigger>
-          <SelectSearchable.TriggerValue placeholder="Choose..." />
+          <SelectSearchable.TriggerValue placeholder='Choose…' />
           <Chevron />
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown>
-          <SelectSearchable.Search placeholder="Search…" />
+          <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
               <SelectSearchable.Option key={option.id} value={option.value}>
@@ -687,31 +687,31 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   render: () => (
     <>
       <style>{`
-        [data-part="dropdown"] {
+        [data-part='dropdown'] {
           visibility: visible;
           transition: opacity 200ms ease;
         }
 
-        [data-part="dropdown"][data-state="closed"] {
+        [data-part='dropdown'][data-state='closed'] {
           opacity: 0;
         }
 
-        [data-part="dropdown"][data-state="open"] {
+        [data-part='dropdown'][data-state='open'] {
           opacity: 1;
         }
       `}</style>
 
       <SelectSearchable.Root
         style={{ maxWidth: 240 }}
-        aria-label="Select Person"
+        aria-label='Select Person'
       >
         <SelectSearchable.Trigger>
-          <SelectSearchable.TriggerValue placeholder="Choose..." />
+          <SelectSearchable.TriggerValue placeholder='Choose…' />
           <Chevron />
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown>
-          <SelectSearchable.Search placeholder="Search…" />
+          <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
               <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>

@@ -19,6 +19,8 @@ type State = {
   // A11y
   ariaLabel?: string;
   ariaLabelledBy?: string;
+  ariaDescription?: string;
+  ariaDescribedBy?: string;
 
   // Native-ish flags
   disabled: boolean;
@@ -28,7 +30,6 @@ type State = {
   value: SelectSearchableValue;
   selectedValueSet: ReadonlySet<string>; // Fast lookup for option's isSelected check
   open: boolean;
-  onTriggerBlur?: React.FocusEventHandler<HTMLElement>;
   activeDescendantId: string | null;
 
   hasSearch: boolean;
@@ -63,13 +64,12 @@ export type SelectSearchableStore = {
     controlId: string;
     listboxId: string;
   }) => void;
-  setA11y: (p: { ariaLabel?: string; ariaLabelledBy?: string }) => void;
+  setA11y: (p: { ariaLabel?: string; ariaLabelledBy?: string, ariaDescription?: string, ariaDescribedBy?: string }) => void;
   setFlags: (p: { disabled: boolean; multiple: boolean }) => void;
 
   // state setters
   setValue: (value: SelectSearchableValue) => void;
   setOpen: (open: boolean) => void;
-  setOnTriggerBlur: (fn: React.FocusEventHandler<HTMLElement> | undefined) => void;
 
   setActiveDescendantId: (id: string | null) => void;
 
@@ -138,6 +138,8 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     ariaLabel: undefined,
     ariaLabelledBy: undefined,
+    ariaDescription: undefined,
+    ariaDescribedBy: undefined,
 
     disabled: false,
     multiple: false,
@@ -179,7 +181,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       return;
     }
 
-    const ids = Array.from(root.querySelectorAll<HTMLElement>("[data-option-id]"))
+    const ids = Array.from(root.querySelectorAll<HTMLElement>('[data-option-id]'))
       .map((el) => el.dataset.optionId)
       .filter((id): id is string => !!id);
 
@@ -231,10 +233,53 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
       setState(() => {
         state.activeDescendantId = id;
-        state.options.get(id)?.node?.scrollIntoView?.({ block: "nearest" });
+        state.options.get(id)?.node?.scrollIntoView?.({ block: 'nearest' });
       });
       return;
     }
+  }
+
+  function findFirstVisibleNavigableId(): string | null {
+    for (const id of state.orderedIds) {
+      if (!state.visibleIds.has(id)) continue;
+      const opt = state.options.get(id);
+      if (!opt || opt.disabled) continue;
+      return id;
+    }
+    return null;
+  }
+
+  // ensures activeDescendentId stays valid after state changes
+  function reconcileActiveDescendant() {
+    const currentActive = state.activeDescendantId;
+
+    // Multi-select: keep active if still navigable; else choose first visible navigable.
+    if (state.multiple) {
+      if (currentActive) {
+        const opt = state.options.get(currentActive);
+        const stillNavigable =
+          !!opt && !opt.disabled && state.visibleIds.has(currentActive);
+
+        if (stillNavigable) return;
+      }
+
+      state.activeDescendantId = findFirstVisibleNavigableId();
+      return;
+    }
+
+    // Single-select: active should match the selected value (if any)
+    const selectedValue =
+      state.value === undefined || Array.isArray(state.value)
+        ? undefined
+        : state.value;
+
+    if (selectedValue === undefined) {
+      state.activeDescendantId = null;
+      return;
+    }
+
+    const selectedId = state.valueToId.get(selectedValue) ?? null;
+    state.activeDescendantId = selectedId;
   }
 
   const store: SelectSearchableStore = {
@@ -257,6 +302,8 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.ariaLabel = p.ariaLabel;
         state.ariaLabelledBy = p.ariaLabelledBy;
+        state.ariaDescription = p.ariaDescription;
+        state.ariaDescribedBy = p.ariaDescribedBy;
       });
     },
 
@@ -264,6 +311,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.disabled = p.disabled;
         state.multiple = p.multiple;
+        reconcileActiveDescendant();
       });
     },
 
@@ -271,18 +319,13 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.value = value;
         state.selectedValueSet = toSelectedSet(value);
+        reconcileActiveDescendant();
       });
     },
 
     setOpen(open) {
       setState(() => {
         state.open = open;
-      });
-    },
-
-    setOnTriggerBlur(fn) {
-      setState(() => {
-        state.onTriggerBlur = fn;
       });
     },
 
@@ -338,7 +381,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     dispatchNativeChange() {
       const el = state.nativeSelectEl;
       if (!el) return;
-      el.dispatchEvent(new Event("change", { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
     },
 
     registerOption(opt) {
@@ -402,6 +445,6 @@ export const SelectSearchableStoreContext = React.createContext<SelectSearchable
 
 export function useSelectSearchableStoreContext(): SelectSearchableStore {
   const v = React.useContext(SelectSearchableStoreContext);
-  if (!v) throw new Error("SelectSearchable components must be used within <SelectSearchableRoot>.");
+  if (!v) throw new Error('SelectSearchable components must be used within <SelectSearchableRoot>.');
   return v;
 }

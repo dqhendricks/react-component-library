@@ -1,13 +1,13 @@
-import React, { useLayoutEffect, useState } from "react";
-import { createPortal } from "react-dom";
-import styles from "./SelectSearchable.module.css";
+import React, { useLayoutEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
-} from "./SelectSearchableStoreContext";
-import { mergeProps } from "./mergeProps";
+} from './SelectSearchableStoreContext';
+import { mergeProps } from '../utils/mergeProps';
 
-type Placement = "down" | "up";
+type Placement = 'down' | 'up';
 
 type FloatingStyle = {
   top: number;
@@ -18,10 +18,10 @@ type FloatingStyle = {
   placement: Placement;
 };
 
-type DivProps = React.ComponentPropsWithoutRef<"div">;
+type DivProps = React.ComponentPropsWithoutRef<'div'>;
 
 export type SelectSearchableDropdownProps = React.PropsWithChildren<
-  Omit<DivProps, "ref">
+  Omit<DivProps, 'ref'>
 > & {
   maxHeightWithClamp?: number; // Max height, in pixels, and clamped to viewport.
   gap?: number; // Gap between dropdown and trigger element in px.
@@ -56,17 +56,17 @@ export function SelectSearchableDropdown({
       const spaceAbove = r.top - margin;
 
       const placement: Placement =
-        spaceBelow >= 160 || spaceBelow >= spaceAbove ? "down" : "up";
+        spaceBelow >= 160 || spaceBelow >= spaceAbove ? 'down' : 'up';
 
       const viewportMaxHeight = Math.max(
         80,
-        (placement === "down" ? spaceBelow : spaceAbove) - gap,
+        (placement === 'down' ? spaceBelow : spaceAbove) - gap,
       );
 
       // Default, clamped by viewport
       const maxHeight = Math.min(maxHeightWithClamp, viewportMaxHeight);
 
-      const top = placement === "down" ? r.bottom + gap : r.top - gap;
+      const top = placement === 'down' ? r.bottom + gap : r.top - gap;
       const maxWidth = window.innerWidth - margin * 2;
 
       const minWidth = Math.round(r.width);
@@ -91,7 +91,7 @@ export function SelectSearchableDropdown({
     compute();
 
     // Recompute on resize
-    window.addEventListener("resize", compute);
+    window.addEventListener('resize', compute);
 
     // Close on scroll
     const onScrollCapture = (ev: Event) => {
@@ -110,11 +110,11 @@ export function SelectSearchableDropdown({
       triggerEl?.focus();
     };
 
-    window.addEventListener("scroll", onScrollCapture, true);
+    window.addEventListener('scroll', onScrollCapture, true);
 
     return () => {
-      window.removeEventListener("resize", compute);
-      window.removeEventListener("scroll", onScrollCapture, true);
+      window.removeEventListener('resize', compute);
+      window.removeEventListener('scroll', onScrollCapture, true);
     };
   }, [open, disabled, triggerEl, maxHeightWithClamp, gap, store]);
 
@@ -122,9 +122,9 @@ export function SelectSearchableDropdown({
 
   // Keep mounted even before we've computed position (so options can register)
   const baseStyle: React.CSSProperties = floating
-    ? floating.placement === "down"
+    ? floating.placement === 'down'
       ? {
-          position: "fixed",
+          position: 'fixed',
           top: floating.top,
           left: floating.left,
           minWidth: floating.minWidth,
@@ -132,16 +132,16 @@ export function SelectSearchableDropdown({
           maxHeight: floating.maxHeight,
         }
       : {
-          position: "fixed",
+          position: 'fixed',
           top: floating.top,
           left: floating.left,
           minWidth: floating.minWidth,
           maxWidth: floating.maxWidth,
           maxHeight: floating.maxHeight,
-          transform: "translateY(-100%)",
+          transform: 'translateY(-100%)',
         }
     : {
-        position: "fixed",
+        position: 'fixed',
         top: -9999,
         left: -9999,
         maxHeight: 0,
@@ -153,7 +153,7 @@ export function SelectSearchableDropdown({
       hidden ? styles.dropdownClosed : null,
     ]
       .filter(Boolean)
-      .join(" "),
+      .join(' '),
     style: baseStyle,
   };
 
@@ -166,8 +166,8 @@ export function SelectSearchableDropdown({
       // Consumer styling hooks
       data-part='dropdown'
       data-owner={controlId}
-      data-state={hidden ? "closed" : "open"}
-      data-placement={floating?.placement ?? "down"}
+      data-state={hidden ? 'closed' : 'open'}
+      data-placement={floating?.placement ?? 'down'}
     >
       {children}
     </div>,

@@ -14,17 +14,17 @@ function pick<T>(rng: () => number, arr: readonly T[]): T {
 }
 
 const firstNames = [
-  "Alice","Benjamin","Charlotte","Daniel","Emily","Frederick","Grace","Henry","Isabella","James",
-  "Katherine","Liam","Maya","Noah","Olivia","Patrick","Quinn","Rachel","Samuel","Tanya",
-  "Uma","Victor","William","Xavier","Yara","Zachary","Aiden","Bianca","Caleb","Diana",
-  "Ethan","Fatima","Gavin","Hana","Ibrahim","Jade","Kai","Leila","Mateo","Nina",
+  'Alice','Benjamin','Charlotte','Daniel','Emily','Frederick','Grace','Henry','Isabella','James',
+  'Katherine','Liam','Maya','Noah','Olivia','Patrick','Quinn','Rachel','Samuel','Tanya',
+  'Uma','Victor','William','Xavier','Yara','Zachary','Aiden','Bianca','Caleb','Diana',
+  'Ethan','Fatima','Gavin','Hana','Ibrahim','Jade','Kai','Leila','Mateo','Nina',
 ] as const;
 
 const lastNames = [
-  "Johnson","Wright","Nguyen","Alvarez","Thompson","Moore","Kim","Patel","Rossi","Anderson",
-  "Lee","O’Connor","Fernandez","Stein","Brooks","Doyle","Matthews","Cohen","Park","Ivanova",
-  "Srinivasan","Chen","Turner","Morales","Haddad","Phillips","Foster","Silva","Young","Kowalski",
-  "Khan","Garcia","Martinez","Brown","Taylor","Clark","Lopez","Walker","Hall","Rivera",
+  'Johnson','Wright','Nguyen','Alvarez','Thompson','Moore','Kim','Patel','Rossi','Anderson',
+  'Lee','O’Connor','Fernandez','Stein','Brooks','Doyle','Matthews','Cohen','Park','Ivanova',
+  'Srinivasan','Chen','Turner','Morales','Haddad','Phillips','Foster','Silva','Young','Kowalski',
+  'Khan','Garcia','Martinez','Brown','Taylor','Clark','Lopez','Walker','Hall','Rivera',
 ] as const;
 
 export function generatePeople(count: number, seed = 42): PersonOption[] {

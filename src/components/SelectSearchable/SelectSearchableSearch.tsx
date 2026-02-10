@@ -25,11 +25,13 @@ export function SelectSearchableSearch({
 }: SelectSearchableSearchProps) {
   const store = useSelectSearchableStoreContext();
 
+  const labelId = useSelectSearchableStore(store, (s) => s.labelId);
   const listboxId = useSelectSearchableStore(store, s => s.listboxId);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const searchQuery = useSelectSearchableStore(store, (s) => s.searchQuery);
   const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
+  const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
   const ariaLabel = useSelectSearchableStore(store, s => s.ariaLabel);
   const ariaLabelledBy = useSelectSearchableStore(store, s => s.ariaLabelledBy);
 
@@ -45,7 +47,7 @@ export function SelectSearchableSearch({
   useEffect(() => {
     store.setHasSearch(true);
     return () => store.setHasSearch(false);
-  }, [store]);
+  }, []);
 
   useEffect(() => {
     if (!open || disabled) return;
@@ -67,7 +69,15 @@ export function SelectSearchableSearch({
 
   useEffect(() => {
     if (firstMatchId) store.setActiveDescendantId(firstMatchId);
-  }, [firstMatchId, store]);
+  }, [firstMatchId]);
+
+  // Process labelled by
+  const ariaLabelledByMerged = Array.from(
+    new Set([
+      hasLabel && labelId,
+      ariaLabelledBy,
+    ].filter(Boolean))
+  ).join(' ') || undefined;
 
   const ourInputProps: React.ComponentPropsWithoutRef<'input'> = {
     className: styles.searchInput,
@@ -82,7 +92,7 @@ export function SelectSearchableSearch({
     'aria-activedescendant': activeDescendantId,
     'aria-autocomplete': 'list',
     'aria-label': ariaLabel,
-    'aria-labelledby': ariaLabelledBy,
+    'aria-labelledby': ariaLabelledByMerged,
     onKeyDown,
   };
 

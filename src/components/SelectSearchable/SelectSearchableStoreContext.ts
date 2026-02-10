@@ -36,6 +36,7 @@ type State = {
   open: boolean;
   activeDescendantId: string | null;
 
+  hasLabel: boolean;
   hasSearch: boolean;
   searchQuery: string;
 
@@ -63,13 +64,15 @@ export type SelectSearchableStore = {
   subscribe: (l: Listener) => () => void;
   getSnapshot: () => State;
 
-  // config/identity
+  // identity
   setIdentity: (p: {
     labelId: string;
     triggerId: string;
     dropdownId: string;
     listboxId: string;
   }) => void;
+
+  // A11y
   setA11y: (p: {
     ariaLabel?: string;
     ariaLabelledBy?: string,
@@ -78,6 +81,8 @@ export type SelectSearchableStore = {
     ariaInvalid?: React.AriaAttributes['aria-invalid'],
     ariaErrorMessage?: string,
   }) => void;
+
+  // config
   setFlags: (p: { disabled: boolean; multiple: boolean }) => void;
 
   // state setters
@@ -86,6 +91,7 @@ export type SelectSearchableStore = {
 
   setActiveDescendantId: (id: string | null) => void;
 
+  setHasLabel: (has: boolean) => void;
   setHasSearch: (has: boolean) => void;
   setSearchQuery: (q: string) => void;
 
@@ -166,6 +172,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     open: false,
     activeDescendantId: null,
 
+    hasLabel: false,
     hasSearch: false,
     searchQuery: '',
 
@@ -353,6 +360,12 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setActiveDescendantId(id) {
       setState(() => {
         state.activeDescendantId = id;
+      });
+    },
+
+    setHasLabel(has) {
+      setState(() => {
+        state.hasLabel = has;
       });
     },
 

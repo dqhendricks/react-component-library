@@ -45,6 +45,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
   function SelectSearchableTrigger({ children, ...rest }, ref) {
     const store = useSelectSearchableStoreContext();
 
+    const labelId = useSelectSearchableStore(store, (s) => s.labelId);
     const triggerId = useSelectSearchableStore(store, (s) => s.triggerId);
     const dropdownId = useSelectSearchableStore(store, (s) => s.dropdownId);
     const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
@@ -52,6 +53,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const open = useSelectSearchableStore(store, (s) => s.open);
     const valueUnion = useSelectSearchableStore(store, (s) => s.value);
     const multiple = useSelectSearchableStore(store, (s) => s.multiple);
+    const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
     const ariaLabel = useSelectSearchableStore(store, s => s.ariaLabel);
     const ariaLabelledBy = useSelectSearchableStore(store, s => s.ariaLabelledBy);
@@ -70,6 +72,14 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       [store, ref],
     );
 
+    // Process labelled by
+    const ariaLabelledByMerged = Array.from(
+      new Set([
+        hasLabel && labelId,
+        ariaLabelledBy,
+      ].filter(Boolean))
+    ).join(' ') || undefined;
+
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
       id: triggerId,
       type: 'button',
@@ -85,7 +95,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       'aria-controls': hasSearch ? dropdownId : listboxId,
       'aria-activedescendant': hasSearch ? undefined : activeDescendantId,
       'aria-label': ariaLabel,
-      'aria-labelledby': ariaLabelledBy,
+      'aria-labelledby': ariaLabelledByMerged,
       'aria-description': ariaDescription,
       'aria-describedby': ariaDescribedBy,
       'aria-invalid': ariaInvalid,

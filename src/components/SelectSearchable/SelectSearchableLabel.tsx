@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
@@ -17,6 +17,12 @@ export function SelectSearchableLabel({
 
   const triggerId = useSelectSearchableStore(store, (s) => s.triggerId);
   const labelId = useSelectSearchableStore(store, (s) => s.labelId);
+
+  // Mark that a label is present while mounted.
+  useEffect(() => {
+      store.setHasLabel(true);
+      return () => store.setHasLabel(false);
+  }, []);
 
   return (
     <label

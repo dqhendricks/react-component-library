@@ -1,4 +1,5 @@
 import { SelectSearchableRoot } from './SelectSearchableRoot';
+import { SelectSearchableLabel } from './SelectSearchableLabel';
 import { SelectSearchableTrigger } from './SelectSearchableTrigger';
 import { SelectSearchableTriggerValue } from './SelectSearchableTriggerValue';
 import { SelectSearchableDropdown } from './SelectSearchableDropdown';
@@ -8,6 +9,7 @@ import { SelectSearchableOption } from './SelectSearchableOption';
 
 export const SelectSearchable = {
     Root: SelectSearchableRoot,
+    Label: SelectSearchableLabel,
     Trigger: SelectSearchableTrigger,
     TriggerValue: SelectSearchableTriggerValue,
     Dropdown: SelectSearchableDropdown,

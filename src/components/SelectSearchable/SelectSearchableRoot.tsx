@@ -15,7 +15,7 @@ import {
   useSelectSearchableStore,
 } from './SelectSearchableStoreContext';
 import { assignRef } from '../utils/assignRef';
-import { proxyToNativeSelect, type FocusLikeEvent } from './proxyToNativeSelect';
+import { proxyToNativeSelect, type FocusLikeEventHandler } from './proxyToNativeSelect';
 
 function normalizeByMode(
   next: SelectSearchableValue,
@@ -26,24 +26,26 @@ function normalizeByMode(
     : (Array.isArray(next) ? (next[0] ?? undefined) : next);
 }
 
-type FocusLikeEventHandler = (e: FocusLikeEvent) => void;
-
 type CommonRootProps = PropsWithChildren<
-  Omit<
+  Pick<
     ComponentPropsWithoutRef<'select'>,
-    | 'children'
-    | 'onFocus'
-    | 'onBlur'
-    | 'size'
-    | 'autoComplete'
-    | 'value'
-    | 'defaultValue'
-    | 'multiple'
+    | 'id'
+    | 'name'
+    | 'disabled'
+    | 'required'
+    | 'form'
     | 'onChange'
+    | 'onInvalid'
+    | 'aria-label'
+    | 'aria-label'
+    | 'aria-labelledby'
+    | 'aria-description'
+    | 'aria-describedby'
+    | 'aria-invalid'
+    | 'aria-errormessage'
   > & {
     onFocus?: FocusLikeEventHandler;
     onBlur?: FocusLikeEventHandler;
-    onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   }
 >;
 
@@ -76,32 +78,40 @@ export const SelectSearchableRoot = React.forwardRef<
   SelectSearchableRootProps
 >(function SelectSearchableRoot(
   {
-    id,
+    // native select props
+    name,
     multiple = false,
-    className,
-    style,
-    children,
-    onValueChange,
-    onFocus,
-    onBlur,
+    disabled = false,
+    required,
+    form,
     value: controlledValue,
     defaultValue,
     onChange,
+    onValueChange,
+    onInvalid,
+    // composite props
+    onFocus,
+    onBlur,
+    // focused control props
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
+    // trigger props
+    id,
     'aria-description': ariaDescription,
     'aria-describedby': ariaDescribedBy,
-    ...selectProps
+    'aria-invalid': ariaInvalid,
+    'aria-errormessage': ariaErrorMessage,
+    // root props
+    children,
   },
   forwardedRef,
 ) {
   const reactId = useId();
-  const controlId = id ?? `ss-${reactId}`;
-  const rootId = `${controlId}--root`;
-  const listboxId = `${controlId}--listbox`;
-  const nativeSelectId = `${controlId}--native`;
-
-  const disabled = !!selectProps.disabled;
+  const triggerId = id ?? `ss-${reactId}`;
+  const labelId = `${triggerId}--label`;
+  const dropdownId = `${triggerId}--dropdown`;
+  const listboxId = `${triggerId}--listbox`;
+  const nativeSelectId = `${triggerId}--native`;
 
   const isControlled = controlledValue != null;
   const [uncontrolledValue, setUncontrolledValue] = useState<SelectSearchableValue>(defaultValue);
@@ -117,15 +127,15 @@ export const SelectSearchableRoot = React.forwardRef<
 
   // prop sync
   useEffect(() => {
-    store.setIdentity({ controlId, listboxId });
-    store.setA11y({ ariaLabel, ariaLabelledBy, ariaDescription, ariaDescribedBy });
+    store.setIdentity({ labelId, triggerId, dropdownId, listboxId });
+    store.setA11y({ ariaLabel, ariaLabelledBy, ariaDescription, ariaDescribedBy, ariaInvalid, ariaErrorMessage });
     store.setFlags({ disabled, multiple });
-  }, [store, controlId, listboxId, ariaLabel, ariaLabelledBy, disabled, multiple]);
+  }, [triggerId, listboxId, ariaLabel, ariaLabelledBy, ariaDescription, ariaDescribedBy, ariaInvalid, ariaErrorMessage, disabled, multiple]);
 
   // value sync
   useEffect(() => {
     store.setValue(value);
-  }, [store, value]);
+  }, [value]);
 
   // normalize value on `multiple` mode change
   useEffect(() => {
@@ -154,17 +164,17 @@ export const SelectSearchableRoot = React.forwardRef<
       store.setOpen(false);
       store.getSnapshot().triggerEl?.focus();
     }
-  }, [disabled, isControlled, multiple, onValueChange, store]);
+  }, [disabled, isControlled, multiple, onValueChange]);
 
   useEffect(() => {
     store.setCommitValue(commitValue);
     return () => store.setCommitValue(null);
-  }, [store, commitValue]);
+  }, [commitValue]);
 
   // Dispatch native change event (keeps external onChange listeners happy)
   useEffect(() => {
     store.dispatchNativeChange();
-  }, [store, value]);
+  }, [value]);
 
   // Close on outside click
   useEffect(() => {
@@ -185,7 +195,7 @@ export const SelectSearchableRoot = React.forwardRef<
 
     document.addEventListener('pointerdown', onPointerDown, true);
     return () => document.removeEventListener('pointerdown', onPointerDown, true);
-  }, [store, open]);
+  }, [open]);
 
   // Handle onFocus/onBlur universally for the control
   useEffect(() => {
@@ -220,31 +230,29 @@ export const SelectSearchableRoot = React.forwardRef<
       document.removeEventListener('focusin', onFocusIn, true);
       document.removeEventListener('focusout', onFocusOut, true);
     };
-  }, [store, onFocus, onBlur]);
+  }, [onFocus, onBlur]);
 
 
   return (
     <SelectSearchableStoreContext.Provider value={store}>
-      <div
-        id={rootId}
-        className={[styles.root, disabled ? styles.disabled : '', className].filter(Boolean).join(' ')}
-        style={style}
-        // Consumer styling hooks
-        data-part='root'
-      >
+      <>
         <select
-          {...selectProps}
           ref={(el) => {
             store.setNativeSelectEl(el);
             assignRef(forwardedRef, el);
           }}
           id={nativeSelectId}
+          name={name}
           value={value === undefined ? (multiple ? [] : '') : value}
           multiple={multiple}
+          form={form}
+          required={required}
+          disabled={disabled}
           onChange={onChange || (() => {})}
+          onInvalid={onInvalid}
           className={styles.hiddenSelect}
           tabIndex={-1}
-          aria-hidden={true}
+          aria-hidden='true'
         >
           {Array.isArray(value) ? (
             value.map((val) => (
@@ -258,7 +266,7 @@ export const SelectSearchableRoot = React.forwardRef<
         </select>
 
         {children}
-      </div>
+      </>
     </SelectSearchableStoreContext.Provider>
   );
 });

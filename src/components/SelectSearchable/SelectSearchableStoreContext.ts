@@ -13,14 +13,18 @@ type SelectSearchableOptionRecord = {
 
 type State = {
   // Identity / wiring
-  controlId: string;
-  listboxId: string;
+  labelId?: string;
+  triggerId?: string;
+  dropdownId?: string;
+  listboxId?: string;
 
   // A11y
   ariaLabel?: string;
   ariaLabelledBy?: string;
   ariaDescription?: string;
   ariaDescribedBy?: string;
+  ariaInvalid?: React.AriaAttributes['aria-invalid'];
+  ariaErrorMessage?: string;
 
   // Native-ish flags
   disabled: boolean;
@@ -61,10 +65,19 @@ export type SelectSearchableStore = {
 
   // config/identity
   setIdentity: (p: {
-    controlId: string;
+    labelId: string;
+    triggerId: string;
+    dropdownId: string;
     listboxId: string;
   }) => void;
-  setA11y: (p: { ariaLabel?: string; ariaLabelledBy?: string, ariaDescription?: string, ariaDescribedBy?: string }) => void;
+  setA11y: (p: {
+    ariaLabel?: string;
+    ariaLabelledBy?: string,
+    ariaDescription?: string,
+    ariaDescribedBy?: string,
+    ariaInvalid?: React.AriaAttributes['aria-invalid'],
+    ariaErrorMessage?: string,
+  }) => void;
   setFlags: (p: { disabled: boolean; multiple: boolean }) => void;
 
   // state setters
@@ -133,13 +146,17 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   let cleanupObserve: (() => void) | null = null;
 
   const state: State = {
-    controlId: '',
-    listboxId: '',
+    labelId: undefined,
+    triggerId: undefined,
+    dropdownId: undefined,
+    listboxId: undefined,
 
     ariaLabel: undefined,
     ariaLabelledBy: undefined,
     ariaDescription: undefined,
     ariaDescribedBy: undefined,
+    ariaInvalid: undefined,
+    ariaErrorMessage: undefined,
 
     disabled: false,
     multiple: false,
@@ -293,7 +310,9 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     setIdentity(p) {
       setState(() => {
-        state.controlId = p.controlId;
+        state.labelId = p.labelId;
+        state.triggerId = p.triggerId;
+        state.dropdownId = p.dropdownId;
         state.listboxId = p.listboxId;
       });
     },
@@ -304,6 +323,8 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.ariaLabelledBy = p.ariaLabelledBy;
         state.ariaDescription = p.ariaDescription;
         state.ariaDescribedBy = p.ariaDescribedBy;
+        state.ariaInvalid = p.ariaInvalid;
+        state.ariaErrorMessage = p.ariaErrorMessage;
       });
     },
 

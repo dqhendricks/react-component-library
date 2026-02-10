@@ -9,7 +9,7 @@ const peopleOptions = generatePeople(50);
 function Chevron() {
   return (
     <span
-      aria-hidden={true}
+      aria-hidden='true'
       style={{
         width: 0,
         height: 0,
@@ -86,11 +86,10 @@ import type { MySelectSearchableProps } from './types';
 export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelectSearchableProps) => {
   <SelectSearchable.Root
     multiple={multiple}
-    style={{ maxWidth: 240 }}
     onValueChange={onValueChange}
     aria-label='Select Person' // You can use a <label> instead
   >
-    <SelectSearchable.Trigger>
+    <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
@@ -122,6 +121,15 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
         },
       },
     },
+    disabled: {
+      control: 'boolean',
+      description: 'Allow disabling of control.',
+      table: {
+        type: {
+          summary: 'boolean',
+        },
+      },
+    },
     onValueChange: {
       control: false,
       description: 'Convenience handler for getting the set value. Allowed type signature depends on value of `multiple`.',
@@ -136,10 +144,9 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
     <SelectSearchable.Root
       {...args}
       onValueChange={(val: string | string[]) => console.log(val)}
-      style={{ maxWidth: 240 }}
       aria-label='Select Person'
     >
-      <SelectSearchable.Trigger>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
         <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
@@ -169,11 +176,10 @@ import type { MySelectSearchableProps } from './types';
 
 export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchableProps) => {
   <SelectSearchable.Root
-    style={{ maxWidth: 240 }}
     onValueChange={onValueChange}
     aria-label='Select Person' // You can use a <label> instead
   >
-    <SelectSearchable.Trigger>
+    <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
@@ -196,11 +202,10 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
   },
   render: () => (
     <SelectSearchable.Root
-      style={{ maxWidth: 240 }}
       onValueChange={(val) => console.log(val)}
       aria-label='Select Person'
     >
-      <SelectSearchable.Trigger>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
         <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
@@ -231,11 +236,10 @@ import type { MySelectSearchableProps } from './types';
 export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchableProps) => {
   <SelectSearchable.Root
     multiple
-    style={{ maxWidth: 240 }}
     onValueChange={onValueChange}
     aria-label='Select Person' // You can use a <label> instead
   >
-    <SelectSearchable.Trigger>
+    <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
@@ -259,11 +263,10 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
   render: () => (
     <SelectSearchable.Root
       multiple
-      style={{ maxWidth: 240 }}
       onValueChange={(val) => console.log(val)}
       aria-label='Select Person'
     >
-      <SelectSearchable.Trigger>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
         <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
@@ -293,10 +296,9 @@ import type { MySelectSearchableProps } from './types';
 
 export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   <SelectSearchable.Root
-    style={{ maxWidth: 240 }}
     aria-label='Select Person' // You can use a <label> instead
   >
-    <SelectSearchable.Trigger>
+    <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       <SelectSearchable.TriggerValue placeholder='Choose…' />
       <Chevron />
     </SelectSearchable.Trigger>
@@ -318,10 +320,9 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   },
   render: () => (
     <SelectSearchable.Root
-      style={{ maxWidth: 240 }}
       aria-label='Select Person'
     >
-      <SelectSearchable.Trigger>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
         <SelectSearchable.TriggerValue placeholder='Choose…' />
         <Chevron />
       </SelectSearchable.Trigger>
@@ -351,10 +352,9 @@ import type { MySelectSearchableProps } from './types';
 export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   <SelectSearchable.Root
     multiple
-    style={{ maxWidth: 240 }}
     aria-label='Select Person' // You can use a <label> instead
   >
-    <SelectSearchable.Trigger>
+    <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       {({ values, isOpen }) => {
         // You should use value or values, depending on whether multiple is true
         const display = values.join(', ');
@@ -397,9 +397,8 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
   render: () => (
     <SelectSearchable.Root
       multiple
-      style={{ maxWidth: 240 }}
     >
-      <SelectSearchable.Trigger>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
         {({ values, isOpen }) => {
           const display = values.join(', ');
 
@@ -455,7 +454,7 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
         }
 
         /* Styling with part styling hooks */
-        .demoSelect [data-part='trigger'] {
+        [data-part='trigger'] {
           width: 100%;
           display: flex;
           align-items: center;
@@ -466,10 +465,10 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
         }
 
         /* Styling with state styling hooks */
-        .demoSelect [data-part='trigger'][data-state='closed'] {
+        .demoSelect[data-state='closed'] {
           background: rgba(0,0,0,0.02);
         }
-        .demoSelect [data-part='trigger'][data-state='open'] {
+        .demoSelect[data-state='open'] {
           background: rgba(0,0,0,0.06);
           border-color: rgba(0,0,0,0.5);
         }
@@ -505,10 +504,9 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
     </style>
 
     <SelectSearchable.Root
-      className='demoSelect'
       aria-label='Select Person' // You can use a <label> instead
     >
-      <SelectSearchable.Trigger>
+      <SelectSearchable.Trigger className='demoSelect'>
         <SelectSearchable.TriggerValue
           // Inline styling of a sub component
           style={{ fontFamily: '"Courier New", monospace' }}
@@ -541,13 +539,13 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
     <>
       <style>
         {`
-          /* Styling Root with className */
+          /* Styling Trigger with className */
           .demoSelect {
             max-width: 240px;
           }
 
           /* Styling with part styling hooks */
-          .demoSelect [data-part='trigger'] {
+          [data-part='trigger'] {
             width: 100%;
             display: flex;
             align-items: center;
@@ -558,10 +556,10 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
           }
 
           /* Styling with state styling hooks */
-          .demoSelect [data-part='trigger'][data-state='closed'] {
+          .demoSelect[data-state='closed'] {
             background: rgba(0,0,0,0.02);
           }
-          .demoSelect [data-part='trigger'][data-state='open'] {
+          .demoSelect[data-state='open'] {
             background: rgba(0,0,0,0.06);
             border-color: rgba(0,0,0,0.5);
           }
@@ -596,10 +594,9 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
         `}
       </style>
       <SelectSearchable.Root
-        className='demoSelect'
         aria-label='Select Person'
       >
-        <SelectSearchable.Trigger>
+        <SelectSearchable.Trigger className='demoSelect'>
           <SelectSearchable.TriggerValue
             // Inline styling of a sub component
             style={{ fontFamily: '"Courier New", monospace' }}
@@ -658,10 +655,9 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
       </style>
 
       <SelectSearchable.Root
-        style={{ maxWidth: 240 }}
         aria-label='Select Person' // You can use a <label> instead
       >
-        <SelectSearchable.Trigger>
+        <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
           <SelectSearchable.TriggerValue placeholder='Choose…' />
           <Chevron />
         </SelectSearchable.Trigger>
@@ -702,10 +698,9 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
       `}</style>
 
       <SelectSearchable.Root
-        style={{ maxWidth: 240 }}
         aria-label='Select Person'
       >
-        <SelectSearchable.Trigger>
+        <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
           <SelectSearchable.TriggerValue placeholder='Choose…' />
           <Chevron />
         </SelectSearchable.Trigger>

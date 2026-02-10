@@ -4,7 +4,7 @@ import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
 } from './SelectSearchableStoreContext';
-import { useComboboxOwnerProps } from './useComboboxOwnerProps';
+import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
 
 export type SelectSearchableSearchProps = Omit<
@@ -12,35 +12,33 @@ export type SelectSearchableSearchProps = Omit<
   | 'role'
   | 'value'
   | 'defaultValue'
-  | 'onChange'
-  | 'autoFocus' // controlled by Root
-  | 'aria-label' // controlled by Root
-  | 'aria-labeledby' // controlled by Root
-  | 'aria-description' // controlled by Search
-  | 'aria-describedby' // controlled by Search
-> & {
-  searchFieldDescription?: string; // Screen readers will use Root label + this search field description
-};
+  | 'autoFocus'
+  | 'aria-label'
+  | 'aria-labeledby'
+  | 'aria-invalid'
+  | 'aria-errormessage'
+>;
 
 export function SelectSearchableSearch({
   placeholder = 'Search…',
-  searchFieldDescription = 'Search field.',
   ...rest
 }: SelectSearchableSearchProps) {
   const store = useSelectSearchableStoreContext();
 
-  const controlId = useSelectSearchableStore(store, (s) => s.controlId);
+  const listboxId = useSelectSearchableStore(store, s => s.listboxId);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const searchQuery = useSelectSearchableStore(store, (s) => s.searchQuery);
+  const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
+  const ariaLabel = useSelectSearchableStore(store, s => s.ariaLabel);
+  const ariaLabelledBy = useSelectSearchableStore(store, s => s.ariaLabelledBy);
 
   // Derived visibility is computed once per query in the store;
   // we just use it here to pick the first visible option.
   const orderedIds = useSelectSearchableStore(store, (s) => s.orderedIds);
   const visibleIds = useSelectSearchableStore(store, (s) => s.visibleIds);
   const options = useSelectSearchableStore(store, (s) => s.options);
-
-  const comboboxOwnerProps = useComboboxOwnerProps();
+  const onKeyDown = useSelectNavigationKeyDown();
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Mark that the search input is the combobox 'owner' while mounted.
@@ -71,8 +69,6 @@ export function SelectSearchableSearch({
     if (firstMatchId) store.setActiveDescendantId(firstMatchId);
   }, [firstMatchId, store]);
 
-  const searchHintId = `${controlId}--search-hint`;
-
   const ourInputProps: React.ComponentPropsWithoutRef<'input'> = {
     className: styles.searchInput,
     type: 'text',
@@ -80,10 +76,17 @@ export function SelectSearchableSearch({
     placeholder,
     value: searchQuery,
     onChange: (e) => store.setSearchQuery(e.currentTarget.value),
-    'aria-describedby': searchHintId,
+    role: 'combobox',
+    'aria-expanded': open,
+    'aria-controls': listboxId,
+    'aria-activedescendant': activeDescendantId,
+    'aria-autocomplete': 'list',
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    onKeyDown,
   };
 
-  const merged = mergeProps(rest, { ...ourInputProps, ...comboboxOwnerProps });
+  const merged = mergeProps(rest, ourInputProps);
 
   return (
     <>
@@ -93,9 +96,6 @@ export function SelectSearchableSearch({
         // Consumer styling hooks
         data-part='search'
       />
-      <span id={searchHintId} className={styles.srOnly}>
-        { searchFieldDescription }
-      </span>
     </>
   );
 }

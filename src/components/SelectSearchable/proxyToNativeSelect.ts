@@ -7,6 +7,8 @@ export interface FocusLikeEvent<T extends HTMLElement = HTMLElement> {
   stopPropagation(): void;
 }
 
+export type FocusLikeEventHandler = (e: FocusLikeEvent) => void;
+
 export function proxyToNativeSelect(
   e: FocusEvent,
   nativeElement: HTMLSelectElement | null,

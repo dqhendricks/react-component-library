@@ -35,7 +35,7 @@ export function SelectSearchableDropdown({
 }: SelectSearchableDropdownProps) {
   const store = useSelectSearchableStoreContext();
 
-  const controlId = useSelectSearchableStore(store, (s) => s.controlId);
+  const triggerId = useSelectSearchableStore(store, (s) => s.triggerId);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const triggerEl = useSelectSearchableStore(store, (s) => s.triggerEl);
@@ -165,7 +165,7 @@ export function SelectSearchableDropdown({
       ref={store.setDropdownEl}
       // Consumer styling hooks
       data-part='dropdown'
-      data-owner={controlId}
+      data-owner={triggerId}
       data-state={hidden ? 'closed' : 'open'}
       data-placement={floating?.placement ?? 'down'}
     >

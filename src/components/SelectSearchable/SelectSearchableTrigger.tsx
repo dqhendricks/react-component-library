@@ -5,7 +5,7 @@ import {
   useSelectSearchableStore,
   type SelectSearchableValue,
 } from './SelectSearchableStoreContext';
-import { useComboboxOwnerProps } from './useComboboxOwnerProps';
+import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
 import { assignRef } from '../utils/assignRef';
 
@@ -25,10 +25,12 @@ export type SelectSearchableTriggerProps = Omit<
   | 'aria-controls'
   | 'aria-expanded'
   | 'aria-activedescendant'
-  | 'aria-label' // controlled by Root
-  | 'aria-labeledby' // controlled by Root
-  | 'aria-description' // controlled by Root
-  | 'aria-describedby' // controlled by Root
+  | 'aria-label'
+  | 'aria-labeledby'
+  | 'aria-description'
+  | 'aria-describedby'
+  | 'aria-invalid'
+  | 'aria-errormessage'
   | 'disabled'
   | 'role'
 > & {
@@ -43,17 +45,22 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
   function SelectSearchableTrigger({ children, ...rest }, ref) {
     const store = useSelectSearchableStoreContext();
 
-    const controlId = useSelectSearchableStore(store, (s) => s.controlId);
+    const triggerId = useSelectSearchableStore(store, (s) => s.triggerId);
+    const dropdownId = useSelectSearchableStore(store, (s) => s.dropdownId);
+    const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
     const disabled = useSelectSearchableStore(store, (s) => s.disabled);
     const open = useSelectSearchableStore(store, (s) => s.open);
     const valueUnion = useSelectSearchableStore(store, (s) => s.value);
     const multiple = useSelectSearchableStore(store, (s) => s.multiple);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
+    const ariaLabel = useSelectSearchableStore(store, s => s.ariaLabel);
+    const ariaLabelledBy = useSelectSearchableStore(store, s => s.ariaLabelledBy);
     const ariaDescription = useSelectSearchableStore(store, s => s.ariaDescription);
     const ariaDescribedBy = useSelectSearchableStore(store, s => s.ariaDescribedBy);
-
-    const comboboxOwnerProps = useComboboxOwnerProps();
-    const triggerOwnsCombobox = !hasSearch;
+    const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
+    const ariaErrorMessage = useSelectSearchableStore(store, s => s.ariaErrorMessage);
+    const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
+    const onKeyDown = useSelectNavigationKeyDown();
 
     const mergedRef = useCallback(
       (el: HTMLButtonElement | null) => {
@@ -64,7 +71,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     );
 
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
-      id: controlId,
+      id: triggerId,
       type: 'button',
       className: [styles.trigger, disabled ? styles.triggerDisabled : ''].filter(Boolean).join(' '),
       disabled,
@@ -72,12 +79,21 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
         if (disabled) return;
         store.setOpen(!open);
       },
+      role: hasSearch ? undefined : 'combobox',
+      'aria-haspopup': 'listbox',
+      'aria-expanded': open,
+      'aria-controls': hasSearch ? dropdownId : listboxId,
+      'aria-activedescendant': hasSearch ? undefined : activeDescendantId,
+      'aria-label': ariaLabel,
+      'aria-labelledby': ariaLabelledBy,
       'aria-description': ariaDescription,
       'aria-describedby': ariaDescribedBy,
+      'aria-invalid': ariaInvalid,
+      'aria-errormessage': ariaErrorMessage,
+      onKeyDown,
     };
 
-    const ownerProps = triggerOwnsCombobox ? comboboxOwnerProps : {};
-    const merged = mergeProps(rest, { ...ourButtonProps, ...ownerProps });
+    const merged = mergeProps(rest, ourButtonProps);
 
     const values = useMemo(() => toValues(valueUnion), [valueUnion]);
 

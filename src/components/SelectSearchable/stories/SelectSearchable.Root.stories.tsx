@@ -112,33 +112,121 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
   },
   tags: ['!dev'],
   argTypes: {
+    // native select props
+    name: {
+      control: false,
+      description:
+        'The name of the form control, used to identify the field and its value when the form data is submitted to a server.',
+      table: { type: { summary: 'text' } },
+    },
+    form: {
+      control: false,
+      description:
+        'Associates the control with a form element by `id`, allowing it to submit with that form even if rendered outside the `<form>`.',
+      table: { type: { summary: 'text' } },
+    },
     multiple: {
       control: 'boolean',
       description: 'Allow selecting multiple values.',
-      table: {
-        type: {
-          summary: 'boolean',
-        },
-      },
+      table: { type: { summary: 'boolean' } },
     },
     disabled: {
       control: 'boolean',
-      description: 'Allow disabling of control.',
-      table: {
-        type: {
-          summary: 'boolean',
-        },
-      },
+      description: 'Disables the control.',
+      table: { type: { summary: 'boolean' } },
+    },
+    required: {
+      control: false,
+      description:
+        'Specifies that the select field must be filled out before the form can be submitted.',
+      table: { type: { summary: 'boolean' } },
+    },
+    value: {
+      control: false,
+      description: 'Value for controlled usage. Type depends on `multiple` (string | string[]).',
+      table: { type: { summary: 'string | string[]' } },
+    },
+    defaultValue: {
+      control: false,
+      description: 'Initial value for uncontrolled usage. Type depends on `multiple` (string | string[]).',
+      table: { type: { summary: 'string | string[]' } },
+    },
+    onChange: {
+      control: false,
+      description: 'Native change handler from the underlying (hidden) `<select>`. Useful for form libraries.',
+      table: { type: { summary: '(e: React.ChangeEvent<HTMLSelectElement>) => void' } },
+    },
+    onInvalid: {
+      control: false,
+      description: 'Native invalid handler from the underlying (hidden) `<select>`, fired during form validation.',
+      table: { type: { summary: '(e: React.InvalidEvent<HTMLSelectElement>) => void' } },
     },
     onValueChange: {
       control: false,
-      description: 'Convenience handler for getting the set value. Allowed type signature depends on value of `multiple`.',
+      description: 'Convenience handler for receiving the committed value. Signature depends on `multiple`.',
       table: {
-        type: {
-          summary: '(value: string) => void | (value: string[]) => void',
-        },
+        type: { summary: '(value: string | undefined) => void | (value: string[] | undefined) => void' },
       },
-    }
+    },
+
+    // composite props
+    id: {
+      control: false,
+      description: '`id` is forwarded to the Trigger, as well as used to derive sub-component `id`s to be used for accessibility. If none is provided, one will be generated.',
+      table: { type: { summary: 'text' } },
+    },
+    onFocus: {
+      control: false,
+      description:
+        'Fires when focus enters the composite control (Trigger/Search). Event is proxied to behave like a native select focus event.',
+      table: { type: { summary: '(e: FocusLikeEvent) => void' } },
+    },
+    onBlur: {
+      control: false,
+      description:
+        'Fires when focus leaves the composite control. Event is proxied to behave like a native select blur event.',
+      table: { type: { summary: '(e: FocusLikeEvent) => void' } },
+    },
+
+    // focused control props (naming/labeling)
+    'aria-label': {
+      control: false,
+      description: 'Accessible name for the focused control when no <label> / aria-labelledby is used.',
+      table: { type: { summary: 'string' } },
+    },
+    'aria-labelledby': {
+      control: false,
+      description:
+        'Accessible name for the focused control via one or more element ids (space-separated). Prefer this when using visible labels.',
+      table: { type: { summary: 'string' } },
+    },
+    'aria-description': {
+      control: false,
+      description: 'Accessible description string for the focused control (screen reader support varies).',
+      table: { type: { summary: 'string' } },
+    },
+    'aria-describedby': {
+      control: false,
+      description: 'Accessible description for the focused control via one or more element ids (space-separated).',
+      table: { type: { summary: 'string' } },
+    },
+    'aria-invalid': {
+      control: false,
+      description: 'Marks the focused control as invalid. Useful to mirror form validation state visually and for assistive tech.',
+      table: { type: { summary: 'boolean | "true" | "false" | "grammar" | "spelling"' } },
+    },
+    'aria-errormessage': {
+      control: false,
+      description: 'Id of an element that contains the error message for the focused control (typically used with aria-invalid).',
+      table: { type: { summary: 'string' } },
+    },
+
+    // root props
+    children: {
+      control: false,
+      description: 'Subcomponents composing the select (Label, Trigger, Dropdown, Search, OptionList, Option, etc.).',
+      table: { type: { summary: 'React.ReactNode' } },
+    },
   },
   render: (args) => (
     <SelectSearchable.Root

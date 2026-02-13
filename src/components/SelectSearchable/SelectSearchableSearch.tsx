@@ -6,6 +6,7 @@ import {
 } from './SelectSearchableStoreContext';
 import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
+import { mergeAriaList } from '../utils/mergeAriaList';
 
 export type SelectSearchableSearchProps = Omit<
   React.ComponentPropsWithoutRef<'input'>,
@@ -13,14 +14,22 @@ export type SelectSearchableSearchProps = Omit<
   | 'value'
   | 'defaultValue'
   | 'autoFocus'
-  | 'aria-label'
-  | 'aria-labeledby'
   | 'aria-invalid'
   | 'aria-errormessage'
 >;
 
+function isAriaInvalid(
+  value: React.AriaAttributes['aria-invalid']
+): boolean {
+  return value === true || value === 'true' || value === 'grammar' || value === 'spelling';
+}
+
 export function SelectSearchableSearch({
   placeholder = 'Search…',
+  'aria-label': ariaLabelProp,
+  'aria-labelledby': ariaLabelledByProp,
+  'aria-description': ariaDescriptionProp,
+  'aria-describedby': ariaDescribedByProp,
   ...rest
 }: SelectSearchableSearchProps) {
   const store = useSelectSearchableStoreContext();
@@ -32,8 +41,18 @@ export function SelectSearchableSearch({
   const searchQuery = useSelectSearchableStore(store, (s) => s.searchQuery);
   const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
   const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
-  const ariaLabel = useSelectSearchableStore(store, s => s.ariaLabel);
-  const ariaLabelledBy = useSelectSearchableStore(store, s => s.ariaLabelledBy);
+  const ariaLabelRoot = useSelectSearchableStore(store, s => s.ariaLabel);
+  const ariaLabelledByRoot = useSelectSearchableStore(store, s => s.ariaLabelledBy);
+  const ariaDescriptionRoot = useSelectSearchableStore(store, s => s.ariaDescription);
+  const ariaDescribedByRoot = useSelectSearchableStore(store, s => s.ariaDescribedBy);
+  const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
+  const ariaErrorMessageRoot = useSelectSearchableStore(store, s => s.ariaErrorMessage);
+
+  // Process aria merges
+  const ariaLabelMerged = mergeAriaList([ariaLabelProp, ariaLabelRoot]);
+  const ariaLabelledByMerged = mergeAriaList([ariaLabelledByProp, ariaLabelledByRoot, hasLabel && labelId]);
+  const ariaDescriptionMerged = mergeAriaList([ariaDescriptionProp, ariaDescriptionRoot]);
+  const ariaDescribedByMerged = mergeAriaList([ariaDescribedByProp, ariaDescribedByRoot, isAriaInvalid(ariaInvalid) && ariaErrorMessageRoot]);
 
   // Derived visibility is computed once per query in the store;
   // we just use it here to pick the first visible option.
@@ -71,14 +90,6 @@ export function SelectSearchableSearch({
     if (firstMatchId) store.setActiveDescendantId(firstMatchId);
   }, [firstMatchId]);
 
-  // Process labelled by
-  const ariaLabelledByMerged = Array.from(
-    new Set([
-      hasLabel && labelId,
-      ariaLabelledBy,
-    ].filter(Boolean))
-  ).join(' ') || undefined;
-
   const ourInputProps: React.ComponentPropsWithoutRef<'input'> = {
     className: styles.searchInput,
     type: 'text',
@@ -91,8 +102,11 @@ export function SelectSearchableSearch({
     'aria-controls': listboxId,
     'aria-activedescendant': activeDescendantId,
     'aria-autocomplete': 'list',
-    'aria-label': ariaLabel,
+    'aria-invalid': ariaInvalid,
+    'aria-label': ariaLabelMerged,
     'aria-labelledby': ariaLabelledByMerged,
+    'aria-description': ariaDescriptionMerged,
+    'aria-describedby': ariaDescribedByMerged,
     onKeyDown,
   };
 

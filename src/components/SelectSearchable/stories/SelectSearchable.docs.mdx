@@ -14,27 +14,7 @@ selection, custom triggers, and large option sets.
 ## SelectSearchable.Root
 
 **SelectSearchable.Root** is the top-level component that manages state, focus, and accessibility for the select.
-
-<details>
-  It wraps a native `<select>` element and forwards most standard `<select>` attributes (such as `name`, `onChange`, and `value`). The following attributes are **not supported**:
-
-  - `size`
-  - `autoComplete`
-
-  **Accessibility**
-
-  SelectSearchable.Root requires an accessible name. Provide one via `aria-label`, `aria-labelledby`, wrapping it in a `<label>` element, or using an associated `<label htmlFor>` pointing to the same `id` given to Root props.
-
-  **IDs**
-
-  The `id` prop set in the Root is applied to the Trigger element so it can be referenced by a `<label htmlFor>` for accessible labeling.
-  The internal Root element uses the same base `id` with a '--root' suffix to avoid collisions.
-  If no `id` is provided, a stable one is automatically generated to ensure accessibility compliance.
-
-  **Styling**
-
-  Exposes `data-part='root'` for easy custom styling.
-</details>
+It wraps a hidden native `<select>` element that can be used for traditional form submissions and other native functionality.
 
 <Controls of={RootStories.Playground} />
 
@@ -64,6 +44,8 @@ selection, custom triggers, and large option sets.
   **Styling**
 
   Exposes `data-part='trigger'` and `data-state='open | closed'` for easy custom styling.
+
+  
 </details>
 
 <Controls of={TriggerStories.Default} />

@@ -8,6 +8,7 @@ import {
 import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
 import { assignRef } from '../utils/assignRef';
+import { mergeAriaList } from '../utils/mergeAriaList';
 
 export type SelectSearchableTriggerRenderArgs = {
   value: string; // Use if not multiple
@@ -25,10 +26,6 @@ export type SelectSearchableTriggerProps = Omit<
   | 'aria-controls'
   | 'aria-expanded'
   | 'aria-activedescendant'
-  | 'aria-label'
-  | 'aria-labeledby'
-  | 'aria-description'
-  | 'aria-describedby'
   | 'aria-invalid'
   | 'aria-errormessage'
   | 'disabled'
@@ -41,8 +38,21 @@ function toValues(v: SelectSearchableValue): string[] {
   return Array.isArray(v) ? v : v ? [v] : [];
 }
 
+function isAriaInvalid(
+  value: React.AriaAttributes['aria-invalid']
+): boolean {
+  return value === true || value === 'true' || value === 'grammar' || value === 'spelling';
+}
+
 export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearchableTriggerProps>(
-  function SelectSearchableTrigger({ children, ...rest }, ref) {
+  function SelectSearchableTrigger({
+    children,
+    'aria-label': ariaLabelProp,
+    'aria-labelledby': ariaLabelledByProp,
+    'aria-description': ariaDescriptionProp,
+    'aria-describedby': ariaDescribedByProp,
+    ...rest
+  }, ref) {
     const store = useSelectSearchableStoreContext();
 
     const labelId = useSelectSearchableStore(store, (s) => s.labelId);
@@ -55,12 +65,12 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const multiple = useSelectSearchableStore(store, (s) => s.multiple);
     const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
-    const ariaLabel = useSelectSearchableStore(store, s => s.ariaLabel);
-    const ariaLabelledBy = useSelectSearchableStore(store, s => s.ariaLabelledBy);
-    const ariaDescription = useSelectSearchableStore(store, s => s.ariaDescription);
-    const ariaDescribedBy = useSelectSearchableStore(store, s => s.ariaDescribedBy);
+    const ariaLabelRoot = useSelectSearchableStore(store, s => s.ariaLabel);
+    const ariaLabelledByRoot = useSelectSearchableStore(store, s => s.ariaLabelledBy);
+    const ariaDescriptionRoot = useSelectSearchableStore(store, s => s.ariaDescription);
+    const ariaDescribedByRoot = useSelectSearchableStore(store, s => s.ariaDescribedBy);
     const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
-    const ariaErrorMessage = useSelectSearchableStore(store, s => s.ariaErrorMessage);
+    const ariaErrorMessageRoot = useSelectSearchableStore(store, s => s.ariaErrorMessage);
     const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
     const onKeyDown = useSelectNavigationKeyDown();
 
@@ -72,13 +82,11 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       [store, ref],
     );
 
-    // Process labelled by
-    const ariaLabelledByMerged = Array.from(
-      new Set([
-        hasLabel && labelId,
-        ariaLabelledBy,
-      ].filter(Boolean))
-    ).join(' ') || undefined;
+    // Process aria merges
+    const ariaLabelMerged = mergeAriaList([ariaLabelProp, ariaLabelRoot]);
+    const ariaLabelledByMerged = mergeAriaList([ariaLabelledByProp, ariaLabelledByRoot, hasLabel && labelId]);
+    const ariaDescriptionMerged = mergeAriaList([ariaDescriptionProp, ariaDescriptionRoot]);
+    const ariaDescribedByMerged = mergeAriaList([ariaDescribedByProp, ariaDescribedByRoot, isAriaInvalid(ariaInvalid) && ariaErrorMessageRoot]);
 
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
       id: triggerId,
@@ -92,14 +100,13 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       role: hasSearch ? undefined : 'combobox',
       'aria-haspopup': 'listbox',
       'aria-expanded': open,
-      'aria-controls': hasSearch ? dropdownId : listboxId,
+      'aria-controls': open ? (hasSearch ? dropdownId : listboxId) : undefined, // only when open, to satisfy accessibility checkers
       'aria-activedescendant': hasSearch ? undefined : activeDescendantId,
-      'aria-label': ariaLabel,
+      'aria-invalid': hasSearch ? undefined : ariaInvalid,
+      'aria-label': ariaLabelMerged,
       'aria-labelledby': ariaLabelledByMerged,
-      'aria-description': ariaDescription,
-      'aria-describedby': ariaDescribedBy,
-      'aria-invalid': ariaInvalid,
-      'aria-errormessage': ariaErrorMessage,
+      'aria-description': ariaDescriptionMerged,
+      'aria-describedby': ariaDescribedByMerged,
       onKeyDown,
     };
 

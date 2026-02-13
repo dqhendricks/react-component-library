@@ -37,7 +37,6 @@ type CommonRootProps = PropsWithChildren<
     | 'onChange'
     | 'onInvalid'
     | 'aria-label'
-    | 'aria-label'
     | 'aria-labelledby'
     | 'aria-description'
     | 'aria-describedby'
@@ -90,13 +89,12 @@ export const SelectSearchableRoot = React.forwardRef<
     onValueChange,
     onInvalid,
     // composite props
+    id,
     onFocus,
     onBlur,
     // focused control props
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
-    // trigger props
-    id,
     'aria-description': ariaDescription,
     'aria-describedby': ariaDescribedBy,
     'aria-invalid': ariaInvalid,

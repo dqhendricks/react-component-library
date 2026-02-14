@@ -39,6 +39,7 @@ export function SelectSearchableDropdown({
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const triggerEl = useSelectSearchableStore(store, (s) => s.triggerEl);
+  const ariaInvalidBool = useSelectSearchableStore(store, s => s.ariaInvalidBool);
 
   const [floating, setFloating] = useState<FloatingStyle | null>(null);
 
@@ -168,6 +169,7 @@ export function SelectSearchableDropdown({
       data-owner={triggerId}
       data-state={hidden ? 'closed' : 'open'}
       data-placement={floating?.placement ?? 'down'}
+      data-invalid={ariaInvalidBool ? 'true' : undefined}
     >
       {children}
     </div>,

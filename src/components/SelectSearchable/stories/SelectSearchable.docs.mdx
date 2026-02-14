@@ -11,11 +11,16 @@ selection, custom triggers, and large option sets.
 
 <Canvas of={RootStories.Playground} />
 
+Jump to: [Root](#root), [Trigger](#trigger)
+
+<a id="root" />
 ## SelectSearchable.Root
 
 **SelectSearchable.Root** is the top-level component that manages state, focus, and accessibility for the select.
 
 <details>
+  <summary>Details</summary>
+
   SelectSearchable renders a visually hidden native `<select>` element for form submission and native integration.
 
   ### Focus Management
@@ -56,11 +61,14 @@ selection, custom triggers, and large option sets.
 
 <Controls of={RootStories.Playground} />
 
+<a id="trigger" />
 ## SelectSearchable.Trigger
 
 **SelectSearchable.Trigger** renders the interactive control that opens and closes the dropdown.
 
 <details>
+  <summary>Details</summary>
+
   It wraps a native `<button>` element and forwards all standard `<button>` attributes **except** those managed by the Root context.
 
   ### Controlled props (cannot be overridden):
@@ -82,7 +90,7 @@ selection, custom triggers, and large option sets.
   ### Styling
 
   Exposes `data-part='trigger'` and `data-state='open | closed'` for easy custom styling.
-  
+
 </details>
 
 <Controls of={TriggerStories.Default} />

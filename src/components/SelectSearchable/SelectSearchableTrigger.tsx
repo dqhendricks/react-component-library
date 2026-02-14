@@ -64,6 +64,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const ariaDescriptionRoot = useSelectSearchableStore(store, s => s.ariaDescription);
     const ariaDescribedByRoot = useSelectSearchableStore(store, s => s.ariaDescribedBy);
     const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
+    const ariaInvalidBool = useSelectSearchableStore(store, s => s.ariaInvalidBool);
     const ariaErrorMessageRoot = useSelectSearchableStore(store, s => s.ariaErrorMessage);
     const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
     const onKeyDown = useSelectNavigationKeyDown();
@@ -82,7 +83,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       ariaDescriptionMerged,
       ariaDescribedByMerged,
     } = useMergeAriaAttributes({
-      ariaInvalid,
+      ariaInvalidBool,
       ariaLabelProp,
       ariaLabelRoot,
       ariaLabelledByProp,
@@ -141,6 +142,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
         // Consumer styling hooks
         data-part='trigger'
         data-state={open ? 'open' : 'closed'}
+        data-invalid={ariaInvalidBool ? 'true' : undefined}
       >
         {content}
       </button>

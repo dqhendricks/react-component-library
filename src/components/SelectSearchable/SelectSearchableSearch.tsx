@@ -40,6 +40,7 @@ export function SelectSearchableSearch({
   const ariaDescriptionRoot = useSelectSearchableStore(store, s => s.ariaDescription);
   const ariaDescribedByRoot = useSelectSearchableStore(store, s => s.ariaDescribedBy);
   const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
+  const ariaInvalidBool = useSelectSearchableStore(store, s => s.ariaInvalidBool);
   const ariaErrorMessageRoot = useSelectSearchableStore(store, s => s.ariaErrorMessage);
 
   const {
@@ -48,7 +49,7 @@ export function SelectSearchableSearch({
     ariaDescriptionMerged,
     ariaDescribedByMerged,
   } = useMergeAriaAttributes({
-    ariaInvalid,
+    ariaInvalidBool,
     ariaLabelProp,
     ariaLabelRoot,
     ariaLabelledByProp,

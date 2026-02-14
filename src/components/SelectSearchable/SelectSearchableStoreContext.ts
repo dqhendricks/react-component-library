@@ -24,6 +24,7 @@ type State = {
   ariaDescription?: string;
   ariaDescribedBy?: string;
   ariaInvalid?: React.AriaAttributes['aria-invalid'];
+  ariaInvalidBool: boolean;
   ariaErrorMessage?: string;
 
   // Native-ish flags
@@ -144,6 +145,10 @@ function recomputeVisibleIds(state: State) {
   state.visibleIds = next;
 }
 
+function ariaInvalidToBool(value: React.AriaAttributes['aria-invalid']): boolean {
+  return value === true || value === 'true' || value === 'grammar' || value === 'spelling';
+}
+
 export function createSelectSearchableStore(): SelectSearchableStore {
   const listeners = new Set<Listener>();
 
@@ -162,6 +167,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     ariaDescription: undefined,
     ariaDescribedBy: undefined,
     ariaInvalid: undefined,
+    ariaInvalidBool: false,
     ariaErrorMessage: undefined,
 
     disabled: false,
@@ -331,6 +337,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.ariaDescription = p.ariaDescription;
         state.ariaDescribedBy = p.ariaDescribedBy;
         state.ariaInvalid = p.ariaInvalid;
+        state.ariaInvalidBool = ariaInvalidToBool(p.ariaInvalid);
         state.ariaErrorMessage = p.ariaErrorMessage;
       });
     },

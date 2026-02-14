@@ -1,0 +1,6 @@
+details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}

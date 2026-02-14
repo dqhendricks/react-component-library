@@ -1,4 +1,4 @@
-export function mergeAriaIdRefList(
+export function mergeAriaList(
   refList: Array<string | false | undefined>,
 ): string | undefined {
   const tokens = refList

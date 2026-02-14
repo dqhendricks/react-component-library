@@ -17,6 +17,7 @@ export function SelectSearchableLabel({
 
   const triggerId = useSelectSearchableStore(store, (s) => s.triggerId);
   const labelId = useSelectSearchableStore(store, (s) => s.labelId);
+  const ariaInvalidBool = useSelectSearchableStore(store, s => s.ariaInvalidBool);
 
   // Mark that a label is present while mounted.
   useEffect(() => {
@@ -31,6 +32,7 @@ export function SelectSearchableLabel({
       htmlFor={triggerId}
       // Consumer styling hook
       data-part="label"
+      data-invalid={ariaInvalidBool ? 'true' : undefined}
     >
       {children}
     </label>

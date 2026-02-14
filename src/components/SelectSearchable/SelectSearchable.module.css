@@ -11,6 +11,12 @@
   white-space: nowrap;
 }
 
+/* Error */
+
+.error {
+  color: darkred;
+}
+
 /* Trigger */
 
 .trigger {

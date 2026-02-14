@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SelectSearchable } from '..';
+import { SelectSearchable, type SelectSearchableValue } from '..';
 import { generatePeople } from '../../../storybook/utils/generatePeople';
 
 const peopleOptions = generatePeople(50);
@@ -72,6 +73,48 @@ type Story = StoryObj<typeof meta>;
 
 /* Stories */
 
+const PlaygroundComponent = (args: any) => {
+  const [touched, setTouched] = useState(false);
+  const [value, setValue] = useState<SelectSearchableValue>();
+
+  const hasValue = Array.isArray(value) ? value.length > 0 : !!value;
+  const error = touched && !hasValue ? 'Please select a person.' : undefined;
+
+  return (
+    <SelectSearchable.Root
+      {...args}
+      aria-invalid={!!error}
+      onValueChange={(val: SelectSearchableValue) => {
+        setValue(val);
+        console.log(val);
+      }}
+      onBlur={() => {
+        setTouched(true);
+      }}
+    >
+      <SelectSearchable.Label>Select Person</SelectSearchable.Label>
+
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
+        <SelectSearchable.TriggerValue placeholder="Choose…" />
+        <Chevron />
+      </SelectSearchable.Trigger>
+
+      <SelectSearchable.Dropdown>
+        <SelectSearchable.Search placeholder="Search…" />
+        <SelectSearchable.OptionList>
+          {peopleOptions.map((o, i) => (
+            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+              {o.label}
+            </SelectSearchable.Option>
+          ))}
+        </SelectSearchable.OptionList>
+      </SelectSearchable.Dropdown>
+
+      <SelectSearchable.Error hideWhenValid>{error}</SelectSearchable.Error>
+    </SelectSearchable.Root>
+  );
+};
+
 export const Playground: Story = {
   parameters: {
     docsOnly: true,
@@ -79,14 +122,28 @@ export const Playground: Story = {
     docs: {
       source: {
         code: `
-import { SelectSearchable } from './SelectSearchable';
+import { useState } from 'react';
+import { SelectSearchable, type SelectSearchableValue } from './SelectSearchable';
 import { Chevron } from './Chevron'; // Not included
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelectSearchableProps) => {
+export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProps) => {
+  const [touched, setTouched] = useState(false);
+  const [value, setValue] = useState<SelectSearchableValue>();
+
+  const hasValue = Array.isArray(value) ? value.length > 0 : !!value;
+  const error = touched && !hasValue ? 'Please select a person.' : undefined;
+
   <SelectSearchable.Root
     multiple={multiple}
-    onValueChange={onValueChange}
+    aria-invalid={!!error}
+    onValueChange={(val: SelectSearchableValue) => {
+      setValue(val);
+      console.log(val);
+    }}
+    onBlur={() => {
+      setTouched(true);
+    }}
   >
     <SelectSearchable.Label>Select Person</SelectSearchable.Label>
     <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
@@ -104,6 +161,8 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
         ))}
       </SelectSearchable.OptionList>
     </SelectSearchable.Dropdown>
+
+    <SelectSearchable.Error hideWhenValid>{error}</SelectSearchable.Error>
   </SelectSearchable.Root>
 };
         `.trim(),
@@ -233,29 +292,7 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
       table: { type: { summary: 'React.ReactNode' } },
     },
   },
-  render: (args) => (
-    <SelectSearchable.Root
-      {...args}
-      onValueChange={(val: string | string[]) => console.log(val)}
-    >
-      <SelectSearchable.Label>Select Person</SelectSearchable.Label>
-      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
-        <SelectSearchable.TriggerValue placeholder='Choose…' />
-        <Chevron />
-      </SelectSearchable.Trigger>
-
-      <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
-        <SelectSearchable.OptionList>
-          {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
-              {o.label}
-            </SelectSearchable.Option>
-          ))}
-        </SelectSearchable.OptionList>
-      </SelectSearchable.Dropdown>
-    </SelectSearchable.Root>
-  ),
+  render: (args) => <PlaygroundComponent {...args} />,
 };
 
 export const SingleSelection: Story = {
@@ -267,8 +304,11 @@ import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchableProps) => {
-  <SelectSearchable.Root onValueChange={onValueChange}>
+export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSearchableProps) => {
+  <SelectSearchable.Root
+    onValueChange={onValueChange}
+    aria-invalid={!!error}
+  >
     <SelectSearchable.Label>Select Person</SelectSearchable.Label>
     <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       <SelectSearchable.TriggerValue placeholder='Choose…' />
@@ -285,6 +325,8 @@ export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchabl
         ))}
       </SelectSearchable.OptionList>
     </SelectSearchable.Dropdown>
+
+    <SelectSearchable.Error hideWhenValid>{error}</SelectSearchable.Error>
   </SelectSearchable.Root>
 };
         `.trim(),
@@ -322,10 +364,11 @@ import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options, onValueChange }: MySelectSearchableProps) => {
+export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSearchableProps) => {
   <SelectSearchable.Root
     multiple
     onValueChange={onValueChange}
+    aria-invalid={!!error}
   >
     <SelectSearchable.Label>Select Person</SelectSearchable.Label>
     <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
@@ -383,8 +426,8 @@ import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
-  <SelectSearchable.Root>
+export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) => {
+  <SelectSearchable.Root aria-invalid={!!error}>
     <SelectSearchable.Label>Select Person</SelectSearchable.Label>
     <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       <SelectSearchable.TriggerValue placeholder='Choose…' />
@@ -436,8 +479,11 @@ import { SelectSearchable } from './SelectSearchable';
 import { UpDownChevron } from './UpDownChevron';
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
-  <SelectSearchable.Root multiple>
+export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) => {
+  <SelectSearchable.Root
+    multiple
+    aria-invalid={!!error}
+  >
     <SelectSearchable.Label>Select Person</SelectSearchable.Label>
     <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
       {({ values, isOpen }) => {
@@ -528,7 +574,7 @@ import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
+export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) => {
   <>
     <style>
       {\`
@@ -593,7 +639,7 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
     </style>
 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} class='demoSelectContainer'>
-      <SelectSearchable.Root>
+      <SelectSearchable.Root aria-invalid={!!error}>
         <SelectSearchable.Label>Select Person</SelectSearchable.Label>
         <SelectSearchable.Trigger className='demoSelect'>
           <SelectSearchable.TriggerValue
@@ -725,7 +771,7 @@ import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
 import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
+export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) => {
   return (
     <>
       <style>
@@ -750,7 +796,7 @@ export const MySelectSearchable = ({ options }: MySelectSearchableProps) => {
         \`}
       </style>
 
-      <SelectSearchable.Root>
+      <SelectSearchable.Root aria-invalid={!!error}>
         <SelectSearchable.Label>Select Person</SelectSearchable.Label>
         <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
           <SelectSearchable.TriggerValue placeholder='Choose…' />

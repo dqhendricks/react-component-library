@@ -50,6 +50,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const store = useSelectSearchableStoreContext();
 
     const labelId = useSelectSearchableStore(store, (s) => s.labelId);
+    const errorId = useSelectSearchableStore(store, (s) => s.errorId);
     const triggerId = useSelectSearchableStore(store, (s) => s.triggerId);
     const dropdownId = useSelectSearchableStore(store, (s) => s.dropdownId);
     const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
@@ -58,6 +59,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const valueUnion = useSelectSearchableStore(store, (s) => s.value);
     const multiple = useSelectSearchableStore(store, (s) => s.multiple);
     const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
+    const hasError = useSelectSearchableStore(store, (s) => s.hasError);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
     const ariaLabelRoot = useSelectSearchableStore(store, s => s.ariaLabel);
     const ariaLabelledByRoot = useSelectSearchableStore(store, s => s.ariaLabelledBy);
@@ -95,6 +97,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       ariaDescribedByRoot,
       ariaErrorMessageProp,
       ariaErrorMessageRoot,
+      ariaErrorMessageSubComponent: hasError ? errorId : undefined,
     });
 
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {

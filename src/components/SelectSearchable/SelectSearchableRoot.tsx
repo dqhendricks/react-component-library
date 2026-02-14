@@ -107,6 +107,7 @@ export const SelectSearchableRoot = React.forwardRef<
   const reactId = useId();
   const triggerId = id ?? `ss-${reactId}`;
   const labelId = `${triggerId}--label`;
+  const errorId = `${triggerId}--error`;
   const dropdownId = `${triggerId}--dropdown`;
   const listboxId = `${triggerId}--listbox`;
   const nativeSelectId = `${triggerId}--native`;
@@ -125,7 +126,7 @@ export const SelectSearchableRoot = React.forwardRef<
 
   // prop sync
   useEffect(() => {
-    store.setIdentity({ labelId, triggerId, dropdownId, listboxId });
+    store.setIdentity({ labelId, errorId, triggerId, dropdownId, listboxId });
     store.setA11y({ ariaLabel, ariaLabelledBy, ariaDescription, ariaDescribedBy, ariaInvalid, ariaErrorMessage });
     store.setFlags({ disabled, multiple });
   }, [triggerId, listboxId, ariaLabel, ariaLabelledBy, ariaDescription, ariaDescribedBy, ariaInvalid, ariaErrorMessage, disabled, multiple]);

@@ -14,6 +14,7 @@ type SelectSearchableOptionRecord = {
 type State = {
   // Identity / wiring
   labelId?: string;
+  errorId?: string;
   triggerId?: string;
   dropdownId?: string;
   listboxId?: string;
@@ -38,6 +39,7 @@ type State = {
   activeDescendantId: string | null;
 
   hasLabel: boolean;
+  hasError: boolean;
   hasSearch: boolean;
   searchQuery: string;
 
@@ -68,6 +70,7 @@ export type SelectSearchableStore = {
   // identity
   setIdentity: (p: {
     labelId: string;
+    errorId: string;
     triggerId: string;
     dropdownId: string;
     listboxId: string;
@@ -93,6 +96,7 @@ export type SelectSearchableStore = {
   setActiveDescendantId: (id: string | null) => void;
 
   setHasLabel: (has: boolean) => void;
+  setHasError: (has: boolean) => void;
   setHasSearch: (has: boolean) => void;
   setSearchQuery: (q: string) => void;
 
@@ -158,6 +162,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
   const state: State = {
     labelId: undefined,
+    errorId: undefined,
     triggerId: undefined,
     dropdownId: undefined,
     listboxId: undefined,
@@ -179,6 +184,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     activeDescendantId: null,
 
     hasLabel: false,
+    hasError: false,
     hasSearch: false,
     searchQuery: '',
 
@@ -324,6 +330,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setIdentity(p) {
       setState(() => {
         state.labelId = p.labelId;
+        state.errorId = p.errorId;
         state.triggerId = p.triggerId;
         state.dropdownId = p.dropdownId;
         state.listboxId = p.listboxId;
@@ -373,6 +380,12 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setHasLabel(has) {
       setState(() => {
         state.hasLabel = has;
+      });
+    },
+
+    setHasError(has) {
+      setState(() => {
+        state.hasError = has;
       });
     },
 

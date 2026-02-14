@@ -29,12 +29,14 @@ export function SelectSearchableSearch({
   const store = useSelectSearchableStoreContext();
 
   const labelId = useSelectSearchableStore(store, (s) => s.labelId);
+  const errorId = useSelectSearchableStore(store, (s) => s.errorId);
   const listboxId = useSelectSearchableStore(store, s => s.listboxId);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const searchQuery = useSelectSearchableStore(store, (s) => s.searchQuery);
   const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
   const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
+  const hasError = useSelectSearchableStore(store, (s) => s.hasError);
   const ariaLabelRoot = useSelectSearchableStore(store, s => s.ariaLabel);
   const ariaLabelledByRoot = useSelectSearchableStore(store, s => s.ariaLabelledBy);
   const ariaDescriptionRoot = useSelectSearchableStore(store, s => s.ariaDescription);
@@ -61,6 +63,7 @@ export function SelectSearchableSearch({
     ariaDescribedByRoot,
     ariaErrorMessageProp,
     ariaErrorMessageRoot,
+    ariaErrorMessageSubComponent: hasError ? errorId : undefined,
   });
 
   // Derived visibility is computed once per query in the store;

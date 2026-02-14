@@ -34,7 +34,7 @@ Jump to: [Root](#root), [Trigger](#trigger)
 
   ### Labelling
 
-  In most cases, you should use the `Label` subcomponent. It automatically associates a visible label with both internal focusable elements.
+  In most cases, you should use the `Label` and `Error` subcomponents. It automatically associates a visible label and error with both internal focusable elements.
 
   If you need manual control, you may provide ARIA attributes directly.
 
@@ -55,11 +55,11 @@ Jump to: [Root](#root), [Trigger](#trigger)
   When `aria-invalid` is set on the Root:
 
   - The invalid state is applied to the combobox element.
-  - Any referenced `aria-errormessage` id is automatically included in `aria-describedby` so that error text is announced when either focusable element receives focus.
+  - Any `Error` sub component or referenced `aria-errormessage` id is automatically included in `aria-describedby` so that error text is announced when either focusable element receives focus.
 
   ### Styling Invalid
 
-  For styling invalid state, SelectSearchable exposes a `data-invalid` attribute on internal parts (e.g. Trigger / Search / Dropdown).  
+  For styling invalid state, SelectSearchable exposes a `data-invalid` attribute on internal parts (e.g. Label / Trigger / Search / Dropdown / Error).  
   Prefer using `data-invalid` as a visual hook rather than styling based on `aria-invalid`, since `aria-invalid` is only applied to the combobox element.
 
 </details>

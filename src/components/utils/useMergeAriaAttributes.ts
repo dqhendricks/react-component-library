@@ -13,6 +13,7 @@ export type MergeAriaAttributesArgs = {
   ariaDescribedByRoot?: string;
   ariaErrorMessageProp?: string;
   ariaErrorMessageRoot?: string;
+  ariaErrorMessageSubComponent?: string;
 };
 
 export function useMergeAriaAttributes({
@@ -28,6 +29,7 @@ export function useMergeAriaAttributes({
   ariaDescribedByRoot,
   ariaErrorMessageProp,
   ariaErrorMessageRoot,
+  ariaErrorMessageSubComponent,
 }: MergeAriaAttributesArgs) {
 
   const ariaLabelMerged = mergeAriaList([ariaLabelRoot, ariaLabelProp]);
@@ -43,6 +45,7 @@ export function useMergeAriaAttributes({
   const ariaDescribedByMerged = mergeAriaList([
     ariaDescribedByRoot,
     ariaDescribedByProp,
+    ariaInvalidBool && ariaErrorMessageSubComponent,
     ariaInvalidBool && ariaErrorMessageRoot,
     ariaInvalidBool && ariaErrorMessageProp,
   ]);

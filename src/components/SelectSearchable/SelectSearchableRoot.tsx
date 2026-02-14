@@ -92,7 +92,7 @@ export const SelectSearchableRoot = React.forwardRef<
     id,
     onFocus,
     onBlur,
-    // focused control props
+    // aria props
     'aria-label': ariaLabel,
     'aria-labelledby': ariaLabelledBy,
     'aria-description': ariaDescription,

@@ -8,7 +8,7 @@ import {
 import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
 import { assignRef } from '../utils/assignRef';
-import { mergeAriaList } from '../utils/mergeAriaList';
+import { useMergeAriaAttributes } from '../utils/useMergeAriaAttributes';
 
 export type SelectSearchableTriggerRenderArgs = {
   value: string; // Use if not multiple
@@ -27,7 +27,6 @@ export type SelectSearchableTriggerProps = Omit<
   | 'aria-expanded'
   | 'aria-activedescendant'
   | 'aria-invalid'
-  | 'aria-errormessage'
   | 'disabled'
   | 'role'
 > & {
@@ -38,12 +37,6 @@ function toValues(v: SelectSearchableValue): string[] {
   return Array.isArray(v) ? v : v ? [v] : [];
 }
 
-function isAriaInvalid(
-  value: React.AriaAttributes['aria-invalid']
-): boolean {
-  return value === true || value === 'true' || value === 'grammar' || value === 'spelling';
-}
-
 export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearchableTriggerProps>(
   function SelectSearchableTrigger({
     children,
@@ -51,6 +44,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     'aria-labelledby': ariaLabelledByProp,
     'aria-description': ariaDescriptionProp,
     'aria-describedby': ariaDescribedByProp,
+    'aria-errormessage': ariaErrorMessageProp,
     ...rest
   }, ref) {
     const store = useSelectSearchableStoreContext();
@@ -82,11 +76,25 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       [store, ref],
     );
 
-    // Process aria merges
-    const ariaLabelMerged = mergeAriaList([ariaLabelProp, ariaLabelRoot]);
-    const ariaLabelledByMerged = mergeAriaList([ariaLabelledByProp, ariaLabelledByRoot, hasLabel && labelId]);
-    const ariaDescriptionMerged = mergeAriaList([ariaDescriptionProp, ariaDescriptionRoot]);
-    const ariaDescribedByMerged = mergeAriaList([ariaDescribedByProp, ariaDescribedByRoot, isAriaInvalid(ariaInvalid) && ariaErrorMessageRoot]);
+    const {
+      ariaLabelMerged,
+      ariaLabelledByMerged,
+      ariaDescriptionMerged,
+      ariaDescribedByMerged,
+    } = useMergeAriaAttributes({
+      ariaInvalid,
+      ariaLabelProp,
+      ariaLabelRoot,
+      ariaLabelledByProp,
+      ariaLabelledByRoot,
+      ariaLabelledBySubComponent: hasLabel ? labelId : undefined,
+      ariaDescriptionProp,
+      ariaDescriptionRoot,
+      ariaDescribedByProp,
+      ariaDescribedByRoot,
+      ariaErrorMessageProp,
+      ariaErrorMessageRoot,
+    });
 
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
       id: triggerId,

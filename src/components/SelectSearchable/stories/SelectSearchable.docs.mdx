@@ -14,7 +14,45 @@ selection, custom triggers, and large option sets.
 ## SelectSearchable.Root
 
 **SelectSearchable.Root** is the top-level component that manages state, focus, and accessibility for the select.
-It wraps a hidden native `<select>` element that can be used for traditional form submissions and other native functionality.
+
+<details>
+  SelectSearchable renders a visually hidden native `<select>` element for form submission and native integration.
+
+  ### Focus Management
+
+  SelectSearchable contains two internal focusable elements:
+
+  - **Trigger** – `role="button"` (displays the selected value and toggles the listbox)
+  - **Search** – `role="combobox"` (used to filter and navigate options)
+
+  If no `Search` subcomponent is composed, the `Trigger` assumes the `combobox` role instead.
+
+  ### Labelling
+
+  In most cases, you should use the `Label` subcomponent. It automatically associates a visible label with both internal focusable elements.
+
+  If you need manual control, you may provide ARIA attributes directly.
+
+  The following attributes can be set on the **Root** and will be forwarded to internal focusable elements:
+
+  - `aria-labelledby`
+  - `aria-label`
+  - `aria-describedby`
+  - `aria-description`
+  - `aria-errormessage`
+
+  These attributes may also be provided directly on `Trigger` or `Search`.
+
+  If attributes are provided in multiple places (Root + subcomponent), their values are merged (duplicates removed) before being applied.
+
+  ### Validation
+
+  When `aria-invalid` is set on the Root:
+
+  - The invalid state is applied to the combobox element.
+  - Any referenced `aria-errormessage` id is automatically included in `aria-describedby` so that error text is announced when either focusable element receives focus.
+
+</details>
 
 <Controls of={RootStories.Playground} />
 
@@ -25,7 +63,7 @@ It wraps a hidden native `<select>` element that can be used for traditional for
 <details>
   It wraps a native `<button>` element and forwards all standard `<button>` attributes **except** those managed by the Root context.
 
-  **Controlled props (cannot be overridden):**
+  ### Controlled props (cannot be overridden):
 
   - `id`
   - `type`
@@ -35,16 +73,15 @@ It wraps a hidden native `<select>` element that can be used for traditional for
 
   The Trigger’s `id` is stable and derived from the Root `id`, using the suffix `--control`.
 
-  **Children**
+  ### Children
 
   `children` may be either:
   - A `ReactNode`, or
   - A render function receiving: `value`, `values`, `isOpen`, `multiple`.
 
-  **Styling**
+  ### Styling
 
   Exposes `data-part='trigger'` and `data-state='open | closed'` for easy custom styling.
-
   
 </details>
 

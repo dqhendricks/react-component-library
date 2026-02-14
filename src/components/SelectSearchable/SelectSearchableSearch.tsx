@@ -6,7 +6,7 @@ import {
 } from './SelectSearchableStoreContext';
 import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
-import { mergeAriaList } from '../utils/mergeAriaList';
+import { useMergeAriaAttributes } from '../utils/useMergeAriaAttributes';
 
 export type SelectSearchableSearchProps = Omit<
   React.ComponentPropsWithoutRef<'input'>,
@@ -15,14 +15,7 @@ export type SelectSearchableSearchProps = Omit<
   | 'defaultValue'
   | 'autoFocus'
   | 'aria-invalid'
-  | 'aria-errormessage'
 >;
-
-function isAriaInvalid(
-  value: React.AriaAttributes['aria-invalid']
-): boolean {
-  return value === true || value === 'true' || value === 'grammar' || value === 'spelling';
-}
 
 export function SelectSearchableSearch({
   placeholder = 'Search…',
@@ -30,6 +23,7 @@ export function SelectSearchableSearch({
   'aria-labelledby': ariaLabelledByProp,
   'aria-description': ariaDescriptionProp,
   'aria-describedby': ariaDescribedByProp,
+  'aria-errormessage': ariaErrorMessageProp,
   ...rest
 }: SelectSearchableSearchProps) {
   const store = useSelectSearchableStoreContext();
@@ -48,11 +42,25 @@ export function SelectSearchableSearch({
   const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
   const ariaErrorMessageRoot = useSelectSearchableStore(store, s => s.ariaErrorMessage);
 
-  // Process aria merges
-  const ariaLabelMerged = mergeAriaList([ariaLabelProp, ariaLabelRoot]);
-  const ariaLabelledByMerged = mergeAriaList([ariaLabelledByProp, ariaLabelledByRoot, hasLabel && labelId]);
-  const ariaDescriptionMerged = mergeAriaList([ariaDescriptionProp, ariaDescriptionRoot]);
-  const ariaDescribedByMerged = mergeAriaList([ariaDescribedByProp, ariaDescribedByRoot, isAriaInvalid(ariaInvalid) && ariaErrorMessageRoot]);
+  const {
+    ariaLabelMerged,
+    ariaLabelledByMerged,
+    ariaDescriptionMerged,
+    ariaDescribedByMerged,
+  } = useMergeAriaAttributes({
+    ariaInvalid,
+    ariaLabelProp,
+    ariaLabelRoot,
+    ariaLabelledByProp,
+    ariaLabelledByRoot,
+    ariaLabelledBySubComponent: hasLabel ? labelId : undefined,
+    ariaDescriptionProp,
+    ariaDescriptionRoot,
+    ariaDescribedByProp,
+    ariaDescribedByRoot,
+    ariaErrorMessageProp,
+    ariaErrorMessageRoot,
+  });
 
   // Derived visibility is computed once per query in the store;
   // we just use it here to pick the first visible option.

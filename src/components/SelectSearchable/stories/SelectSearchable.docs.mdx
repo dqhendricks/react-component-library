@@ -57,6 +57,11 @@ Jump to: [Root](#root), [Trigger](#trigger)
   - The invalid state is applied to the combobox element.
   - Any referenced `aria-errormessage` id is automatically included in `aria-describedby` so that error text is announced when either focusable element receives focus.
 
+  ### Styling Invalid
+
+  For styling invalid state, SelectSearchable exposes a `data-invalid` attribute on internal parts (e.g. Trigger / Search / Dropdown).  
+  Prefer using `data-invalid` as a visual hook rather than styling based on `aria-invalid`, since `aria-invalid` is only applied to the combobox element.
+
 </details>
 
 <Controls of={RootStories.Playground} />

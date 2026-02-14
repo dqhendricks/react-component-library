@@ -30,21 +30,21 @@ export function useMergeAriaAttributes({
   ariaErrorMessageRoot,
 }: MergeAriaAttributesArgs) {
 
-  const ariaLabelMerged = mergeAriaList([ariaLabelProp, ariaLabelRoot]);
+  const ariaLabelMerged = mergeAriaList([ariaLabelRoot, ariaLabelProp]);
 
   const ariaLabelledByMerged = mergeAriaList([
-    ariaLabelledByProp,
-    ariaLabelledByRoot,
     ariaLabelledBySubComponent,
+    ariaLabelledByRoot,
+    ariaLabelledByProp,
   ]);
 
-  const ariaDescriptionMerged = mergeAriaList([ariaDescriptionProp, ariaDescriptionRoot]);
+  const ariaDescriptionMerged = mergeAriaList([ariaDescriptionRoot, ariaDescriptionProp]);
 
   const ariaDescribedByMerged = mergeAriaList([
-    ariaDescribedByProp,
     ariaDescribedByRoot,
-    ariaInvalidBool && ariaErrorMessageProp,
+    ariaDescribedByProp,
     ariaInvalidBool && ariaErrorMessageRoot,
+    ariaInvalidBool && ariaErrorMessageProp,
   ]);
 
   return {

@@ -192,37 +192,37 @@ export const MySelectSearchable = ({ options, multiple, onValueChange }: MySelec
     'aria-label': {
       control: false,
       description:
-        'Accessible name for the SelectSearchable when no visible label / aria-labelledby is provided. Applied to internal focusable elements.',
+        'Accessible name for the control when no visible label or aria-labelledby is provided. Forwarded to internal focusable elements.',
       table: { type: { summary: 'string' } },
     },
     'aria-labelledby': {
       control: false,
       description:
-        'Element id(s) that label the SelectSearchable (space-separated). Prefer this when using a visible <label>.',
+        'Space-separated id reference(s) of element(s) that label the control. Forwarded to internal focusable elements. Prefer when using a visible `<label>`.',
       table: { type: { summary: 'string' } },
     },
     'aria-description': {
       control: false,
       description:
-        'Accessible description text for the SelectSearchable. Screen reader support varies.',
+        'Additional accessible description text. Forwarded to internal focusable elements. Screen reader support varies.',
       table: { type: { summary: 'string' } },
     },
     'aria-describedby': {
       control: false,
       description:
-        'Element id(s) that describe the SelectSearchable (space-separated). Commonly used for help or error text.',
+        'Space-separated id reference(s) of element(s) that describe the control (e.g., help or error text). Forwarded to internal focusable elements.',
       table: { type: { summary: 'string' } },
     },
     'aria-invalid': {
       control: false,
       description:
-        'Marks the SelectSearchable as invalid. Applied to the combobox portion of the control.',
+        'Marks the control as invalid. Applied to the combobox element (Search when present, otherwise Trigger).',
       table: { type: { summary: 'boolean | "true" | "false" | "grammar" | "spelling"' } },
     },
     'aria-errormessage': {
       control: false,
       description:
-        'Element id of the error message. Applied to the combobox portion when aria-invalid is true.',
+        'Id reference of the element containing the error message. When aria-invalid is true, the id is merged into aria-describedby and applied to internal focusable elements.',
       table: { type: { summary: 'string' } },
     },
 

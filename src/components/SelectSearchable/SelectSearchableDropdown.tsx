@@ -21,7 +21,7 @@ type FloatingStyle = {
 type DivProps = React.ComponentPropsWithoutRef<'div'>;
 
 export type SelectSearchableDropdownProps = React.PropsWithChildren<
-  Omit<DivProps, 'ref'>
+  Omit<DivProps, 'ref' | 'aria-hidden'>
 > & {
   maxHeightWithClamp?: number; // Max height, in pixels, and clamped to viewport.
   gap?: number; // Gap between dropdown and trigger element in px.
@@ -164,6 +164,7 @@ export function SelectSearchableDropdown({
     <div
       {...merged}
       ref={store.setDropdownEl}
+      aria-hidden={hidden || undefined}
       // Consumer styling hooks
       data-part='dropdown'
       data-owner={triggerId}

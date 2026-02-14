@@ -187,18 +187,28 @@ export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProp
     multiple: {
       control: 'boolean',
       description: 'Allow selecting multiple values.',
-      table: { type: { summary: 'boolean' } },
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
+
     },
     disabled: {
       control: 'boolean',
       description: 'Disables the control.',
-      table: { type: { summary: 'boolean' } },
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
     },
     required: {
       control: false,
       description:
         'Specifies that the select field must be filled out before the form can be submitted.',
-      table: { type: { summary: 'boolean' } },
+      table: {
+        type: { summary: 'boolean' },
+        defaultValue: { summary: 'false' },
+      },
     },
     value: {
       control: false,

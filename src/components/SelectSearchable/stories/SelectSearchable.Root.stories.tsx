@@ -5,7 +5,6 @@ import {
   FormikProvider,
   Form,
   useField,
-  useFormikContext,
 } from 'formik';
 import { SelectSearchable, type SelectSearchableValue } from '..';
 import { generatePeople } from '../../../storybook/utils/generatePeople';
@@ -128,6 +127,7 @@ export const Playground: Story = {
     controls: { disable: false },
     docs: {
       source: {
+        language: 'tsx',
         code: `
 import { useState } from 'react';
 import { SelectSearchable, type SelectSearchableValue } from './SelectSearchable';
@@ -316,6 +316,7 @@ export const SingleSelection: Story = {
   parameters: {
     docs: {
       source: {
+        language: 'tsx',
         code: `
 import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
@@ -376,6 +377,7 @@ export const MultipleSelection: Story = {
   parameters: {
     docs: {
       source: {
+        language: 'tsx',
         code: `
 import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
@@ -438,6 +440,7 @@ export const WithoutSearch: Story = {
   parameters: {
     docs: {
       source: {
+        language: 'tsx',
         code: `
 import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
@@ -491,6 +494,7 @@ export const CustomRenderedTrigger: Story = {
   parameters: {
     docs: {
       source: {
+        language: 'tsx',
         code: `
 import { SelectSearchable } from './SelectSearchable';
 import { UpDownChevron } from './UpDownChevron';
@@ -586,6 +590,7 @@ export const StylingExamples: Story = {
   parameters: {
     docs: {
       source: {
+        language: 'tsx',
         code: `
 import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
@@ -783,6 +788,7 @@ export const ShowHideAnimation: Story = {
   parameters: {
     docs: {
       source: {
+        language: 'tsx',
         code: `
 import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
@@ -877,39 +883,39 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
   ),
 };
 
-type FormValues = { person: string };
-
-function PersonSelect() {
-  const [field, meta] = useField<string>('person');
-  const showError = Boolean(meta.touched && meta.error);
+function FormikSelectSearchable({ name, label }: { name: string, label: string }) {
+  const [field, meta] = useField<string>(name);
+  const isInvalid = Boolean(meta.touched && meta.error);
 
   return (
-    <SelectSearchable.Root
-      {...field}
-      aria-invalid={showError}
-    >
-      <SelectSearchable.Label>Select Person</SelectSearchable.Label>
-      
-      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
-        <SelectSearchable.TriggerValue placeholder='Choose…' />
-        <Chevron />
-      </SelectSearchable.Trigger>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <SelectSearchable.Root
+        {...field}
+        aria-invalid={isInvalid}
+      >
+        <SelectSearchable.Label>{ label }</SelectSearchable.Label>
+        
+        <SelectSearchable.Trigger>
+          <SelectSearchable.TriggerValue placeholder='Choose…' />
+          <Chevron />
+        </SelectSearchable.Trigger>
 
-      <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
-        <SelectSearchable.OptionList>
-          {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
-              {o.label}
-            </SelectSearchable.Option>
-          ))}
-        </SelectSearchable.OptionList>
-      </SelectSearchable.Dropdown>
+        <SelectSearchable.Dropdown>
+          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.OptionList>
+            {peopleOptions.map((o, i) => (
+              <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+                {o.label}
+              </SelectSearchable.Option>
+            ))}
+          </SelectSearchable.OptionList>
+        </SelectSearchable.Dropdown>
 
-      <SelectSearchable.Error hideWhenValid>
-        {meta.error}
-      </SelectSearchable.Error>
-    </SelectSearchable.Root>
+        <SelectSearchable.Error hideWhenValid>
+          {meta.error}
+        </SelectSearchable.Error>
+      </SelectSearchable.Root>
+    </div>
   );
 }
 
@@ -917,41 +923,100 @@ export const WithFormik: Story = {
   parameters: {
     docs: {
       source: {
+        language: 'tsx',
         code: `
+import {
+  useFormik,
+  FormikProvider,
+  Form,
+  useField,
+} from 'formik';
 import { SelectSearchable } from './SelectSearchable';
 import { Chevron } from './Chevron';
-import type { MySelectSearchableProps } from './types';
 
-export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSearchableProps) => {
-  <SelectSearchable.Root
-    onValueChange={onValueChange}
-    aria-invalid={!!error}
-  >
-    <SelectSearchable.Label>Select Person</SelectSearchable.Label>
-    <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
-      <SelectSearchable.TriggerValue placeholder='Choose…' />
-      <Chevron />
-    </SelectSearchable.Trigger>
+interface SelectSearchableOptions {
+  id: string;
+  value: string;
+  label: string;
+}
 
-    <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder='Search…' />
-      <SelectSearchable.OptionList>
-        {options.map((option) => (
-          <SelectSearchable.Option key={option.id} value={option.value}>
-            {option.label}
-          </SelectSearchable.Option>
-        ))}
-      </SelectSearchable.OptionList>
-    </SelectSearchable.Dropdown>
+// Reusable SelectSearchable component made for use with Formik
 
-    <SelectSearchable.Error hideWhenValid>{error}</SelectSearchable.Error>
-  </SelectSearchable.Root>
+interface FormikSelectSearchableProps {
+  name: string;
+  label: string;
+  options: SelectSearchableOptions[];
+}
+
+export const FormikSelectSearchable = ({ name, label, options }: FormikSelectSearchableProps) => {
+  const [field, meta] = useField<string>(name);
+  const isInvalid = Boolean(meta.touched && meta.error);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <SelectSearchable.Root
+        {...field}
+        aria-invalid={isInvalid}
+      >
+        <SelectSearchable.Label>{ label }</SelectSearchable.Label>
+        
+        <SelectSearchable.Trigger>
+          <SelectSearchable.TriggerValue placeholder='Choose…' />
+          <Chevron />
+        </SelectSearchable.Trigger>
+
+        <SelectSearchable.Dropdown>
+          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.OptionList>
+            {options.map((option) => (
+              <SelectSearchable.Option key={option.id} value={option.value}>
+                {option.label}
+              </SelectSearchable.Option>
+            ))}
+          </SelectSearchable.OptionList>
+        </SelectSearchable.Dropdown>
+
+        <SelectSearchable.Error hideWhenValid>
+          {meta.error}
+        </SelectSearchable.Error>
+      </SelectSearchable.Root>
+    </div>
+  );
+};
+
+
+// Formik form component that uses reusable FormikSelectSearchable component
+
+interface FormValues {
+  person: string;
+}
+
+export const FormikForm = ({ peopleOptions }: { peopleOptions: SelectSearchableOptions[] }) => {
+  const formik = useFormik<FormValues>({
+    initialValues: { person: '' },
+    validate: (values) =>
+      !values.person ? { person: 'Required' } : {},
+    onSubmit: (values) => {
+      console.log('submitted', values);
+    },
+  });
+
+  return (
+    <FormikProvider value={formik}>
+      <Form style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 240 }}>
+        <FormikSelectSearchable name="person" label="Select Person" options={peopleOptions} />
+        <button type="submit">Submit</button>
+      </Form>
+    </FormikProvider>
+  );
 };
         `.trim(),
       },
     },
   },
   render: () => {
+    type FormValues = { person: string };
+
     const formik = useFormik<FormValues>({
       initialValues: { person: '' },
       validate: (values) =>
@@ -964,7 +1029,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
     return (
       <FormikProvider value={formik}>
         <Form style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 240 }}>
-          <PersonSelect />
+          <FormikSelectSearchable name="person" label="Select Person" />
           <button type="submit">Submit</button>
         </Form>
       </FormikProvider>

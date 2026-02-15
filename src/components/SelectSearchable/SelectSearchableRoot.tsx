@@ -15,7 +15,8 @@ import {
   useSelectSearchableStore,
 } from './SelectSearchableStoreContext';
 import { assignRef } from '../utils/assignRef';
-import { proxyToNativeSelect, type FocusLikeEventHandler } from './proxyToNativeSelect';
+import { proxyToNativeSelectFocus, type FocusLikeEventHandler } from './proxyToNativeSelectFocus';
+import { proxyToNativeSelectChange, type ChangeLikeEventHandler } from './proxyToNativeSelectChange';
 
 function normalizeByMode(
   next: SelectSearchableValue,
@@ -34,7 +35,6 @@ type CommonRootProps = PropsWithChildren<
     | 'disabled'
     | 'required'
     | 'form'
-    | 'onChange'
     | 'onInvalid'
     | 'aria-label'
     | 'aria-labelledby'
@@ -43,6 +43,7 @@ type CommonRootProps = PropsWithChildren<
     | 'aria-invalid'
     | 'aria-errormessage'
   > & {
+    onChange?: ChangeLikeEventHandler;
     onFocus?: FocusLikeEventHandler;
     onBlur?: FocusLikeEventHandler;
   }
@@ -149,6 +150,15 @@ export const SelectSearchableRoot = React.forwardRef<
     const normalized = normalizeByMode(next, multiple);
     if (!isControlled) setUncontrolledValue(normalized);
 
+    onChange?.(
+      proxyToNativeSelectChange(
+        store.getSnapshot().nativeSelectEl,
+        name,
+        normalized,
+        multiple
+      )
+    );
+
     if (multiple) {
       (onValueChange as ((v: string[] | undefined) => void) | undefined)?.(
         (normalized as string[]).length ? (normalized as string[]) : undefined
@@ -169,11 +179,6 @@ export const SelectSearchableRoot = React.forwardRef<
     store.setCommitValue(commitValue);
     return () => store.setCommitValue(null);
   }, [commitValue]);
-
-  // Dispatch native change event (keeps external onChange listeners happy)
-  useEffect(() => {
-    store.dispatchNativeChange();
-  }, [value]);
 
   // Close on outside click
   useEffect(() => {
@@ -211,7 +216,7 @@ export const SelectSearchableRoot = React.forwardRef<
       // entered from outside?
       if (isInside(e.target) && !isInside(e.relatedTarget)) {
         const snap = store.getSnapshot();
-        onFocus?.(proxyToNativeSelect(e, snap.nativeSelectEl, 'focus'));
+        onFocus?.(proxyToNativeSelectFocus(e, snap.nativeSelectEl, 'focus'));
       }
     };
 
@@ -219,7 +224,7 @@ export const SelectSearchableRoot = React.forwardRef<
       // leaving to outside?
       if (isInside(e.target) && !isInside(e.relatedTarget)) {
         const snap = store.getSnapshot();
-        onBlur?.(proxyToNativeSelect(e, snap.nativeSelectEl, 'blur'));
+        onBlur?.(proxyToNativeSelectFocus(e, snap.nativeSelectEl, 'blur'));
       }
     };
 
@@ -247,7 +252,7 @@ export const SelectSearchableRoot = React.forwardRef<
           form={form}
           required={required}
           disabled={disabled}
-          onChange={onChange || (() => {})}
+          onChange={() => {}}   
           onInvalid={onInvalid}
           className={styles.hiddenSelect}
           tabIndex={-1}

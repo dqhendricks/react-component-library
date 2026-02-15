@@ -1,5 +1,12 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import {
+  useFormik,
+  FormikProvider,
+  Form,
+  useField,
+  useFormikContext,
+} from 'formik';
 import { SelectSearchable, type SelectSearchableValue } from '..';
 import { generatePeople } from '../../../storybook/utils/generatePeople';
 
@@ -868,4 +875,102 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
       </SelectSearchable.Root>
     </>
   ),
+};
+
+type FormValues = { person: string };
+
+function PersonSelect() {
+  const [field, meta] = useField<string>('person');
+  const showError = Boolean(meta.touched && meta.error);
+
+  return (
+    <SelectSearchable.Root
+      name={field.name}
+      value={field.value}
+      onChange={field.onChange}
+      onBlur={field.onBlur}
+      aria-invalid={showError}
+    >
+      <SelectSearchable.Label>Select Person</SelectSearchable.Label>
+      
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
+        <Chevron />
+      </SelectSearchable.Trigger>
+
+      <SelectSearchable.Dropdown>
+        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.OptionList>
+          {peopleOptions.map((o, i) => (
+            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+              {o.label}
+            </SelectSearchable.Option>
+          ))}
+        </SelectSearchable.OptionList>
+      </SelectSearchable.Dropdown>
+
+      <SelectSearchable.Error hideWhenValid>
+        {showError ? meta.error : undefined}
+      </SelectSearchable.Error>
+    </SelectSearchable.Root>
+  );
+}
+
+export const WithFormik: Story = {
+  parameters: {
+    docs: {
+      source: {
+        code: `
+import { SelectSearchable } from './SelectSearchable';
+import { Chevron } from './Chevron';
+import type { MySelectSearchableProps } from './types';
+
+export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSearchableProps) => {
+  <SelectSearchable.Root
+    onValueChange={onValueChange}
+    aria-invalid={!!error}
+  >
+    <SelectSearchable.Label>Select Person</SelectSearchable.Label>
+    <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
+      <SelectSearchable.TriggerValue placeholder='Choose…' />
+      <Chevron />
+    </SelectSearchable.Trigger>
+
+    <SelectSearchable.Dropdown>
+      <SelectSearchable.Search placeholder='Search…' />
+      <SelectSearchable.OptionList>
+        {options.map((option) => (
+          <SelectSearchable.Option key={option.id} value={option.value}>
+            {option.label}
+          </SelectSearchable.Option>
+        ))}
+      </SelectSearchable.OptionList>
+    </SelectSearchable.Dropdown>
+
+    <SelectSearchable.Error hideWhenValid>{error}</SelectSearchable.Error>
+  </SelectSearchable.Root>
+};
+        `.trim(),
+      },
+    },
+  },
+  render: () => {
+    const formik = useFormik<FormValues>({
+      initialValues: { person: '' },
+      validate: (values) =>
+        !values.person ? { person: 'Required' } : {},
+      onSubmit: (values) => {
+        console.log('submitted', values);
+      },
+    });
+
+    return (
+      <FormikProvider value={formik}>
+        <Form style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 240 }}>
+          <PersonSelect />
+          <button type="submit">Submit</button>
+        </Form>
+      </FormikProvider>
+    );
+  },
 };

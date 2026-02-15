@@ -51,13 +51,11 @@ type State = {
   triggerEl: HTMLElement | null;
   dropdownEl: HTMLElement | null
   optionListEl: HTMLElement | null;
+  nativeSelectEl: HTMLSelectElement | null;
 
   // Option registry
   options: Map<string, SelectSearchableOptionRecord>;
   valueToId: Map<string, string>; // helps fast lookup by value
-
-  // For native change dispatch (optional)
-  nativeSelectEl: HTMLSelectElement | null;
 };
 
 type Listener = () => void;
@@ -103,9 +101,7 @@ export type SelectSearchableStore = {
   setTriggerEl: (el: HTMLElement | null) => void;
   setDropdownEl(el: HTMLElement | null): void
   setOptionListEl: (el: HTMLElement | null) => void;
-
   setNativeSelectEl: (el: HTMLSelectElement | null) => void;
-  dispatchNativeChange: () => void;
 
   // option registry
   registerOption: (opt: SelectSearchableOptionRecord) => () => void;
@@ -194,11 +190,10 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     triggerEl: null,
     dropdownEl: null,
     optionListEl: null,
+    nativeSelectEl: null,
 
     options: new Map(),
     valueToId: new Map(),
-
-    nativeSelectEl: null,
   };
 
   function emit() {
@@ -430,12 +425,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.nativeSelectEl = el;
       });
-    },
-
-    dispatchNativeChange() {
-      const el = state.nativeSelectEl;
-      if (!el) return;
-      el.dispatchEvent(new Event('change', { bubbles: true }));
     },
 
     registerOption(opt) {

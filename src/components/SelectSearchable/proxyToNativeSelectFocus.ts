@@ -9,7 +9,7 @@ export interface FocusLikeEvent<T extends HTMLElement = HTMLElement> {
 
 export type FocusLikeEventHandler = (e: FocusLikeEvent) => void;
 
-export function proxyToNativeSelect(
+export function proxyToNativeSelectFocus(
   e: FocusEvent,
   nativeElement: HTMLSelectElement | null,
   type: 'focus' | 'blur'

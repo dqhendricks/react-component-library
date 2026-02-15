@@ -885,10 +885,7 @@ function PersonSelect() {
 
   return (
     <SelectSearchable.Root
-      name={field.name}
-      value={field.value}
-      onChange={field.onChange}
-      onBlur={field.onBlur}
+      {...field}
       aria-invalid={showError}
     >
       <SelectSearchable.Label>Select Person</SelectSearchable.Label>
@@ -910,7 +907,7 @@ function PersonSelect() {
       </SelectSearchable.Dropdown>
 
       <SelectSearchable.Error hideWhenValid>
-        {showError ? meta.error : undefined}
+        {meta.error}
       </SelectSearchable.Error>
     </SelectSearchable.Root>
   );

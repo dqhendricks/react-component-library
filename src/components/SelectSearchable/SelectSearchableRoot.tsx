@@ -27,7 +27,7 @@ function normalizeByMode(
     : (Array.isArray(next) ? (next[0] ?? undefined) : next);
 }
 
-type CommonRootProps = PropsWithChildren<
+type SelectSearchableRootProps = PropsWithChildren<
   Pick<
     ComponentPropsWithoutRef<'select'>,
     | 'id'
@@ -43,29 +43,15 @@ type CommonRootProps = PropsWithChildren<
     | 'aria-invalid'
     | 'aria-errormessage'
   > & {
+    multiple?: boolean;
+    value?: SelectSearchableValue;
+    defaultValue?: SelectSearchableValue;
+    onValueChange?: (value: SelectSearchableValue) => void;
     onChange?: ChangeLikeEventHandler;
     onFocus?: FocusLikeEventHandler;
     onBlur?: FocusLikeEventHandler;
   }
 >;
-
-type SelectSearchableRootPropsSingle = CommonRootProps & {
-  multiple?: false | undefined;
-  value?: string;
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
-};
-
-type SelectSearchableRootPropsMultiple = CommonRootProps & {
-  multiple: true;
-  value?: string[];
-  defaultValue?: string[];
-  onValueChange?: (value: string[]) => void;
-};
-
-export type SelectSearchableRootProps =
-  | SelectSearchableRootPropsSingle
-  | SelectSearchableRootPropsMultiple;
 
 /**
  * Root container for the SelectSearchable composite component.

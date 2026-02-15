@@ -75,6 +75,7 @@ See Storybook for full usage patterns and accessibility behavior.
 ```bash
 npm run dev
 npm run storybook
+npm run test
 ```
 
 ---

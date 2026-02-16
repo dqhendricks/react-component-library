@@ -507,9 +507,8 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
   >
     <SelectSearchable.Label>Select Person</SelectSearchable.Label>
     <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
-      {({ values, isOpen }) => {
-        // You should use value or values, depending on whether multiple is true
-        const display = values.join(', ');
+      {({ selectedLabels, isOpen }) => {
+        const display = selectedLabels.join('; ');
 
         return (
           <>
@@ -550,8 +549,8 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
     <SelectSearchable.Root>
       <SelectSearchable.Label>Select Person</SelectSearchable.Label>
       <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
-        {({ values, isOpen }) => {
-          const display = values.join(', ');
+        {({ selectedLabels, isOpen }) => {
+          const display = selectedLabels.join('; ');
 
           return (
             <>

@@ -5,6 +5,7 @@ import {
   useSelectSearchableStore,
 } from './SelectSearchableStoreContext';
 import { mergeProps } from '../utils/mergeProps';
+import { extractNodeText } from '../utils/extractNodeText';
 
 type LiProps = React.ComponentPropsWithoutRef<'li'>;
 
@@ -47,7 +48,7 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
   const isActive = useSelectSearchableStore(store, (s) => s.activeDescendantId === optionId);
   const isVisible = useSelectSearchableStore(store, (s) => s.visibleIds.has(optionId));
 
-  const label = useMemo(() => (typeof children === 'string' ? children : value), [children, value]);
+  const label = useMemo(() => extractNodeText(children), [children]);
 
   useEffect(() => {
     return store.registerOption({ id: optionId, value, label, disabled, node: nodeRef.current });

@@ -284,33 +284,33 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   function reconcileActiveDescendant() {
     const currentActive = state.activeDescendantId;
 
-    // Multi-select: keep active if still navigable; else choose first visible navigable.
-    if (state.multiple) {
-      if (currentActive) {
-        const opt = state.options.get(currentActive);
-        const stillNavigable =
-          !!opt && !opt.disabled && state.visibleIds.has(currentActive);
+    // If current active exists but is invalid → clear it
+    if (currentActive) {
+      const opt = state.options.get(currentActive);
+      const stillNavigable =
+        !!opt && !opt.disabled && state.visibleIds.has(currentActive);
 
-        if (stillNavigable) return;
+      if (!stillNavigable) {
+        state.activeDescendantId = null;
       }
 
-      state.activeDescendantId = findFirstVisibleNavigableId();
       return;
     }
 
-    // Single-select: active should match the selected value (if any)
-    const selectedValue =
-      state.value === undefined || Array.isArray(state.value)
-        ? undefined
-        : state.value;
+    // No active yet
+    if (!state.multiple) {
+      const selectedValue =
+        state.value === undefined || Array.isArray(state.value)
+          ? undefined
+          : state.value;
 
-    if (selectedValue === undefined) {
+      if (selectedValue !== undefined) {
+        state.activeDescendantId =
+          state.valueToId.get(selectedValue) ?? null;
+      }
+    } else {
       state.activeDescendantId = null;
-      return;
     }
-
-    const selectedId = state.valueToId.get(selectedValue) ?? null;
-    state.activeDescendantId = selectedId;
   }
 
   const store: SelectSearchableStore = {

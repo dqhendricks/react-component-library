@@ -189,11 +189,22 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   `children` may be either:
   - A `ReactNode`, or
-  - A render function receiving: `value`, `values`, `isOpen`, `multiple`.
+  - A render function receiving:
+    - `selectedValues: string[]`
+    - `selectedLabels: string[]`
+    - `isOpen: boolean`
+    - `multiple: boolean`
+
+  `selectedValues` contains the currently selected option values.
+  `selectedLabels` contains the corresponding resolved labels from the registry.
 
   ### Styling
 
-  Exposes `data-part='trigger'` and `data-state='open | closed'` for easy custom styling.
+  Exposes:
+  - `data-part='trigger'`
+  - `data-state='open | closed'`
+
+  for easy custom styling.
 
 </details>
 

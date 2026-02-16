@@ -20,23 +20,22 @@ export function SelectSearchableTriggerValue({
   const store = useSelectSearchableStoreContext();
 
   const value = useSelectSearchableStore(store, (s) => s.value);
-  const nativeSelectEl = useSelectSearchableStore(store, (s) => s.nativeSelectEl);
 
-  const display = useMemo<React.ReactNode>(() => {
+  const display = useMemo(() => {
     if (Array.isArray(value)) {
-      if (!value.length) return placeholder;
-      return `${value.length} selected`;
+      if (value.length === 0) return placeholder;
+
+      const labels = value
+        .map(v => store.getOptionByValue(String(v))?.label)
+        .filter(Boolean) as string[];
+
+      return labels.length ? labels.join(', ') : '';
     }
 
     if (value == null || value === '') return placeholder;
 
-    const v = String(value);
-    const fromRegistry = store.getOptionByValue(v)?.label;
-    if (fromRegistry) return fromRegistry;
-
-    const idx = nativeSelectEl?.selectedIndex ?? -1;
-    return (idx >= 0 ? nativeSelectEl?.options[idx]?.text : undefined) ?? v;
-  }, [value, placeholder, store, nativeSelectEl]);
+    return store.getOptionByValue(String(value))?.label ?? '';
+  }, [value, placeholder, store]);
 
   const ourProps: React.ComponentPropsWithoutRef<'span'> = {
     className: styles.triggerValue,

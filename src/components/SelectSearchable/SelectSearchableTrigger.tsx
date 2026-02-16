@@ -11,15 +11,15 @@ import { assignRef } from '../utils/assignRef';
 import { useMergeAriaAttributes } from '../utils/useMergeAriaAttributes';
 
 export type SelectSearchableTriggerRenderArgs = {
-  value: string; // Use if not multiple
-  values: string[]; // Use if multiple
+  selectedValues: string[];
+  selectedLabels: string[];
   isOpen: boolean;
   multiple: boolean;
 };
 
 export type SelectSearchableTriggerProps = Omit<
   React.ComponentPropsWithoutRef<'button'>,
-  | 'id' 
+  | 'id'
   | 'children'
   | 'type'
   | 'aria-haspopup'
@@ -38,15 +38,18 @@ function toValues(v: SelectSearchableValue): string[] {
 }
 
 export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearchableTriggerProps>(
-  function SelectSearchableTrigger({
-    children,
-    'aria-label': ariaLabelProp,
-    'aria-labelledby': ariaLabelledByProp,
-    'aria-description': ariaDescriptionProp,
-    'aria-describedby': ariaDescribedByProp,
-    'aria-errormessage': ariaErrorMessageProp,
-    ...rest
-  }, ref) {
+  function SelectSearchableTrigger(
+    {
+      children,
+      'aria-label': ariaLabelProp,
+      'aria-labelledby': ariaLabelledByProp,
+      'aria-description': ariaDescriptionProp,
+      'aria-describedby': ariaDescribedByProp,
+      'aria-errormessage': ariaErrorMessageProp,
+      ...rest
+    },
+    ref,
+  ) {
     const store = useSelectSearchableStoreContext();
 
     const labelId = useSelectSearchableStore(store, (s) => s.labelId);
@@ -61,14 +64,16 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
     const hasError = useSelectSearchableStore(store, (s) => s.hasError);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
-    const ariaLabelRoot = useSelectSearchableStore(store, s => s.ariaLabel);
-    const ariaLabelledByRoot = useSelectSearchableStore(store, s => s.ariaLabelledBy);
-    const ariaDescriptionRoot = useSelectSearchableStore(store, s => s.ariaDescription);
-    const ariaDescribedByRoot = useSelectSearchableStore(store, s => s.ariaDescribedBy);
-    const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
-    const ariaInvalidBool = useSelectSearchableStore(store, s => s.ariaInvalidBool);
-    const ariaErrorMessageRoot = useSelectSearchableStore(store, s => s.ariaErrorMessage);
-    const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
+    const ariaLabelRoot = useSelectSearchableStore(store, (s) => s.ariaLabel);
+    const ariaLabelledByRoot = useSelectSearchableStore(store, (s) => s.ariaLabelledBy);
+    const ariaDescriptionRoot = useSelectSearchableStore(store, (s) => s.ariaDescription);
+    const ariaDescribedByRoot = useSelectSearchableStore(store, (s) => s.ariaDescribedBy);
+    const ariaInvalid = useSelectSearchableStore(store, (s) => s.ariaInvalid);
+    const ariaInvalidBool = useSelectSearchableStore(store, (s) => s.ariaInvalidBool);
+    const ariaErrorMessageRoot = useSelectSearchableStore(store, (s) => s.ariaErrorMessage);
+    const activeDescendantId =
+      useSelectSearchableStore(store, (s) => s.activeDescendantId) ?? undefined;
+
     const onKeyDown = useSelectNavigationKeyDown();
 
     const mergedRef = useCallback(
@@ -103,7 +108,9 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
       id: triggerId,
       type: 'button',
-      className: [styles.trigger, disabled ? styles.triggerDisabled : ''].filter(Boolean).join(' '),
+      className: [styles.trigger, disabled ? styles.triggerDisabled : '']
+        .filter(Boolean)
+        .join(' '),
       disabled,
       onClick: () => {
         if (disabled) return;
@@ -112,7 +119,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       role: hasSearch ? undefined : 'combobox',
       'aria-haspopup': 'listbox',
       'aria-expanded': open,
-      'aria-controls': open ? (hasSearch ? dropdownId : listboxId) : undefined, // only when open, to satisfy accessibility checkers
+      'aria-controls': open ? (hasSearch ? dropdownId : listboxId) : undefined,
       'aria-activedescendant': hasSearch ? undefined : activeDescendantId,
       'aria-invalid': hasSearch ? undefined : ariaInvalid,
       'aria-label': ariaLabelMerged,
@@ -124,25 +131,32 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
 
     const merged = mergeProps(rest, ourButtonProps);
 
-    const values = useMemo(() => toValues(valueUnion), [valueUnion]);
+    const selectedValues = useMemo(() => toValues(valueUnion), [valueUnion]);
+
+    const selectedLabels = useMemo(() => {
+      if (selectedValues.length === 0) return [];
+      return selectedValues
+        .map((v) => store.getOptionByValue(v)?.label)
+        .filter(Boolean) as string[];
+    }, [store, selectedValues]);
 
     const renderArgs = useMemo(
       () => ({
-        value: values[0] ?? '',
-        values,
+        selectedValues,
+        selectedLabels,
         isOpen: open,
         multiple,
       }),
-      [values, open, multiple],
+      [selectedValues, selectedLabels, open, multiple],
     );
 
-    const content = typeof children === 'function' ? children(renderArgs) : children;
+    const content =
+      typeof children === 'function' ? children(renderArgs) : children;
 
     return (
       <button
         {...merged}
         ref={mergedRef}
-        // Consumer styling hooks
         data-part='trigger'
         data-state={open ? 'open' : 'closed'}
         data-invalid={ariaInvalidBool ? 'true' : undefined}

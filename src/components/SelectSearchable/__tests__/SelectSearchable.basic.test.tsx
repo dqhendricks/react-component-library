@@ -16,13 +16,26 @@ describe('SelectSearchable (basic)', () => {
     renderBasic();
 
     expect(
-        screen.queryByRole('listbox'),
-        'listbox should not be accessible while closed',
+      screen.queryByRole('listbox'),
+      'listbox should not be accessible before opening',
     ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Select Person' }));
     expect(screen.getByRole('listbox')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Alice' })).toBeInTheDocument();
+  });
+
+  it('selecting an option updates trigger and closes listbox', async () => {
+    const user = userEvent.setup();
+    renderBasic();
+
+    const trigger = screen.getByRole('button', { name: 'Select Person' });
+
+    await user.click(trigger);
+    await user.click(screen.getByRole('option', { name: 'Alice' }));
+
+    expect(trigger).toHaveTextContent('Alice');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
   it('selecting an option updates trigger and fires onValueChange callback', async () => {
@@ -36,7 +49,6 @@ describe('SelectSearchable (basic)', () => {
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));
 
-    expect(trigger).toHaveTextContent('Alice');
     expect(onValueChange).toHaveBeenCalledWith('alice');
   });
 

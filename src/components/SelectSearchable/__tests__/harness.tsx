@@ -18,6 +18,7 @@ export function renderBasic(rootProps: RootProps = {}) {
         <SelectSearchable.OptionList>
           <SelectSearchable.Option value="alice">Alice</SelectSearchable.Option>
           <SelectSearchable.Option value="bob">Bob</SelectSearchable.Option>
+          <SelectSearchable.Option value="alex">Alex</SelectSearchable.Option>
         </SelectSearchable.OptionList>
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>

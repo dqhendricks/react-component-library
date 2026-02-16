@@ -14,7 +14,8 @@ const meta = {
       description: 'Child node of the trigger element.',
       table: {
         type: {
-          summary: 'React.ReactNode | (args: { value: string; values: string[]; isOpen: boolean; multiple: boolean; }) => React.ReactNode',
+          summary:
+            'React.ReactNode | (args: { selectedValues: string[]; selectedLabels: string[]; isOpen: boolean; multiple: boolean; }) => React.ReactNode',
         },
       },
     },
@@ -36,7 +37,7 @@ export const Default: Story = {
   args: { children: 'Children' },
   render: (args) => (
     <SelectSearchable.Trigger>
-      { args.children }
+      {args.children}
     </SelectSearchable.Trigger>
   ),
 };

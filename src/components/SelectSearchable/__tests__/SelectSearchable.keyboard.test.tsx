@@ -60,7 +60,7 @@ describe('SelectSearchable (keyboard)', () => {
     expect(trigger).toHaveTextContent('Bob');
   });
 
-  it('in multiple mode, Enter toggles selection and listbox stays open', async () => {
+    it('in multiple mode, Enter toggles selection on and off and listbox stays open', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
 
@@ -70,10 +70,25 @@ describe('SelectSearchable (keyboard)', () => {
 
     await user.click(trigger);
 
+    // Move to first option
     await user.keyboard('{ArrowDown}');
+
+    // First Enter → select "alice"
     await user.keyboard('{Enter}');
 
-    expect(onValueChange).toHaveBeenLastCalledWith(expect.arrayContaining(['alice']));
+    expect(onValueChange).toHaveBeenLastCalledWith(
+        expect.arrayContaining(['alice'])
+    );
+
     expect(screen.getByRole('listbox')).toBeInTheDocument();
-  });
+
+    // Second Enter → deselect "alice"
+    await user.keyboard('{Enter}');
+
+    expect(onValueChange).toHaveBeenLastCalledWith(
+        expect.not.arrayContaining(['alice'])
+    );
+
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+    });
 });

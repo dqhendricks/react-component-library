@@ -21,6 +21,8 @@ export function renderBasic(rootProps: RootProps = {}) {
           <SelectSearchable.Option value="alex">Alex</SelectSearchable.Option>
         </SelectSearchable.OptionList>
       </SelectSearchable.Dropdown>
+
+      <SelectSearchable.Error hideWhenValid>Error</SelectSearchable.Error>
     </SelectSearchable.Root>
   );
 }

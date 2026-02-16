@@ -270,16 +270,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     }
   }
 
-  function findFirstVisibleNavigableId(): string | null {
-    for (const id of state.orderedIds) {
-      if (!state.visibleIds.has(id)) continue;
-      const opt = state.options.get(id);
-      if (!opt || opt.disabled) continue;
-      return id;
-    }
-    return null;
-  }
-
   // ensures activeDescendentId stays valid after state changes
   function reconcileActiveDescendant() {
     const currentActive = state.activeDescendantId;

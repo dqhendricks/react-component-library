@@ -109,7 +109,7 @@ const PlaygroundComponent = (args: any) => {
         <SelectSearchable.Search placeholder="Search…" />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -162,7 +162,7 @@ export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProp
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option key={option.id} value={option.value}>
+          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -337,7 +337,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option key={option.id} value={option.value}>
+          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -363,7 +363,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -399,7 +399,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option key={option.id} value={option.value}>
+          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -426,7 +426,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -457,7 +457,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
     <SelectSearchable.Dropdown>
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option key={option.id} value={option.value}>
+          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -480,7 +480,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
       <SelectSearchable.Dropdown>
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -533,7 +533,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option key={option.id} value={option.value}>
+          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -575,7 +575,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -678,7 +678,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           />
           <SelectSearchable.OptionList>
             {options.map((option) => (
-              <SelectSearchable.Option key={option.id} value={option.value}>
+              <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
                 {option.label}
               </SelectSearchable.Option>
             ))}
@@ -771,7 +771,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
             <SelectSearchable.Search className='demoSelectSearchInput' placeholder='Search…' />
             <SelectSearchable.OptionList>
               {peopleOptions.map((o, i) => (
-                <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+                <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
                   {o.label}
                 </SelectSearchable.Option>
               ))}
@@ -829,7 +829,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
-              <SelectSearchable.Option key={option.id} value={option.value}>
+              <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
                 {option.label}
               </SelectSearchable.Option>
             ))}
@@ -871,7 +871,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
-              <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+              <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
                 {o.label}
               </SelectSearchable.Option>
             ))}
@@ -903,7 +903,7 @@ function FormikSelectSearchable({ name, label }: { name: string, label: string }
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
-              <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
+              <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
                 {o.label}
               </SelectSearchable.Option>
             ))}
@@ -968,7 +968,7 @@ export const FormikSelectSearchable = ({ name, label, options }: FormikSelectSea
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
-              <SelectSearchable.Option key={option.id} value={option.value}>
+              <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
                 {option.label}
               </SelectSearchable.Option>
             ))}

@@ -25,9 +25,9 @@ function renderWithCustomTrigger({
       <SelectSearchable.Dropdown>
         <SelectSearchable.Search placeholder="Search…" />
         <SelectSearchable.OptionList>
-          <SelectSearchable.Option value="alice">Alice</SelectSearchable.Option>
-          <SelectSearchable.Option value="bob">Bob</SelectSearchable.Option>
-          <SelectSearchable.Option value="alex">Alex</SelectSearchable.Option>
+          <SelectSearchable.Option itemId='1' value="alice">Alice</SelectSearchable.Option>
+          <SelectSearchable.Option itemId='2' value="bob">Bob</SelectSearchable.Option>
+          <SelectSearchable.Option itemId='3' value="alex">Alex</SelectSearchable.Option>
         </SelectSearchable.OptionList>
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>,

@@ -379,14 +379,16 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 <details>
   <summary>Details</summary>
 
-  It wraps a native `<li>` element and automatically registers itself with the Root for selection, keyboard navigation, and filtering.
+  It wraps a native `<li>` element and automatically participates in selection, keyboard navigation, ordering, and filtering within the `SelectSearchableOptionList`.
 
   ### Required props
 
+  - `itemId: string` – A stable, unique identifier for this option within the list. Used internally for registration and ARIA linking. This is **not** the DOM `id`.
   - `value: string` – The value committed to the control when this option is selected.
 
-  ### Controlled props (cannot be overridden):
+  ### Controlled props (cannot be overridden)
 
+  - `id`
   - `role`
   - `aria-selected`
   - `aria-disabled`
@@ -394,8 +396,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   - `hidden`
   - `ref`
 
-  The `id` is auto-generated unless explicitly provided.  
-  If you provide an `id`, it must be **stable and unique**.
+  The DOM `id` is generated automatically from the listbox and `itemId` to ensure uniqueness and correct `aria-activedescendant` behavior.
 
   ### Accessibility
 

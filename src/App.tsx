@@ -60,7 +60,6 @@ function App() {
         <p>SelectSearchable</p>
 
         <SelectSearchable.Root
-          style={{ maxWidth: 200 }}
           onValueChange={(val) => console.log(val)}
           multiple
         >
@@ -87,7 +86,7 @@ function App() {
 
             <SelectSearchable.OptionList>
               {options.map((o, i) => (
-                <SelectSearchable.Option key={i + o.label} value={o.label}>
+                <SelectSearchable.Option itemId={`${o.label} ${i}`} key={i + o.label} value={o.label}>
                   {o.label}
                 </SelectSearchable.Option>
               ))}

@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import checker from 'vite-plugin-checker';
 
 const config: StorybookConfig = {
   'stories': [
@@ -12,5 +13,14 @@ const config: StorybookConfig = {
     '@storybook/addon-docs'
   ],
   'framework': '@storybook/react-vite',
+  async viteFinal(viteConfig) {
+    viteConfig.plugins ??= [];
+    viteConfig.plugins.push(
+      checker({
+        typescript: { tsconfigPath: './tsconfig.app.json' }
+      }),
+    );
+    return viteConfig;
+  },
 };
 export default config;

@@ -9,6 +9,15 @@ const meta = {
   },
   tags: ['!dev'],
   argTypes: {
+    itemId: {
+      control: false,
+      description:
+        'Stable unique identifier for the option within the list.',
+      table: {
+        type: { summary: 'string' },
+        required: true,
+      },
+    },
     value: {
       control: false,
       description:
@@ -37,6 +46,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
+    itemId: 'testId',
     value: 'example',
   },
   render: (args) => <SelectSearchable.Option {...args} />,

@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { observeListboxMutations } from './observeListboxMutations';
 
 export type SelectSearchableValue = string | string[] | undefined;
 
@@ -8,7 +7,6 @@ type SelectSearchableOptionRecord = {
   value: string;
   label: string; // display / search string
   disabled?: boolean;
-  node: HTMLElement | null;
 };
 
 type State = {
@@ -45,11 +43,11 @@ type State = {
 
   // Derived
   visibleIds: Set<string>; // derived once per searchQuery/options change
-  orderedIds: string[]; // derived from DOM order (mutation observed)
+  orderedIds: string[]; // derived from option registration order
 
   // Elements
   triggerEl: HTMLElement | null;
-  dropdownEl: HTMLElement | null
+  dropdownEl: HTMLElement | null;
   optionListEl: HTMLElement | null;
   nativeSelectEl: HTMLSelectElement | null;
 
@@ -104,7 +102,7 @@ export type SelectSearchableStore = {
   setNativeSelectEl: (el: HTMLSelectElement | null) => void;
 
   // option registry
-  registerOption: (opt: SelectSearchableOptionRecord) => () => void;
+  registerOptions: (opts: SelectSearchableOptionRecord[]) => () => void;
 
   // queries/helpers
   getOptionByValue: (value: string) => SelectSearchableOptionRecord | undefined;
@@ -135,12 +133,9 @@ function recomputeVisibleIds(state: State) {
   const q = state.searchQuery;
 
   for (const [id, opt] of state.options) {
-    if (opt.disabled) continue; // usually still visible, but not navigable. flip if you want disabled visible
+    if (opt.disabled) continue;
     if (matchesSearch(q, opt.label)) next.add(id);
   }
-
-  // If you want disabled options to remain visible, do this instead:
-  // for (const [id, opt] of state.options) if (matchesSearch(q, opt.label)) next.add(id);
 
   state.visibleIds = next;
 }
@@ -153,8 +148,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   const listeners = new Set<Listener>();
 
   let commitValueFn: ((next: SelectSearchableValue) => void) | null = null;
-
-  let cleanupObserve: (() => void) | null = null;
 
   const state: State = {
     labelId: undefined,
@@ -205,42 +198,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     emit();
   }
 
-  function recomputeOrderFromDOM() {
-    const root = state.optionListEl;
-    if (!root) {
-      state.orderedIds = [];
-      return;
-    }
-
-    const ids = Array.from(root.querySelectorAll<HTMLElement>('[data-option-id]'))
-      .map((el) => el.dataset.optionId)
-      .filter((id): id is string => !!id);
-
-    state.orderedIds = ids;
-  }
-
-  function startObservingListbox(el: HTMLElement | null) {
-    cleanupObserve?.();
-    cleanupObserve = null;
-
-    if (!el) return;
-
-    cleanupObserve = observeListboxMutations(el, () => {
-      setState(() => {
-        recomputeOrderFromDOM();
-        // active might point at removed node id
-        if (state.activeDescendantId && !state.options.has(state.activeDescendantId)) {
-          state.activeDescendantId = null;
-        }
-      });
-    });
-
-    // initial
-    setState(() => {
-      recomputeOrderFromDOM();
-    });
-  }
-
   function isNavigable(id: string) {
     const opt = state.options.get(id);
     if (!opt) return false;
@@ -264,7 +221,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
       setState(() => {
         state.activeDescendantId = id;
-        state.options.get(id)?.node?.scrollIntoView?.({ block: 'nearest' });
       });
       return;
     }
@@ -274,7 +230,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   function reconcileActiveDescendant() {
     const currentActive = state.activeDescendantId;
 
-    // If current active exists but is invalid → clear it
+    // If current active exists but is invalid clear it
     if (currentActive) {
       const opt = state.options.get(currentActive);
       const stillNavigable =
@@ -385,7 +341,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.searchQuery = q;
         recomputeVisibleIds(state);
 
-        // If active becomes non-visible, clear (caller may choose to moveActive(1))
+        // If active becomes non-visible, clear
         if (state.activeDescendantId && !state.visibleIds.has(state.activeDescendantId)) {
           state.activeDescendantId = null;
         }
@@ -408,7 +364,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.optionListEl = el;
       });
-      startObservingListbox(el);
     },
 
     setNativeSelectEl(el) {
@@ -417,20 +372,35 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       });
     },
 
-    registerOption(opt) {
+    registerOptions(opts) {
       setState(() => {
-        state.options.set(opt.id, opt);
-        state.valueToId.set(opt.value, opt.id);
+        state.options.clear();
+        state.valueToId.clear();
+
+        state.orderedIds = opts.map((o) => o.id);
+
+        for (const opt of opts) {
+          state.options.set(opt.id, opt);
+          // if duplicate values exist, last one wins
+          state.valueToId.set(opt.value, opt.id);
+        }
+
         recomputeVisibleIds(state);
+
+        if (state.activeDescendantId && !state.options.has(state.activeDescendantId)) {
+          state.activeDescendantId = null;
+        }
+
+        reconcileActiveDescendant();
       });
 
       return () => {
         setState(() => {
-          state.options.delete(opt.id);
-          state.valueToId.delete(opt.value);
-          state.visibleIds.delete(opt.id);
-          state.orderedIds = state.orderedIds.filter((x) => x !== opt.id);
-          if (state.activeDescendantId === opt.id) state.activeDescendantId = null;
+          state.options.clear();
+          state.valueToId.clear();
+          state.visibleIds.clear();
+          state.orderedIds = [];
+          if (state.activeDescendantId) state.activeDescendantId = null;
         });
       };
     },

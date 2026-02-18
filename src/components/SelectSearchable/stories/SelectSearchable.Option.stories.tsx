@@ -15,14 +15,15 @@ const meta = {
         'Stable unique identifier for the option within the list.',
       table: {
         type: { summary: 'string' },
-        required: true,
       },
+      type: { name: 'string', required: true },
     },
     value: {
       control: false,
       description:
         'Value committed to the control when this option is selected.',
       table: { type: { summary: 'string' } },
+      type: { name: 'string', required: true },
     },
     disabled: {
       control: false,

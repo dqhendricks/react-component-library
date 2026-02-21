@@ -993,11 +993,8 @@ interface FormValues {
 export const FormikForm = ({ peopleOptions }: { peopleOptions: SelectSearchableOptions[] }) => {
   const formik = useFormik<FormValues>({
     initialValues: { person: '' },
-    validate: (values) =>
-      !values.person ? { person: 'Required' } : {},
-    onSubmit: (values) => {
-      console.log('submitted', values);
-    },
+    validate: (values) => !values.person ? { person: 'Required' } : {},
+    onSubmit: (values) => console.log('submitted', values),
   });
 
   return (
@@ -1018,11 +1015,8 @@ export const FormikForm = ({ peopleOptions }: { peopleOptions: SelectSearchableO
 
     const formik = useFormik<FormValues>({
       initialValues: { person: '' },
-      validate: (values) =>
-        !values.person ? { person: 'Required' } : {},
-      onSubmit: (values) => {
-        console.log('submitted', values);
-      },
+      validate: (values) => !values.person ? { person: 'Required' } : {},
+      onSubmit: (values) => console.log('submitted', values),
     });
 
     return (

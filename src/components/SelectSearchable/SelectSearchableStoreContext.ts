@@ -128,16 +128,18 @@ function matchesSearch(query: string, label: string) {
   return normalize(label).includes(q);
 }
 
-function recomputeVisibleIds(state: State) {
+function computeVisibleIds(
+  options: Map<string, SelectSearchableOptionRecord>,
+  searchQuery: string,
+): Set<string> {
   const next = new Set<string>();
-  const q = state.searchQuery;
 
-  for (const [id, opt] of state.options) {
+  for (const [id, opt] of options) {
     if (opt.disabled) continue;
-    if (matchesSearch(q, opt.label)) next.add(id);
+    if (matchesSearch(searchQuery, opt.label)) next.add(id);
   }
 
-  state.visibleIds = next;
+  return next;
 }
 
 function ariaInvalidToBool(value: React.AriaAttributes['aria-invalid']): boolean {
@@ -339,7 +341,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setSearchQuery(q) {
       setState(() => {
         state.searchQuery = q;
-        recomputeVisibleIds(state);
+        state.visibleIds = computeVisibleIds(state.options, q);
 
         // If active becomes non-visible, clear
         if (state.activeDescendantId && !state.visibleIds.has(state.activeDescendantId)) {
@@ -374,20 +376,22 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     registerOptions(opts) {
       setState(() => {
-        state.options.clear();
-        state.valueToId.clear();
-
-        state.orderedIds = opts.map((o) => o.id);
+        const nextOptions = new Map<string, SelectSearchableOptionRecord>();
+        const nextValueToId = new Map<string, string>();
+        const nextOrderedIds = opts.map((o) => o.id);
 
         for (const opt of opts) {
-          state.options.set(opt.id, opt);
+          nextOptions.set(opt.id, opt);
           // if duplicate values exist, last one wins
-          state.valueToId.set(opt.value, opt.id);
+          nextValueToId.set(opt.value, opt.id);
         }
 
-        recomputeVisibleIds(state);
+        state.options = nextOptions;
+        state.valueToId = nextValueToId;
+        state.orderedIds = nextOrderedIds;
+        state.visibleIds = computeVisibleIds(nextOptions, state.searchQuery);
 
-        if (state.activeDescendantId && !state.options.has(state.activeDescendantId)) {
+        if (state.activeDescendantId && !nextOptions.has(state.activeDescendantId)) {
           state.activeDescendantId = null;
         }
 
@@ -396,9 +400,9 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
       return () => {
         setState(() => {
-          state.options.clear();
-          state.valueToId.clear();
-          state.visibleIds.clear();
+          state.options = new Map();
+          state.valueToId = new Map();
+          state.visibleIds = new Set();
           state.orderedIds = [];
           if (state.activeDescendantId) state.activeDescendantId = null;
         });

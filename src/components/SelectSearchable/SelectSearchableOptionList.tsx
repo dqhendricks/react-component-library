@@ -46,6 +46,25 @@ function isOptionElement(node: unknown): node is OptionElement {
   return React.isValidElement(node) && node.type === SelectSearchableOption;
 }
 
+function isCategoryHeaderElement(node: unknown): node is CategoryHeaderElement {
+  return React.isValidElement(node) && node.type === SelectSearchableOptionCategoryHeader;
+}
+
+function isDividerElement(node: unknown): node is DividerElement {
+  return React.isValidElement(node) && node.type === SelectSearchableOptionDivider;
+}
+
+type RowType = 'option' | 'header' | 'divider';
+type ParsedRow = {
+  type: RowType;
+  index: number;
+  element: OptionListChild;
+  domId?: string;
+  label?: string;
+  value?: string;
+  disabled?: boolean;
+};
+
 export function SelectSearchableOptionList({ children, ...userProps }: SelectSearchableOptionListProps) {
   const store = useSelectSearchableStoreContext();
 
@@ -55,21 +74,99 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const activeDescendantId = useSelectSearchableStore(store, (s) => s.activeDescendantId);
   const optionListEl = useSelectSearchableStore(store, (s) => s.optionListEl);
+  const visibleIds = useSelectSearchableStore(store, (s) => s.visibleIds);
 
   const hiddenList = !open || disabled;
 
-  const options: ParsedOption[] = useMemo(() => {
-    const arr = React.Children.toArray(children);
+  const rows: ParsedRow[] = useMemo(() => {
+    const arr = React.Children.toArray(children) as OptionListChild[];
 
-    return arr
-      .filter(isOptionElement)
-      .map((el) => {
+    return arr.flatMap((el, index) => {
+      if (isOptionElement(el)) {
         const props = el.props;
         const domId = makeDomOptionId(listboxId, props.itemId);
         const label = extractNodeText(props.children);
-        return { domId, props, label };
-      });
+        return {
+          type: 'option',
+          index,
+          element: el,
+          domId,
+          label,
+          value: props.value,
+          disabled: props.disabled,
+        };
+      }
+
+      if (isCategoryHeaderElement(el)) {
+        return { type: 'header', index, element: el };
+      }
+
+      if (isDividerElement(el)) {
+        return { type: 'divider', index, element: el };
+      }
+
+      return [];
+    });
   }, [children, listboxId]);
+
+  const options: ParsedOption[] = useMemo(
+    () =>
+      rows
+        .filter((row): row is ParsedRow & { type: 'option'; domId: string; label: string; value: string } => row.type === 'option')
+        .map((row) => ({
+          domId: row.domId,
+          props: row.element.props as SelectSearchableOptionProps,
+          label: row.label,
+        })),
+    [rows],
+  );
+
+  const renderedRows = useMemo(() => {
+    const headerHasVisibleOption = new Set<number>();
+
+    let currentHeaderRowIndex: number | null = null;
+    for (const row of rows) {
+      if (row.type === 'header') {
+        currentHeaderRowIndex = row.index;
+        continue;
+      }
+      if (row.type !== 'option') continue;
+      if (!row.domId || !visibleIds.has(row.domId)) continue;
+      if (currentHeaderRowIndex != null) headerHasVisibleOption.add(currentHeaderRowIndex);
+    }
+
+    const provisionalVisible = new Map<number, boolean>();
+    for (const row of rows) {
+      if (row.type === 'option') {
+        provisionalVisible.set(row.index, !!row.domId && visibleIds.has(row.domId));
+      } else if (row.type === 'header') {
+        provisionalVisible.set(row.index, headerHasVisibleOption.has(row.index));
+      } else {
+        // Divider candidates are normalized in the next step.
+        provisionalVisible.set(row.index, true);
+      }
+    }
+
+    const visibleRows = rows.filter((row) => provisionalVisible.get(row.index));
+    const visibleIndexByRow = new Map<number, number>();
+    visibleRows.forEach((row, i) => visibleIndexByRow.set(row.index, i));
+
+    return rows.map((row) => {
+      if (row.type === 'option') return row.element;
+
+      if (row.type === 'header') {
+        return provisionalVisible.get(row.index) ? row.element : null;
+      }
+
+      const visiblePosition = visibleIndexByRow.get(row.index);
+      if (visiblePosition == null) return null;
+
+      const prev = visibleRows[visiblePosition - 1];
+      const next = visibleRows[visiblePosition + 1];
+      const keepDivider = prev?.type === 'option' && next?.type === 'option';
+      return keepDivider ? row.element : null;
+    });
+  }, [rows, visibleIds]);
 
   // Batch register all selectable options (order + labels + disabled metadata).
   useLayoutEffect(() => {
@@ -107,7 +204,7 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
 
   return (
     <ul {...merged} ref={store.setOptionListEl} data-part="list">
-      {children}
+      {renderedRows}
     </ul>
   );
 }

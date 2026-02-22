@@ -7,6 +7,8 @@ import { SelectSearchableDropdown } from './SelectSearchableDropdown';
 import { SelectSearchableSearch } from './SelectSearchableSearch';
 import { SelectSearchableOptionList } from './SelectSearchableOptionList';
 import { SelectSearchableOption } from './SelectSearchableOption';
+import { SelectSearchableOptionCategoryHeader } from './SelectSearchableOptionCategoryHeader';
+import { SelectSearchableOptionDivider } from './SelectSearchableOptionDivider';
 
 export type { SelectSearchableValue } from './SelectSearchableStoreContext';
 
@@ -20,4 +22,6 @@ export const SelectSearchable = {
     Search: SelectSearchableSearch,
     OptionList: SelectSearchableOptionList,
     Option: SelectSearchableOption,
+    OptionCategoryHeader: SelectSearchableOptionCategoryHeader,
+    OptionDivider: SelectSearchableOptionDivider,
 };

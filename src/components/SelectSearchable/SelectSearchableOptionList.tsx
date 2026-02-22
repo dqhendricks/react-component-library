@@ -7,20 +7,33 @@ import {
 import { mergeProps } from '../utils/mergeProps';
 import { extractNodeText } from '../utils/extractNodeText';
 import { SelectSearchableOption, type SelectSearchableOptionProps } from './SelectSearchableOption';
+import {
+  SelectSearchableOptionCategoryHeader,
+  type SelectSearchableOptionCategoryHeaderProps,
+} from './SelectSearchableOptionCategoryHeader';
+import {
+  SelectSearchableOptionDivider,
+  type SelectSearchableOptionDividerProps,
+} from './SelectSearchableOptionDivider';
 import { makeDomOptionId } from '../utils/makeDomOptionId';
 
 type UlProps = React.ComponentPropsWithoutRef<'ul'>;
 
-// Only allow Option children
-type OptionChildren =
-  | React.ReactElement<SelectSearchableOptionProps, typeof SelectSearchableOption>
-  | Array<React.ReactElement<SelectSearchableOptionProps, typeof SelectSearchableOption>>;
+type OptionElement = React.ReactElement<SelectSearchableOptionProps, typeof SelectSearchableOption>;
+type CategoryHeaderElement = React.ReactElement<
+  SelectSearchableOptionCategoryHeaderProps,
+  typeof SelectSearchableOptionCategoryHeader
+>;
+type DividerElement = React.ReactElement<SelectSearchableOptionDividerProps, typeof SelectSearchableOptionDivider>;
+type OptionListChild = OptionElement | CategoryHeaderElement | DividerElement;
+
+type OptionListChildren = OptionListChild | OptionListChild[];
 
 export type SelectSearchableOptionListProps = Omit<
   UlProps,
   'id' | 'role' | 'ref' | 'aria-hidden' | 'aria-multiselectable' | 'children'
 > & {
-  children: OptionChildren;
+  children: OptionListChildren;
 };
 
 type ParsedOption = {
@@ -28,6 +41,10 @@ type ParsedOption = {
   props: SelectSearchableOptionProps;
   label: string;
 };
+
+function isOptionElement(node: unknown): node is OptionElement {
+  return React.isValidElement(node) && node.type === SelectSearchableOption;
+}
 
 export function SelectSearchableOptionList({ children, ...userProps }: SelectSearchableOptionListProps) {
   const store = useSelectSearchableStoreContext();
@@ -42,17 +59,19 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
   const hiddenList = !open || disabled;
 
   const options: ParsedOption[] = useMemo(() => {
-    const arr = Array.isArray(children) ? children : [children];
+    const arr = React.Children.toArray(children);
 
-    return arr.map((el) => {
-      const props = el.props;
-      const domId = makeDomOptionId(listboxId, props.itemId);
-      const label = extractNodeText(props.children);
-      return { domId, props, label };
-    });
+    return arr
+      .filter(isOptionElement)
+      .map((el) => {
+        const props = el.props;
+        const domId = makeDomOptionId(listboxId, props.itemId);
+        const label = extractNodeText(props.children);
+        return { domId, props, label };
+      });
   }, [children, listboxId]);
 
-  // Batch register all options (order + labels + disabled metadata).
+  // Batch register all selectable options (order + labels + disabled metadata).
   useLayoutEffect(() => {
     return store.registerOptions(
       options.map((o) => ({

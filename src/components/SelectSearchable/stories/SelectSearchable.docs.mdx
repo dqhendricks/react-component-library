@@ -15,7 +15,7 @@ selection, custom triggers, and large option sets.
 
 <Canvas of={RootStories.Playground} />
 
-Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [TriggerValue](#triggervalue), [Dropdown](#dropdown), [OptionList](#optionlist), [Option](#option)
+Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [TriggerValue](#triggervalue), [Dropdown](#dropdown), [OptionList](#optionlist), [Option](#option), [OptionCategoryHeader](#optioncategoryheader), [OptionDivider](#optiondivider)
 
 <a id="root" />
 ## SelectSearchable.Root
@@ -430,3 +430,85 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 </details>
 
 <Controls of={OptionStories.Default} />
+
+
+<a id="optioncategoryheader" />
+## SelectSearchable.OptionCategoryHeader
+
+<div className="topLink">
+  [Back to top](#top)
+</div>
+
+**SelectSearchable.OptionCategoryHeader** renders a non-interactive category header row within the OptionList.
+
+<details>
+  <summary>Details</summary>
+
+  It wraps a native `<li>` element and is intended for visual grouping of related options.
+
+  ### Controlled props (cannot be overridden)
+
+  - `role`
+  - `aria-hidden`
+  - `hidden`
+
+  The header is presentation-only and is not selectable.
+
+  ### Accessibility
+
+  - Uses `role="presentation"` so it does not participate as an option in listbox semantics.
+  - It is excluded from selection, active-descendant navigation, and option registration.
+
+  No manual ARIA wiring is required.
+
+  ### Behavior
+
+  - Automatically hides when no visible options remain in its section after filtering.
+  - Serves as a visual grouping primitive for flat OptionList content.
+
+  ### Styling
+
+  Exposes `data-part='option-category-header'` for easy custom styling.
+
+</details>
+
+
+<a id="optiondivider" />
+## SelectSearchable.OptionDivider
+
+<div className="topLink">
+  [Back to top](#top)
+</div>
+
+**SelectSearchable.OptionDivider** renders a non-interactive separator row within the OptionList.
+
+<details>
+  <summary>Details</summary>
+
+  It wraps a native `<li>` element and is intended to visually separate blocks of options.
+
+  ### Controlled props (cannot be overridden)
+
+  - `role`
+  - `aria-hidden`
+  - `hidden`
+
+  The divider is presentation-only and is not selectable.
+
+  ### Accessibility
+
+  - Uses `role="separator"` with `aria-orientation="horizontal"`.
+  - It is excluded from selection, active-descendant navigation, and option registration.
+
+  No manual ARIA wiring is required.
+
+  ### Behavior
+
+  - Automatically hides when it does not separate two visible options (for example: at list edges, stacked with other dividers, or adjacent to headers).
+  - Remains a purely visual structure element while options retain listbox semantics.
+
+  ### Styling
+
+  Exposes `data-part='option-divider'` for easy custom styling.
+
+</details>

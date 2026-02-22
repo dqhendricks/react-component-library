@@ -882,6 +882,71 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
   ),
 };
 
+export const HeadersAndDividers: Story = {
+  parameters: {
+    docs: {
+      source: {
+        language: 'tsx',
+        code: `
+import { SelectSearchable } from './SelectSearchable';
+import { Chevron } from './Chevron';
+
+export const MySelectSearchable = () => {
+  return (
+    <SelectSearchable.Root>
+      <SelectSearchable.Label>Select Food</SelectSearchable.Label>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
+        <Chevron />
+      </SelectSearchable.Trigger>
+
+      <SelectSearchable.Dropdown>
+        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.OptionList>
+          <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option itemId='apple' value='apple'>Apple</SelectSearchable.Option>
+          <SelectSearchable.Option itemId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
+
+          <SelectSearchable.OptionCategoryHeader>Vegetables</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option itemId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
+          <SelectSearchable.Option itemId='beet' value='beet'>Beet</SelectSearchable.Option>
+          <SelectSearchable.OptionDivider />
+          <SelectSearchable.Option itemId='carrot' value='carrot'>Carrot</SelectSearchable.Option>
+        </SelectSearchable.OptionList>
+      </SelectSearchable.Dropdown>
+    </SelectSearchable.Root>
+  );
+};
+        `.trim(),
+      },
+    },
+  },
+  render: () => (
+    <SelectSearchable.Root>
+      <SelectSearchable.Label>Select Food</SelectSearchable.Label>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
+        <Chevron />
+      </SelectSearchable.Trigger>
+
+      <SelectSearchable.Dropdown>
+        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.OptionList>
+          <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option itemId='apple' value='apple'>Apple</SelectSearchable.Option>
+          <SelectSearchable.Option itemId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
+
+          <SelectSearchable.OptionCategoryHeader>Vegetables</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option itemId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
+          <SelectSearchable.Option itemId='beet' value='beet'>Beet</SelectSearchable.Option>
+          <SelectSearchable.OptionDivider />
+          <SelectSearchable.Option itemId='carrot' value='carrot'>Carrot</SelectSearchable.Option>
+        </SelectSearchable.OptionList>
+      </SelectSearchable.Dropdown>
+    </SelectSearchable.Root>
+  ),
+};
+
 function FormikSelectSearchable({ name, label }: { name: string, label: string }) {
   const [field, meta] = useField<string>(name);
   const isInvalid = Boolean(meta.touched && meta.error);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   useFormik,
@@ -945,6 +945,73 @@ export const MySelectSearchable = () => {
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>
   ),
+};
+
+const LargeDataSet5000Component = () => {
+  const largeOptions = useMemo(() => generatePeople(5000), []);
+
+  return (
+    <SelectSearchable.Root>
+      <SelectSearchable.Label>Select Person</SelectSearchable.Label>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
+        <Chevron />
+      </SelectSearchable.Trigger>
+
+      <SelectSearchable.Dropdown>
+        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.OptionList>
+          {largeOptions.map((o, i) => (
+            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+              {o.label}
+            </SelectSearchable.Option>
+          ))}
+        </SelectSearchable.OptionList>
+      </SelectSearchable.Dropdown>
+    </SelectSearchable.Root>
+  );
+};
+
+export const LargeDataSet5000: Story = {
+  parameters: {
+    docs: {
+      source: {
+        language: 'tsx',
+        code: `
+import { useMemo } from 'react';
+import { SelectSearchable } from './SelectSearchable';
+import { generatePeople } from './generatePeople';
+import { Chevron } from './Chevron';
+
+const MySelectSearchable = () => {
+  const options = useMemo(() => generatePeople(5000), []);
+
+  return (
+    <SelectSearchable.Root>
+      <SelectSearchable.Label>Select Person</SelectSearchable.Label>
+      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
+        <SelectSearchable.TriggerValue placeholder='Choose…' />
+        <Chevron />
+      </SelectSearchable.Trigger>
+
+      <SelectSearchable.Dropdown>
+        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.OptionList>
+          {options.map((option, i) => (
+            <SelectSearchable.Option itemId={\`\${option.label}-\${i}\`} key={\`\${option.label}-\${i}\`} value={option.label}>
+              {option.label}
+            </SelectSearchable.Option>
+          ))}
+        </SelectSearchable.OptionList>
+      </SelectSearchable.Dropdown>
+    </SelectSearchable.Root>
+  );
+};
+        `.trim(),
+      },
+    },
+  },
+  render: () => <LargeDataSet5000Component />,
 };
 
 function FormikSelectSearchable({ name, label }: { name: string, label: string }) {

@@ -27,13 +27,14 @@ function renderWithRows() {
           <SelectSearchable.Option itemId="apricot" value="apricot">
             Apricot
           </SelectSearchable.Option>
-          <SelectSearchable.OptionDivider data-testid="div-stacked-1" />
-          <SelectSearchable.OptionDivider data-testid="div-stacked-2" />
+          <SelectSearchable.OptionDivider data-testid="div-before-veg-header-direct" />
 
           <SelectSearchable.OptionCategoryHeader data-testid="hdr-veg">
             Vegetables
           </SelectSearchable.OptionCategoryHeader>
           <SelectSearchable.OptionDivider data-testid="div-after-veg-header" />
+          <SelectSearchable.OptionDivider data-testid="div-stacked-1" />
+          <SelectSearchable.OptionDivider data-testid="div-stacked-2" />
           <SelectSearchable.Option itemId="broccoli" value="broccoli">
             Broccoli
           </SelectSearchable.Option>
@@ -76,6 +77,7 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
     expect(screen.getByTestId('div-veg-between')).toBeInTheDocument();
 
     expect(screen.queryByTestId('div-leading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('div-before-veg-header-direct')).toBeInTheDocument();
     expect(screen.queryByTestId('div-stacked-1')).not.toBeInTheDocument();
     expect(screen.queryByTestId('div-stacked-2')).not.toBeInTheDocument();
     expect(screen.queryByTestId('div-after-veg-header')).not.toBeInTheDocument();
@@ -98,6 +100,7 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
 
     expect(screen.getByTestId('hdr-fruit')).toBeInTheDocument();
     expect(screen.queryByTestId('hdr-veg')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('div-before-veg-header-direct')).not.toBeInTheDocument();
     expect(screen.queryByTestId('hdr-empty')).not.toBeInTheDocument();
   });
 
@@ -115,6 +118,7 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
     await user.clear(search);
     await user.type(search, 'bro');
     expect(screen.queryByTestId('div-fruit-between')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('div-before-veg-header-direct')).not.toBeInTheDocument();
     expect(screen.queryByTestId('div-veg-between')).not.toBeInTheDocument();
     expect(screen.queryByTestId('div-after-veg-header')).not.toBeInTheDocument();
     expect(screen.queryByRole('separator')).not.toBeInTheDocument();

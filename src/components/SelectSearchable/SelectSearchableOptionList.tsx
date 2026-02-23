@@ -121,7 +121,16 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
     [rows],
   );
 
+  const hasSpecialRows = useMemo(
+    () => rows.some((row) => row.type !== 'option'),
+    [rows],
+  );
+
   const renderedRows = useMemo(() => {
+    if (!hasSpecialRows) {
+      return rows.map((row) => row.element);
+    }
+
     const headerHasVisibleOption = new Set<number>();
 
     let currentHeaderRowIndex: number | null = null;
@@ -151,11 +160,32 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
     const visibleIndexByRow = new Map<number, number>();
     visibleRows.forEach((row, i) => visibleIndexByRow.set(row.index, i));
 
-    return rows.map((row) => {
+    const hasVisibleNonDividerBefore = (index: number) => {
+      for (const candidate of rows) {
+        if (candidate.index >= index) break;
+        if (!provisionalVisible.get(candidate.index)) continue;
+        if (candidate.type === 'divider') continue;
+        return true;
+      }
+      return false;
+    };
+
+    return rows.map((row, rowPosition) => {
       if (row.type === 'option') return row.element;
 
       if (row.type === 'header') {
         return provisionalVisible.get(row.index) ? row.element : null;
+      }
+
+      if (visibleRows[0]?.index === row.index) return null;
+
+      // Structural rule: a divider directly before a header follows that header's visibility.
+      const nextAuthored = rows[rowPosition + 1];
+      const prevAuthored = rows[rowPosition - 1];
+      if (nextAuthored?.type === 'header') {
+        if (prevAuthored?.type !== 'option') return null;
+        if (!hasVisibleNonDividerBefore(row.index)) return null;
+        return provisionalVisible.get(nextAuthored.index) ? row.element : null;
       }
 
       const visiblePosition = visibleIndexByRow.get(row.index);
@@ -166,7 +196,7 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
       const keepDivider = prev?.type === 'option' && next?.type === 'option';
       return keepDivider ? row.element : null;
     });
-  }, [rows, visibleIds]);
+  }, [rows, visibleIds, hasSpecialRows]);
 
   // Batch register all selectable options (order + labels + disabled metadata).
   useLayoutEffect(() => {

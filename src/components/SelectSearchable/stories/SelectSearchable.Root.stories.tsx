@@ -906,7 +906,7 @@ export const MySelectSearchable = () => {
           <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
           <SelectSearchable.Option itemId='apple' value='apple'>Apple</SelectSearchable.Option>
           <SelectSearchable.Option itemId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
-
+          <SelectSearchable.OptionDivider />
           <SelectSearchable.OptionCategoryHeader>Vegetables</SelectSearchable.OptionCategoryHeader>
           <SelectSearchable.Option itemId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
           <SelectSearchable.Option itemId='beet' value='beet'>Beet</SelectSearchable.Option>
@@ -935,7 +935,7 @@ export const MySelectSearchable = () => {
           <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
           <SelectSearchable.Option itemId='apple' value='apple'>Apple</SelectSearchable.Option>
           <SelectSearchable.Option itemId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
-
+          <SelectSearchable.OptionDivider />
           <SelectSearchable.OptionCategoryHeader>Vegetables</SelectSearchable.OptionCategoryHeader>
           <SelectSearchable.Option itemId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
           <SelectSearchable.Option itemId='beet' value='beet'>Beet</SelectSearchable.Option>

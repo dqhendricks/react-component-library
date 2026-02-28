@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import {
   useFormik,
@@ -10,6 +10,7 @@ import { SelectSearchable, type SelectSearchableValue } from '..';
 import { generatePeople } from '../../../storybook/utils/generatePeople';
 
 const peopleOptions = generatePeople(50);
+const largeOptions = generatePeople(5000);
 
 /* Helper components */
 
@@ -591,11 +592,19 @@ export const StylingExamples: Story = {
       source: {
         language: 'tsx',
         code: `
+import { useState } from 'react';
 import { SelectSearchable } from './SelectSearchable';
+import type { SelectSearchableValue } from './SelectSearchable';
 import { Chevron } from './Chevron';
 import type { MySelectSearchableProps } from './types';
 
 export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) => {
+  const [touched, setTouched] = useState(false);
+  const [value, setValue] = useState<SelectSearchableValue>();
+
+  const hasValue = Array.isArray(value) ? value.length > 0 : !!value;
+  const error = touched && !hasValue;
+
   <>
     <style>
       {\`
@@ -606,10 +615,6 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
 
         /* Styling with 'part' styling hooks */
         [data-part='trigger'] {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
           padding: 8px 10px;
           border-radius: 8px;
           border: 1px solid rgba(0,0,0,0.25);
@@ -625,8 +630,12 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           background: rgba(0,0,0,0.02);
         }
         .demoSelect[data-state='open'] {
-          background: rgba(0,0,0,0.06);
+          background: rgba(0,0,128,0.08);
           border-color: rgba(0,0,0,0.5);
+        }
+        .demoSelect[data-invalid] {
+          background: rgba(255,0,0,0.08);
+          border-color: rgba(255,0,0,0.5);
         }
 
         /* Styling within the portalled dropdown using styling hooks */
@@ -636,12 +645,12 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
         }
 
         .demoSelectDropdown [data-part='option'][data-active] {
-          outline: 2px solid rgba(0,0,0,0.35);
-          background: rgba(0,0,255,0.06);
+          background: rgba(0,0,255,0.04);
         }
 
         .demoSelectDropdown [data-part='option'][data-selected] {
-          background: rgba(0,0,255,0.08);
+          background: rgba(0,0,255,0.1);
+          outline: 2px solid rgba(0,0,0,0.35);
         }
 
         /* Styling a sub component using className only */
@@ -660,8 +669,12 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
     </style>
 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} class='demoSelectContainer'>
-      <SelectSearchable.Root aria-invalid={!!error}>
-        <SelectSearchable.Label>Select Person</SelectSearchable.Label>
+      <SelectSearchable.Root
+        aria-invalid={error} // Also adds data-invalid styling hook to sub components
+        onValueChange={(val) => setValue(val)}
+        onBlur={() => setTouched(true)}
+      >
+        <SelectSearchable.Label>Select Person*</SelectSearchable.Label>
         <SelectSearchable.Trigger className='demoSelect'>
           <SelectSearchable.TriggerValue
             // Inline styling of a sub component
@@ -684,6 +697,8 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
             ))}
           </SelectSearchable.OptionList>
         </SelectSearchable.Dropdown>
+
+        <SelectSearchable.Error hideWhenValid>Required</SelectSearchable.Error>
       </SelectSearchable.Root>
     </div>
   </>
@@ -692,8 +707,15 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
       },
     },
   },
-  render: () => (
-    <>
+  render: () => {
+    const [touched, setTouched] = useState(false);
+    const [value, setValue] = useState<SelectSearchableValue>();
+
+    const hasValue = Array.isArray(value) ? value.length > 0 : !!value;
+    const invalid = touched && !hasValue;
+
+    return (
+      <>
       <style>
         {`
           /* Styling Trigger with className */
@@ -703,10 +725,6 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
 
           /* Styling with 'part' styling hooks */
           [data-part='trigger'] {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             padding: 8px 10px;
             border-radius: 8px;
             border: 1px solid rgba(0,0,0,0.25);
@@ -722,8 +740,12 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
             background: rgba(0,0,0,0.02);
           }
           .demoSelect[data-state='open'] {
-            background: rgba(0,0,0,0.06);
+            background: rgba(0,0,128,0.08);
             border-color: rgba(0,0,0,0.5);
+          }
+          .demoSelect[data-invalid] {
+            background: rgba(255,0,0,0.08);
+            border-color: rgba(255,0,0,0.5);
           }
 
           /* Styling within the portalled dropdown using styling hooks */
@@ -733,12 +755,12 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           }
 
           .demoSelectDropdown [data-part='option'][data-active] {
-            outline: 2px solid rgba(0,0,0,0.35);
-            background: rgba(0,0,255,0.06);
+            background: rgba(0,0,255,0.04);
           }
 
           .demoSelectDropdown [data-part='option'][data-selected] {
-            background: rgba(0,0,255,0.08);
+            background: rgba(0,0,255,0.1);
+            outline: 2px solid rgba(0,0,0,0.35);
           }
 
           /* Styling a sub component using className only */
@@ -756,8 +778,12 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
         `}
       </style>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }} className='demoSelectContainer'>
-        <SelectSearchable.Root>
-          <SelectSearchable.Label>Select Person</SelectSearchable.Label>
+        <SelectSearchable.Root
+          aria-invalid={invalid}
+          onValueChange={(val) => setValue(val)}
+          onBlur={() => setTouched(true)}
+        >
+          <SelectSearchable.Label>Select Person*</SelectSearchable.Label>
           <SelectSearchable.Trigger className='demoSelect'>
             <SelectSearchable.TriggerValue
               // Inline styling of a sub component
@@ -777,10 +803,13 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
               ))}
             </SelectSearchable.OptionList>
           </SelectSearchable.Dropdown>
+
+          <SelectSearchable.Error hideWhenValid>Required</SelectSearchable.Error>
         </SelectSearchable.Root>
       </div>
-    </>
-  ),
+      </>
+    );
+  },
 };
 
 export const ShowHideAnimation: Story = {
@@ -948,8 +977,6 @@ export const MySelectSearchable = () => {
 };
 
 const LargeDataSet5000Component = () => {
-  const largeOptions = useMemo(() => generatePeople(5000), []);
-
   return (
     <SelectSearchable.Root>
       <SelectSearchable.Label>Select Person</SelectSearchable.Label>
@@ -1132,7 +1159,7 @@ export const FormikForm = ({ peopleOptions }: { peopleOptions: SelectSearchableO
   return (
     <FormikProvider value={formik}>
       <Form style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 240 }}>
-        <FormikSelectSearchable name="person" label="Select Person" options={peopleOptions} />
+        <FormikSelectSearchable name="person" label="Select Person*" options={peopleOptions} />
         <button type="submit">Submit</button>
       </Form>
     </FormikProvider>
@@ -1154,7 +1181,7 @@ export const FormikForm = ({ peopleOptions }: { peopleOptions: SelectSearchableO
     return (
       <FormikProvider value={formik}>
         <Form style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 240 }}>
-          <FormikSelectSearchable name="person" label="Select Person" />
+          <FormikSelectSearchable name="person" label="Select Person*" />
           <button type="submit">Submit</button>
         </Form>
       </FormikProvider>

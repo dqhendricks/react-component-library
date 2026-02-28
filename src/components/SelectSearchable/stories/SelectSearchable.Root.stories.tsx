@@ -655,13 +655,8 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
 
         /* Styling a sub component using className only */
         .demoSelectSearchInput {
-          width: calc(100% - 16px);
-          padding: 8px 10px;
           border: 1px solid rgba(0,0,0,0.2);
           border-radius: 8px;
-          margin: 8px;
-        }
-        .demoSelectSearchInput:focus {
           outline: 2px solid rgba(0,0,0,0.5);
           outline-offset: 2px;
         }
@@ -765,13 +760,8 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
 
           /* Styling a sub component using className only */
           .demoSelectSearchInput {
-            width: calc(100% - 16px);
-            padding: 8px 10px;
             border: 1px solid rgba(0,0,0,0.2);
             border-radius: 8px;
-            margin: 8px;
-          }
-          .demoSelectSearchInput:focus {
             outline: 2px solid rgba(0,0,0,0.5);
             outline-offset: 2px;
           }

@@ -27,7 +27,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.Root** is the top-level component that manages state, focus, and accessibility for the select.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   SelectSearchable renders a visually hidden native `<select>` element for form submission and native integration.
 
@@ -85,7 +85,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.Label** renders a native `<label>` element and automatically associates it with the SelectSearchable control.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   The Label:
 
@@ -124,7 +124,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.Error** renders an error message associated with the SelectSearchable control.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<p>` element and automatically links itself to the control for accessibility.
 
@@ -166,7 +166,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.Trigger** renders the interactive control that opens and closes the dropdown.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<button>` element and forwards all standard `<button>` attributes **except** those managed by the Root context.
   When no `Search` subcomponent is present, the Trigger assumes the `combobox` role and handles keyboard navigation directly.
@@ -221,7 +221,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.TriggerValue** renders the currently selected value (or a placeholder) inside the Trigger.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<span>` element and displays the current selection.
 
@@ -254,7 +254,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.Dropdown** renders the floating panel that contains the Search and OptionList sub components.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<div>` and renders it in a portal (to `document.body`) so it can float above surrounding layout.
 
@@ -295,7 +295,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.Search** renders the combobox input used to filter and navigate options.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<input type="text">` element and is responsible for listbox navigation and active-descendant behavior.
 
@@ -339,7 +339,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.OptionList** renders the listbox container that holds selectable options.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<ul>` element and applies listbox semantics.
 
@@ -377,7 +377,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.Option** renders a selectable item within the OptionList.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<li>` element and automatically participates in selection, keyboard navigation, ordering, and filtering within the `SelectSearchableOptionList`.
 
@@ -442,7 +442,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.OptionCategoryHeader** renders a non-interactive category header row within the OptionList.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<li>` element and is intended for visual grouping of related options.
 
@@ -483,7 +483,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 **SelectSearchable.OptionDivider** renders a non-interactive separator row within the OptionList.
 
 <details>
-  <summary>Details</summary>
+  <summary>Click to expand details</summary>
 
   It wraps a native `<li>` element and is intended to visually separate blocks of options.
 

@@ -3,6 +3,7 @@ details > summary {
   font-weight: 600;
   font-size: 14px;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: rgb(0, 109, 235);
 }
 
 div.topLink {

@@ -9,7 +9,7 @@ const meta = {
   },
   tags: ['!dev'],
   argTypes: {
-    itemId: {
+    rowId: {
       control: false,
       description:
         'Stable unique identifier for the option within the list.',
@@ -47,7 +47,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    itemId: 'testId',
+    rowId: 'testId',
     value: 'example',
   },
   render: (args) => <SelectSearchable.Option {...args} />,

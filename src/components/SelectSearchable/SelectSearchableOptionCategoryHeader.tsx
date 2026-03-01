@@ -7,9 +7,12 @@ type LiProps = React.ComponentPropsWithoutRef<'li'>;
 export type SelectSearchableOptionCategoryHeaderProps = Omit<
   LiProps,
   'role' | 'aria-hidden' | 'hidden'
->;
+> & {
+  rowId: string;
+};
 
 export function SelectSearchableOptionCategoryHeader({
+  rowId: _rowId,
   children,
   ...userProps
 }: SelectSearchableOptionCategoryHeaderProps) {

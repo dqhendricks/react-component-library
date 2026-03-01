@@ -384,7 +384,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   ### Required props
 
-  - `itemId: string` – A stable, unique identifier for this option within the list. Used internally for registration and ARIA linking. This is **not** the DOM `id`.
+  - `rowId: string` – A stable, unique identifier for this row within the list. Used internally for registration and ARIA linking. This is **not** the DOM `id`.
   - `value: string` – The value committed to the control when this option is selected.
 
   ### Controlled props (cannot be overridden)
@@ -397,7 +397,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   - `hidden`
   - `ref`
 
-  The DOM `id` is generated automatically from the listbox and `itemId` to ensure uniqueness and correct `aria-activedescendant` behavior.
+  The DOM `id` is generated automatically from the listbox and `rowId` to ensure uniqueness and correct `aria-activedescendant` behavior.
 
   ### Accessibility
 
@@ -447,6 +447,10 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   It wraps a native `<li>` element and is intended for visual grouping of related options.
 
+  ### Required props
+
+  - `rowId: string` – A stable, unique identifier for this row within the list. Used internally for structural registration and validation. This is **not** the DOM `id`.
+
   ### Controlled props (cannot be overridden)
 
   - `role`
@@ -464,6 +468,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   ### Behavior
 
+  - `rowId` values must be unique within the `OptionList`; duplicate or missing values throw at runtime.
   - Automatically hides when no visible options remain in its section after filtering.
   - Serves as a visual grouping primitive for flat OptionList content.
 
@@ -488,6 +493,10 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   It wraps a native `<li>` element and is intended to visually separate blocks of options.
 
+  ### Required props
+
+  - `rowId: string` – A stable, unique identifier for this row within the list. Used internally for structural registration and validation. This is **not** the DOM `id`.
+
   ### Controlled props (cannot be overridden)
 
   - `role`
@@ -505,6 +514,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   ### Behavior
 
+  - `rowId` values must be unique within the `OptionList`; duplicate or missing values throw at runtime.
   - Automatically hides when it does not separate two visible options (for example: at list edges, stacked with other dividers, or adjacent to headers).
   - If a divider is placed directly before a header, it will follow the visibility of that header.
   - Remains a purely visual structure element while options retain listbox semantics.
@@ -514,3 +524,4 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   Exposes `data-part='option-divider'` for easy custom styling.
 
 </details>
+

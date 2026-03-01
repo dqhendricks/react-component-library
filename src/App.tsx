@@ -86,7 +86,7 @@ function App() {
 
             <SelectSearchable.OptionList>
               {options.map((o, i) => (
-                <SelectSearchable.Option itemId={`${o.label} ${i}`} key={i + o.label} value={o.label}>
+                <SelectSearchable.Option rowId={`${o.label} ${i}`} key={i + o.label} value={o.label}>
                   {o.label}
                 </SelectSearchable.Option>
               ))}

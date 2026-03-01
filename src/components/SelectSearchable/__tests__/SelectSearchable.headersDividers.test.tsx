@@ -15,42 +15,42 @@ function renderWithRows() {
       <SelectSearchable.Dropdown>
         <SelectSearchable.Search placeholder="Search..." />
         <SelectSearchable.OptionList>
-          <SelectSearchable.OptionDivider data-testid="div-leading" />
+          <SelectSearchable.OptionDivider rowId="div-leading" data-testid="div-leading" />
 
-          <SelectSearchable.OptionCategoryHeader data-testid="hdr-fruit">
+          <SelectSearchable.OptionCategoryHeader rowId="hdr-fruit" data-testid="hdr-fruit">
             Fruits
           </SelectSearchable.OptionCategoryHeader>
-          <SelectSearchable.Option itemId="apple" value="apple">
+          <SelectSearchable.Option rowId="apple" value="apple">
             Apple
           </SelectSearchable.Option>
-          <SelectSearchable.OptionDivider data-testid="div-fruit-between" />
-          <SelectSearchable.Option itemId="apricot" value="apricot">
+          <SelectSearchable.OptionDivider rowId="div-fruit-between" data-testid="div-fruit-between" />
+          <SelectSearchable.Option rowId="apricot" value="apricot">
             Apricot
           </SelectSearchable.Option>
-          <SelectSearchable.OptionDivider data-testid="div-before-veg-header-direct" />
+          <SelectSearchable.OptionDivider rowId="div-before-veg-header-direct" data-testid="div-before-veg-header-direct" />
 
-          <SelectSearchable.OptionCategoryHeader data-testid="hdr-veg">
+          <SelectSearchable.OptionCategoryHeader rowId="hdr-veg" data-testid="hdr-veg">
             Vegetables
           </SelectSearchable.OptionCategoryHeader>
-          <SelectSearchable.OptionDivider data-testid="div-after-veg-header" />
-          <SelectSearchable.OptionDivider data-testid="div-stacked-1" />
-          <SelectSearchable.OptionDivider data-testid="div-stacked-2" />
-          <SelectSearchable.Option itemId="broccoli" value="broccoli">
+          <SelectSearchable.OptionDivider rowId="div-after-veg-header" data-testid="div-after-veg-header" />
+          <SelectSearchable.OptionDivider rowId="div-stacked-1" data-testid="div-stacked-1" />
+          <SelectSearchable.OptionDivider rowId="div-stacked-2" data-testid="div-stacked-2" />
+          <SelectSearchable.Option rowId="broccoli" value="broccoli">
             Broccoli
           </SelectSearchable.Option>
-          <SelectSearchable.Option itemId="beet" value="beet">
+          <SelectSearchable.Option rowId="beet" value="beet">
             Beet
           </SelectSearchable.Option>
-          <SelectSearchable.OptionDivider data-testid="div-veg-between" />
-          <SelectSearchable.Option itemId="carrot" value="carrot">
+          <SelectSearchable.OptionDivider rowId="div-veg-between" data-testid="div-veg-between" />
+          <SelectSearchable.Option rowId="carrot" value="carrot">
             Carrot
           </SelectSearchable.Option>
 
-          <SelectSearchable.OptionCategoryHeader data-testid="hdr-empty">
+          <SelectSearchable.OptionCategoryHeader rowId="hdr-empty" data-testid="hdr-empty">
             Empty
           </SelectSearchable.OptionCategoryHeader>
-          <SelectSearchable.OptionDivider data-testid="div-empty" />
-          <SelectSearchable.OptionDivider data-testid="div-trailing" />
+          <SelectSearchable.OptionDivider rowId="div-empty" data-testid="div-empty" />
+          <SelectSearchable.OptionDivider rowId="div-trailing" data-testid="div-trailing" />
         </SelectSearchable.OptionList>
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>,
@@ -123,4 +123,41 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
     expect(screen.queryByTestId('div-after-veg-header')).not.toBeInTheDocument();
     expect(screen.queryByRole('separator')).not.toBeInTheDocument();
   });
+
+  it('throws when a header or divider is missing rowId', () => {
+    expect(() =>
+      render(
+        <SelectSearchable.Root onValueChange={() => {}}>
+          <SelectSearchable.Trigger>
+            <SelectSearchable.TriggerValue />
+          </SelectSearchable.Trigger>
+          <SelectSearchable.Dropdown>
+            <SelectSearchable.OptionList>
+              {/* @ts-expect-error runtime validation */}
+              <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
+            </SelectSearchable.OptionList>
+          </SelectSearchable.Dropdown>
+        </SelectSearchable.Root>,
+      ),
+    ).toThrow(/requires a unique rowId prop/i);
+  });
+
+  it('throws when rowIds are duplicated', () => {
+    expect(() =>
+      render(
+        <SelectSearchable.Root onValueChange={() => {}}>
+          <SelectSearchable.Trigger>
+            <SelectSearchable.TriggerValue />
+          </SelectSearchable.Trigger>
+          <SelectSearchable.Dropdown>
+            <SelectSearchable.OptionList>
+              <SelectSearchable.Option rowId="duplicate" value="apple">Apple</SelectSearchable.Option>
+              <SelectSearchable.OptionDivider rowId="duplicate" />
+            </SelectSearchable.OptionList>
+          </SelectSearchable.Dropdown>
+        </SelectSearchable.Root>,
+      ),
+    ).toThrow(/duplicated within the same OptionList/i);
+  });
 });
+

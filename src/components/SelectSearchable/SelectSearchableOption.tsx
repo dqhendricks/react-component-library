@@ -21,7 +21,7 @@ export type SelectSearchableOptionProps = React.PropsWithChildren<
     | 'hidden'
     | 'ref'
   > & {
-    itemId: string; // used to uniquely identify this option within the SelectSearchable context
+    rowId: string; // used to uniquely identify this row within the SelectSearchable context
     value: string;
     disabled?: boolean;
   }
@@ -38,7 +38,7 @@ function asArray(v: SelectSearchableValue | undefined): string[] {
  * OptionList owns registration/order; each Option owns its own DOM rendering.
  */
 export const SelectSearchableOption = React.memo(function SelectSearchableOption({
-  itemId,
+  rowId,
   value,
   disabled,
   children,
@@ -47,7 +47,7 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
   const store = useSelectSearchableStoreContext();
 
   const listboxId = useSelectSearchableStore(store, (s) => s.listboxId) ?? 'cs-listbox';
-  const domId = useMemo(() => makeDomOptionId(listboxId, itemId), [listboxId, itemId]);
+  const domId = useMemo(() => makeDomOptionId(listboxId, rowId), [listboxId, rowId]);
 
   // Subscribe to this option's own derived flags only.
   const isSelected = useSelectSearchableStore(store, (s) => s.selectedValueSet.has(value));

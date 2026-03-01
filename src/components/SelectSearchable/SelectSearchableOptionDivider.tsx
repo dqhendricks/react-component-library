@@ -7,9 +7,14 @@ type LiProps = React.ComponentPropsWithoutRef<'li'>;
 export type SelectSearchableOptionDividerProps = Omit<
   LiProps,
   'role' | 'aria-hidden' | 'hidden'
->;
+> & {
+  rowId: string;
+};
 
-export function SelectSearchableOptionDivider(props: SelectSearchableOptionDividerProps) {
+export function SelectSearchableOptionDivider({
+  rowId: _rowId,
+  ...props
+}: SelectSearchableOptionDividerProps) {
   const ourProps: LiProps = {
     role: 'separator',
     'aria-orientation': 'horizontal',

@@ -59,6 +59,7 @@ type ParsedRow = {
   type: RowType;
   index: number;
   element: OptionListChild;
+  rowId?: string;
   domId?: string;
   label?: string;
   value?: string;
@@ -84,11 +85,12 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
     return arr.flatMap((el, index) => {
       if (isOptionElement(el)) {
         const props = el.props;
-        const domId = makeDomOptionId(listboxId, props.itemId);
+        const domId = makeDomOptionId(listboxId, props.rowId);
         const label = extractNodeText(props.children);
         return {
           type: 'option',
           index,
+          rowId: props.rowId,
           element: el,
           domId,
           label,
@@ -98,11 +100,13 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
       }
 
       if (isCategoryHeaderElement(el)) {
-        return { type: 'header', index, element: el };
+        const props = (el as CategoryHeaderElement).props;
+        return { type: 'header', index, rowId: props.rowId, element: el };
       }
 
       if (isDividerElement(el)) {
-        return { type: 'divider', index, element: el };
+        const props = (el as DividerElement).props;
+        return { type: 'divider', index, rowId: props.rowId, element: el };
       }
 
       return [];
@@ -125,6 +129,27 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
     () => rows.some((row) => row.type !== 'option'),
     [rows],
   );
+
+  const seenRowIds = new Set<string>();
+  for (const row of rows) {
+    if (!row.rowId) {
+      throw new Error(
+        `SelectSearchable.${row.type === 'option'
+          ? 'Option'
+          : row.type === 'header'
+            ? 'OptionCategoryHeader'
+            : 'OptionDivider'} requires a unique rowId prop.`,
+      );
+    }
+
+    if (seenRowIds.has(row.rowId)) {
+      throw new Error(
+        `SelectSearchable rowId "${row.rowId}" is duplicated within the same OptionList. rowId values must be unique.`,
+      );
+    }
+
+    seenRowIds.add(row.rowId);
+  }
 
   const renderedRows = useMemo(() => {
     if (!hasSpecialRows) {

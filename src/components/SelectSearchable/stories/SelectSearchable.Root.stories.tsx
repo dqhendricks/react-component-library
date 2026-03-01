@@ -110,7 +110,7 @@ const PlaygroundComponent = (args: any) => {
         <SelectSearchable.Search placeholder="Search…" />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -163,7 +163,7 @@ export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProp
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+          <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -338,7 +338,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+          <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -364,7 +364,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -400,7 +400,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+          <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -427,7 +427,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -458,7 +458,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
     <SelectSearchable.Dropdown>
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+          <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -481,7 +481,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
       <SelectSearchable.Dropdown>
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -534,7 +534,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
       <SelectSearchable.Search placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
-          <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+          <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
             {option.label}
           </SelectSearchable.Option>
         ))}
@@ -576,7 +576,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
-            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -686,7 +686,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           />
           <SelectSearchable.OptionList>
             {options.map((option) => (
-              <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+              <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
                 {option.label}
               </SelectSearchable.Option>
             ))}
@@ -787,7 +787,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
             <SelectSearchable.Search className='demoSelectSearchInput' placeholder='Search…' />
             <SelectSearchable.OptionList>
               {peopleOptions.map((o, i) => (
-                <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+                <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
                   {o.label}
                 </SelectSearchable.Option>
               ))}
@@ -848,7 +848,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
-              <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+              <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
                 {option.label}
               </SelectSearchable.Option>
             ))}
@@ -890,7 +890,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
-              <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+              <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
                 {o.label}
               </SelectSearchable.Option>
             ))}
@@ -922,15 +922,15 @@ export const MySelectSearchable = () => {
       <SelectSearchable.Dropdown>
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
-          <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
-          <SelectSearchable.Option itemId='apple' value='apple'>Apple</SelectSearchable.Option>
-          <SelectSearchable.Option itemId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
-          <SelectSearchable.OptionDivider />
-          <SelectSearchable.OptionCategoryHeader>Vegetables</SelectSearchable.OptionCategoryHeader>
-          <SelectSearchable.Option itemId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
-          <SelectSearchable.Option itemId='beet' value='beet'>Beet</SelectSearchable.Option>
-          <SelectSearchable.OptionDivider />
-          <SelectSearchable.Option itemId='carrot' value='carrot'>Carrot</SelectSearchable.Option>
+          <SelectSearchable.OptionCategoryHeader rowId='hdr-fruits'>Fruits</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option rowId='apple' value='apple'>Apple</SelectSearchable.Option>
+          <SelectSearchable.Option rowId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
+          <SelectSearchable.OptionDivider rowId='div-fruits-vegetables' />
+          <SelectSearchable.OptionCategoryHeader rowId='hdr-vegetables'>Vegetables</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option rowId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
+          <SelectSearchable.Option rowId='beet' value='beet'>Beet</SelectSearchable.Option>
+          <SelectSearchable.OptionDivider rowId='div-vegetables-carrot' />
+          <SelectSearchable.Option rowId='carrot' value='carrot'>Carrot</SelectSearchable.Option>
         </SelectSearchable.OptionList>
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>
@@ -951,15 +951,15 @@ export const MySelectSearchable = () => {
       <SelectSearchable.Dropdown>
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
-          <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
-          <SelectSearchable.Option itemId='apple' value='apple'>Apple</SelectSearchable.Option>
-          <SelectSearchable.Option itemId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
-          <SelectSearchable.OptionDivider />
-          <SelectSearchable.OptionCategoryHeader>Vegetables</SelectSearchable.OptionCategoryHeader>
-          <SelectSearchable.Option itemId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
-          <SelectSearchable.Option itemId='beet' value='beet'>Beet</SelectSearchable.Option>
-          <SelectSearchable.OptionDivider />
-          <SelectSearchable.Option itemId='carrot' value='carrot'>Carrot</SelectSearchable.Option>
+          <SelectSearchable.OptionCategoryHeader rowId='hdr-fruits'>Fruits</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option rowId='apple' value='apple'>Apple</SelectSearchable.Option>
+          <SelectSearchable.Option rowId='apricot' value='apricot'>Apricot</SelectSearchable.Option>
+          <SelectSearchable.OptionDivider rowId='div-fruits-vegetables' />
+          <SelectSearchable.OptionCategoryHeader rowId='hdr-vegetables'>Vegetables</SelectSearchable.OptionCategoryHeader>
+          <SelectSearchable.Option rowId='broccoli' value='broccoli'>Broccoli</SelectSearchable.Option>
+          <SelectSearchable.Option rowId='beet' value='beet'>Beet</SelectSearchable.Option>
+          <SelectSearchable.OptionDivider rowId='div-vegetables-carrot' />
+          <SelectSearchable.Option rowId='carrot' value='carrot'>Carrot</SelectSearchable.Option>
         </SelectSearchable.OptionList>
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>
@@ -979,7 +979,7 @@ const LargeDataSet5000Component = () => {
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {largeOptions.map((o, i) => (
-            <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+            <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
               {o.label}
             </SelectSearchable.Option>
           ))}
@@ -1015,7 +1015,7 @@ const MySelectSearchable = () => {
         <SelectSearchable.Search placeholder='Search…' />
         <SelectSearchable.OptionList>
           {options.map((option, i) => (
-            <SelectSearchable.Option itemId={\`\${option.label}-\${i}\`} key={\`\${option.label}-\${i}\`} value={option.label}>
+            <SelectSearchable.Option rowId={\`\${option.label}-\${i}\`} key={\`\${option.label}-\${i}\`} value={option.label}>
               {option.label}
             </SelectSearchable.Option>
           ))}
@@ -1052,7 +1052,7 @@ function FormikSelectSearchable({ name, label }: { name: string, label: string }
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
-              <SelectSearchable.Option itemId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
+              <SelectSearchable.Option rowId={`${o.label}-${i}`} key={`${o.label}-${i}`} value={o.label}>
                 {o.label}
               </SelectSearchable.Option>
             ))}
@@ -1117,7 +1117,7 @@ export const FormikSelectSearchable = ({ name, label, options }: FormikSelectSea
           <SelectSearchable.Search placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
-              <SelectSearchable.Option itemId={option.id} key={option.id} value={option.value}>
+              <SelectSearchable.Option rowId={option.id} key={option.id} value={option.value}>
                 {option.label}
               </SelectSearchable.Option>
             ))}
@@ -1178,3 +1178,4 @@ export const FormikForm = ({ peopleOptions }: { peopleOptions: SelectSearchableO
     );
   },
 };
+

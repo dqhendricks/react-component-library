@@ -402,9 +402,10 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         const nextHeaders = new Map<string, SelectSearchableHeaderRecord>();
         const nextDividers = new Map<string, SelectSearchableDividerRecord>();
 
-        for (const opt of opts) {
+        for (let i = opts.length - 1; i >= 0; i--) {
+          const opt = opts[i];
           nextOptions.set(opt.id, opt);
-          // if duplicate values exist, last one wins
+          // Register in reverse so duplicate values resolve to the first authored option.
           nextValueToId.set(opt.value, opt.id);
         }
 

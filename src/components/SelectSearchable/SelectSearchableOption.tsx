@@ -50,7 +50,11 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
   const domId = useMemo(() => makeDomOptionId(listboxId, rowId), [listboxId, rowId]);
 
   // Subscribe to this option's own derived flags only.
-  const isSelected = useSelectSearchableStore(store, (s) => s.selectedValueSet.has(value));
+  const isSelected = useSelectSearchableStore(store, (s) =>
+    s.multiple
+      ? s.selectedValueSet.has(value)
+      : s.valueToId.get(value) === domId,
+  );
   const isActive = useSelectSearchableStore(store, (s) => s.activeDescendantId === domId);
   const hidden = useSelectSearchableStore(store, (s) => !s.visibleIds.has(domId));
 

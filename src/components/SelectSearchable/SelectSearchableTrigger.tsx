@@ -59,7 +59,8 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
     const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
     const disabled = useSelectSearchableStore(store, (s) => s.disabled);
     const open = useSelectSearchableStore(store, (s) => s.open);
-    const valueUnion = useSelectSearchableStore(store, (s) => s.value);
+    const value = useSelectSearchableStore(store, (s) => s.value);
+    const selectedLabels = useSelectSearchableStore(store, (s) => s.selectedLabels);
     const multiple = useSelectSearchableStore(store, (s) => s.multiple);
     const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
     const hasError = useSelectSearchableStore(store, (s) => s.hasError);
@@ -131,14 +132,7 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
 
     const merged = mergeProps(rest, ourButtonProps);
 
-    const selectedValues = useMemo(() => toValues(valueUnion), [valueUnion]);
-
-    const selectedLabels = useMemo(() => {
-      if (selectedValues.length === 0) return [];
-      return selectedValues
-        .map((v) => store.getOptionByValue(v)?.label)
-        .filter(Boolean) as string[];
-    }, [store, selectedValues]);
+    const selectedValues = useMemo(() => toValues(value), [value]);
 
     const renderArgs = useMemo(
       () => ({

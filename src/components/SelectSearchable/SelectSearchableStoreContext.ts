@@ -45,6 +45,7 @@ type State = {
   // State
   value: SelectSearchableValue;
   selectedValueSet: ReadonlySet<string>; // Fast lookup for option's isSelected check
+  selectedLabels: string[];
   open: boolean;
   activeDescendantId: string | null;
 
@@ -160,6 +161,23 @@ function computeVisibleIds(
   return next;
 }
 
+function computeSelectedLabels(
+  value: SelectSearchableValue,
+  valueToId: Map<string, string>,
+  options: Map<string, SelectSearchableOptionRecord>,
+): string[] {
+  if (value === undefined) return [];
+
+  const values = Array.isArray(value) ? value : [value];
+
+  return values
+    .map((selectedValue) => {
+      const id = valueToId.get(String(selectedValue));
+      return id ? options.get(id)?.label : undefined;
+    })
+    .filter(Boolean) as string[];
+}
+
 function ariaInvalidToBool(value: React.AriaAttributes['aria-invalid']): boolean {
   return value === true || value === 'true' || value === 'grammar' || value === 'spelling';
 }
@@ -189,6 +207,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     value: '',
     selectedValueSet: new Set(),
+    selectedLabels: [],
     open: false,
     activeDescendantId: null,
 
@@ -324,6 +343,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.value = value;
         state.selectedValueSet = toSelectedSet(value);
+        state.selectedLabels = computeSelectedLabels(value, state.valueToId, state.options);
         reconcileActiveDescendant();
       });
     },
@@ -421,6 +441,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.valueToId = nextValueToId;
         state.orderedIds = nextOrderedIds;
         state.visibleIds = computeVisibleIds(nextOptions, state.searchQuery);
+        state.selectedLabels = computeSelectedLabels(state.value, nextValueToId, nextOptions);
         state.headersByRowId = nextHeaders;
         state.dividersByRowId = nextDividers;
 
@@ -437,6 +458,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
           state.valueToId = new Map();
           state.visibleIds = new Set();
           state.orderedIds = [];
+          state.selectedLabels = [];
           state.headersByRowId = new Map();
           state.dividersByRowId = new Map();
           if (state.activeDescendantId) state.activeDescendantId = null;

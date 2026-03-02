@@ -10,7 +10,7 @@ import { SelectSearchable, type SelectSearchableValue } from '..';
 import { generatePeople } from '../../../storybook/utils/generatePeople';
 
 const peopleOptions = generatePeople(50);
-const largeOptions = generatePeople(5000);
+const largeOptions = generatePeople(3000);
 
 /* Helper components */
 
@@ -966,7 +966,7 @@ export const MySelectSearchable = () => {
   ),
 };
 
-const LargeDataSet5000Component = () => {
+const LargeDataSet3000Component = () => {
   return (
     <SelectSearchable.Root>
       <SelectSearchable.Label>Select Person</SelectSearchable.Label>
@@ -989,7 +989,7 @@ const LargeDataSet5000Component = () => {
   );
 };
 
-export const LargeDataSet5000: Story = {
+export const LargeDataSet3000: Story = {
   parameters: {
     docs: {
       source: {
@@ -1001,7 +1001,7 @@ import { generatePeople } from './generatePeople';
 import { Chevron } from './Chevron';
 
 const MySelectSearchable = () => {
-  const options = useMemo(() => generatePeople(5000), []);
+  const options = useMemo(() => generatePeople(3000), []);
 
   return (
     <SelectSearchable.Root>
@@ -1028,7 +1028,7 @@ const MySelectSearchable = () => {
       },
     },
   },
-  render: () => <LargeDataSet5000Component />,
+  render: () => <LargeDataSet3000Component />,
 };
 
 function FormikSelectSearchable({ name, label }: { name: string, label: string }) {

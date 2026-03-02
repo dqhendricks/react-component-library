@@ -69,20 +69,20 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
     renderWithRows();
     await openAndGetSearch();
 
-    expect(screen.getByTestId('hdr-fruit')).toBeInTheDocument();
-    expect(screen.getByTestId('hdr-veg')).toBeInTheDocument();
-    expect(screen.queryByTestId('hdr-empty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hdr-fruit')).toBeVisible();
+    expect(screen.getByTestId('hdr-veg')).toBeVisible();
+    expect(screen.getByTestId('hdr-empty')).not.toBeVisible();
 
-    expect(screen.getByTestId('div-fruit-between')).toBeInTheDocument();
-    expect(screen.getByTestId('div-veg-between')).toBeInTheDocument();
+    expect(screen.getByTestId('div-fruit-between')).toBeVisible();
+    expect(screen.getByTestId('div-veg-between')).toBeVisible();
 
-    expect(screen.queryByTestId('div-leading')).not.toBeInTheDocument();
-    expect(screen.getByTestId('div-before-veg-header-direct')).toBeInTheDocument();
-    expect(screen.queryByTestId('div-stacked-1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-stacked-2')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-after-veg-header')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-empty')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-trailing')).not.toBeInTheDocument();
+    expect(screen.getByTestId('div-leading')).not.toBeVisible();
+    expect(screen.getByTestId('div-before-veg-header-direct')).toBeVisible();
+    expect(screen.getByTestId('div-stacked-1')).not.toBeVisible();
+    expect(screen.getByTestId('div-stacked-2')).not.toBeVisible();
+    expect(screen.getByTestId('div-after-veg-header')).not.toBeVisible();
+    expect(screen.getByTestId('div-empty')).not.toBeVisible();
+    expect(screen.getByTestId('div-trailing')).not.toBeVisible();
   });
 
   it('hides or shows category headers based on section search matches', async () => {
@@ -91,17 +91,17 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
 
     await user.type(search, 'bro');
 
-    expect(screen.queryByTestId('hdr-fruit')).not.toBeInTheDocument();
-    expect(screen.getByTestId('hdr-veg')).toBeInTheDocument();
-    expect(screen.queryByTestId('hdr-empty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hdr-fruit')).not.toBeVisible();
+    expect(screen.getByTestId('hdr-veg')).toBeVisible();
+    expect(screen.getByTestId('hdr-empty')).not.toBeVisible();
 
     await user.clear(search);
     await user.type(search, 'ap');
 
-    expect(screen.getByTestId('hdr-fruit')).toBeInTheDocument();
-    expect(screen.queryByTestId('hdr-veg')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-before-veg-header-direct')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('hdr-empty')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hdr-fruit')).toBeVisible();
+    expect(screen.getByTestId('hdr-veg')).not.toBeVisible();
+    expect(screen.getByTestId('div-before-veg-header-direct')).not.toBeVisible();
+    expect(screen.getByTestId('hdr-empty')).not.toBeVisible();
   });
 
   it('normalizes divider visibility through filtering (stacked/header-adjacent/edges)', async () => {
@@ -109,18 +109,18 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
     const { user, search } = await openAndGetSearch();
 
     await user.type(search, 'ap');
-    expect(screen.getByTestId('div-fruit-between')).toBeInTheDocument();
-    expect(screen.queryByTestId('div-stacked-1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-stacked-2')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-leading')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-trailing')).not.toBeInTheDocument();
+    expect(screen.getByTestId('div-fruit-between')).toBeVisible();
+    expect(screen.getByTestId('div-stacked-1')).not.toBeVisible();
+    expect(screen.getByTestId('div-stacked-2')).not.toBeVisible();
+    expect(screen.getByTestId('div-leading')).not.toBeVisible();
+    expect(screen.getByTestId('div-trailing')).not.toBeVisible();
 
     await user.clear(search);
     await user.type(search, 'bro');
-    expect(screen.queryByTestId('div-fruit-between')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-before-veg-header-direct')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-veg-between')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('div-after-veg-header')).not.toBeInTheDocument();
+    expect(screen.getByTestId('div-fruit-between')).not.toBeVisible();
+    expect(screen.getByTestId('div-before-veg-header-direct')).not.toBeVisible();
+    expect(screen.getByTestId('div-veg-between')).not.toBeVisible();
+    expect(screen.getByTestId('div-after-veg-header')).not.toBeVisible();
     expect(screen.queryByRole('separator')).not.toBeInTheDocument();
   });
 

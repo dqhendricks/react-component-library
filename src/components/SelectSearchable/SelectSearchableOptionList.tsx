@@ -3,6 +3,9 @@ import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
   useSelectSearchableStore,
+  type SelectSearchableOptionRecord,
+  type SelectSearchableHeaderRecord,
+  type SelectSearchableDividerRecord,
 } from './SelectSearchableStoreContext';
 import { mergeProps } from '../utils/mergeProps';
 import { extractNodeText } from '../utils/extractNodeText';
@@ -36,12 +39,6 @@ export type SelectSearchableOptionListProps = Omit<
   children: OptionListChildren;
 };
 
-type ParsedOption = {
-  domId: string;
-  props: SelectSearchableOptionProps;
-  label: string;
-};
-
 function isOptionElement(node: unknown): node is OptionElement {
   return React.isValidElement(node) && node.type === SelectSearchableOption;
 }
@@ -54,17 +51,44 @@ function isDividerElement(node: unknown): node is DividerElement {
   return React.isValidElement(node) && node.type === SelectSearchableOptionDivider;
 }
 
-type RowType = 'option' | 'header' | 'divider';
-type ParsedRow = {
-  type: RowType;
-  index: number;
-  element: OptionListChild;
-  rowId?: string;
-  domId?: string;
-  label?: string;
-  value?: string;
-  disabled?: boolean;
-};
+type ParsedRow =
+  | {
+      type: 'option';
+      index: number;
+      rowId: string;
+      domId: string;
+      value: string;
+      label: string;
+      disabled?: boolean;
+    }
+  | {
+      type: 'header';
+      index: number;
+      rowId: string;
+    }
+  | {
+      type: 'divider';
+      index: number;
+      rowId: string;
+    };
+
+function assertUniqueRowId(
+  rowType: 'Option' | 'OptionCategoryHeader' | 'OptionDivider',
+  rowId: string | undefined,
+  seenRowIds: Set<string>,
+) {
+  if (!rowId) {
+    throw new Error(`SelectSearchable.${rowType} requires a unique rowId prop.`);
+  }
+
+  if (seenRowIds.has(rowId)) {
+    throw new Error(
+      `SelectSearchable rowId "${rowId}" is duplicated within the same OptionList. rowId values must be unique.`,
+    );
+  }
+
+  seenRowIds.add(rowId);
+}
 
 export function SelectSearchableOptionList({ children, ...userProps }: SelectSearchableOptionListProps) {
   const store = useSelectSearchableStoreContext();
@@ -75,165 +99,111 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const activeDescendantId = useSelectSearchableStore(store, (s) => s.activeDescendantId);
   const optionListEl = useSelectSearchableStore(store, (s) => s.optionListEl);
-  const visibleIds = useSelectSearchableStore(store, (s) => s.visibleIds);
 
   const hiddenList = !open || disabled;
 
-  const rows: ParsedRow[] = useMemo(() => {
+  const collection = useMemo(() => {
     const arr = React.Children.toArray(children) as OptionListChild[];
+    const rows: ParsedRow[] = [];
+    const seenRowIds = new Set<string>();
+    const options: SelectSearchableOptionRecord[] = [];
+    let hasNonOptionRows = false;
 
-    return arr.flatMap((el, index) => {
+    for (const [index, el] of arr.entries()) {
       if (isOptionElement(el)) {
         const props = el.props;
+        assertUniqueRowId('Option', props.rowId, seenRowIds);
+
         const domId = makeDomOptionId(listboxId, props.rowId);
         const label = extractNodeText(props.children);
-        return {
+        options.push({
+          id: domId,
+          value: props.value,
+          label,
+          disabled: props.disabled,
+        });
+        rows.push({
           type: 'option',
           index,
           rowId: props.rowId,
-          element: el,
           domId,
           label,
           value: props.value,
           disabled: props.disabled,
-        };
+        });
+        continue;
       }
 
       if (isCategoryHeaderElement(el)) {
         const props = (el as CategoryHeaderElement).props;
-        return { type: 'header', index, rowId: props.rowId, element: el };
+        assertUniqueRowId('OptionCategoryHeader', props.rowId, seenRowIds);
+        hasNonOptionRows = true;
+        rows.push({ type: 'header', index, rowId: props.rowId });
+        continue;
       }
 
       if (isDividerElement(el)) {
         const props = (el as DividerElement).props;
-        return { type: 'divider', index, rowId: props.rowId, element: el };
-      }
-
-      return [];
-    });
-  }, [children, listboxId]);
-
-  const options: ParsedOption[] = useMemo(
-    () =>
-      rows
-        .filter((row): row is ParsedRow & { type: 'option'; domId: string; label: string; value: string } => row.type === 'option')
-        .map((row) => ({
-          domId: row.domId,
-          props: row.element.props as SelectSearchableOptionProps,
-          label: row.label,
-        })),
-    [rows],
-  );
-
-  const hasSpecialRows = useMemo(
-    () => rows.some((row) => row.type !== 'option'),
-    [rows],
-  );
-
-  const seenRowIds = new Set<string>();
-  for (const row of rows) {
-    if (!row.rowId) {
-      throw new Error(
-        `SelectSearchable.${row.type === 'option'
-          ? 'Option'
-          : row.type === 'header'
-            ? 'OptionCategoryHeader'
-            : 'OptionDivider'} requires a unique rowId prop.`,
-      );
-    }
-
-    if (seenRowIds.has(row.rowId)) {
-      throw new Error(
-        `SelectSearchable rowId "${row.rowId}" is duplicated within the same OptionList. rowId values must be unique.`,
-      );
-    }
-
-    seenRowIds.add(row.rowId);
-  }
-
-  const renderedRows = useMemo(() => {
-    if (!hasSpecialRows) {
-      return rows.map((row) => row.element);
-    }
-
-    const headerHasVisibleOption = new Set<number>();
-
-    let currentHeaderRowIndex: number | null = null;
-    for (const row of rows) {
-      if (row.type === 'header') {
-        currentHeaderRowIndex = row.index;
+        assertUniqueRowId('OptionDivider', props.rowId, seenRowIds);
+        hasNonOptionRows = true;
+        rows.push({ type: 'divider', index, rowId: props.rowId });
         continue;
       }
-      if (row.type !== 'option') continue;
-      if (!row.domId || !visibleIds.has(row.domId)) continue;
-      if (currentHeaderRowIndex != null) headerHasVisibleOption.add(currentHeaderRowIndex);
     }
 
-    const provisionalVisible = new Map<number, boolean>();
-    for (const row of rows) {
-      if (row.type === 'option') {
-        provisionalVisible.set(row.index, !!row.domId && visibleIds.has(row.domId));
-      } else if (row.type === 'header') {
-        provisionalVisible.set(row.index, headerHasVisibleOption.has(row.index));
-      } else {
-        // Divider candidates are normalized in the next step.
-        provisionalVisible.set(row.index, true);
-      }
+    const headers: SelectSearchableHeaderRecord[] = [];
+    const dividers: SelectSearchableDividerRecord[] = [];
+
+    if (!hasNonOptionRows) {
+      return { options, headers, dividers };
     }
 
-    const visibleRows = rows.filter((row) => provisionalVisible.get(row.index));
-    const visibleIndexByRow = new Map<number, number>();
-    visibleRows.forEach((row, i) => visibleIndexByRow.set(row.index, i));
-
-    const hasVisibleNonDividerBefore = (index: number) => {
-      for (const candidate of rows) {
-        if (candidate.index >= index) break;
-        if (!provisionalVisible.get(candidate.index)) continue;
-        if (candidate.type === 'divider') continue;
-        return true;
-      }
-      return false;
-    };
-
-    return rows.map((row, rowPosition) => {
-      if (row.type === 'option') return row.element;
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
 
       if (row.type === 'header') {
-        return provisionalVisible.get(row.index) ? row.element : null;
+        const optionIds: string[] = [];
+        for (let j = i + 1; j < rows.length; j++) {
+          const candidate = rows[j];
+          if (candidate.type === 'header') break;
+          if (candidate.type === 'option') optionIds.push(candidate.domId);
+        }
+        headers.push({ rowId: row.rowId, optionIds });
+        continue;
       }
 
-      if (visibleRows[0]?.index === row.index) return null;
+      if (row.type === 'divider') {
+        const beforeOptionIds: string[] = [];
+        for (let j = i - 1; j >= 0; j--) {
+          const candidate = rows[j];
+          if (candidate.type !== 'option') break;
+          beforeOptionIds.unshift(candidate.domId);
+        }
 
-      // Structural rule: a divider directly before a header follows that header's visibility.
-      const nextAuthored = rows[rowPosition + 1];
-      const prevAuthored = rows[rowPosition - 1];
-      if (nextAuthored?.type === 'header') {
-        if (prevAuthored?.type !== 'option') return null;
-        if (!hasVisibleNonDividerBefore(row.index)) return null;
-        return provisionalVisible.get(nextAuthored.index) ? row.element : null;
+        const afterOptionIds: string[] = [];
+        for (let j = i + 1; j < rows.length; j++) {
+          const candidate = rows[j];
+          if (candidate.type !== 'option') break;
+          afterOptionIds.push(candidate.domId);
+        }
+
+        const nextAuthored = rows[i + 1];
+        dividers.push({
+          rowId: row.rowId,
+          beforeOptionIds,
+          afterOptionIds,
+          nextHeaderRowId: nextAuthored?.type === 'header' ? nextAuthored.rowId : undefined,
+        });
       }
+    }
 
-      const visiblePosition = visibleIndexByRow.get(row.index);
-      if (visiblePosition == null) return null;
+    return { options, headers, dividers };
+  }, [children, listboxId]);
 
-      const prev = visibleRows[visiblePosition - 1];
-      const next = visibleRows[visiblePosition + 1];
-      const keepDivider = prev?.type === 'option' && next?.type === 'option';
-      return keepDivider ? row.element : null;
-    });
-  }, [rows, visibleIds, hasSpecialRows]);
-
-  // Batch register all selectable options (order + labels + disabled metadata).
+  // Register selectable rows and structural metadata in one store update.
   useLayoutEffect(() => {
-    return store.registerOptions(
-      options.map((o) => ({
-        id: o.domId,
-        value: o.props.value,
-        label: o.label,
-        disabled: o.props.disabled,
-      })),
-    );
-  }, [store, options]);
+    return store.registerCollection(collection);
+  }, [store, collection]);
 
   // Keep active option visible.
   useLayoutEffect(() => {
@@ -259,7 +229,7 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
 
   return (
     <ul {...merged} ref={store.setOptionListEl} data-part="list">
-      {renderedRows}
+      {children}
     </ul>
   );
 }

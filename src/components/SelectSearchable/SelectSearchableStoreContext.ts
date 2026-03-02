@@ -2,11 +2,23 @@ import * as React from 'react';
 
 export type SelectSearchableValue = string | string[] | undefined;
 
-type SelectSearchableOptionRecord = {
+export type SelectSearchableOptionRecord = {
   id: string; // stable DOM id for aria-activedescendant, etc.
   value: string;
   label: string; // display / search string
   disabled?: boolean;
+};
+
+export type SelectSearchableHeaderRecord = {
+  rowId: string;
+  optionIds: string[];
+};
+
+export type SelectSearchableDividerRecord = {
+  rowId: string;
+  beforeOptionIds: string[];
+  afterOptionIds: string[];
+  nextHeaderRowId?: string;
 };
 
 type State = {
@@ -51,9 +63,11 @@ type State = {
   optionListEl: HTMLElement | null;
   nativeSelectEl: HTMLSelectElement | null;
 
-  // Option registry
+  // Registered rows
   options: Map<string, SelectSearchableOptionRecord>;
   valueToId: Map<string, string>; // helps fast lookup by value
+  headersByRowId: Map<string, SelectSearchableHeaderRecord>;
+  dividersByRowId: Map<string, SelectSearchableDividerRecord>;
 };
 
 type Listener = () => void;
@@ -101,8 +115,12 @@ export type SelectSearchableStore = {
   setOptionListEl: (el: HTMLElement | null) => void;
   setNativeSelectEl: (el: HTMLSelectElement | null) => void;
 
-  // option registry
-  registerOptions: (opts: SelectSearchableOptionRecord[]) => () => void;
+  // row registration
+  registerCollection: (p: {
+    options: SelectSearchableOptionRecord[];
+    headers: SelectSearchableHeaderRecord[];
+    dividers: SelectSearchableDividerRecord[];
+  }) => () => void;
 
   // queries/helpers
   getOptionByValue: (value: string) => SelectSearchableOptionRecord | undefined;
@@ -189,6 +207,8 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     options: new Map(),
     valueToId: new Map(),
+    headersByRowId: new Map(),
+    dividersByRowId: new Map(),
   };
 
   function emit() {
@@ -374,11 +394,13 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       });
     },
 
-    registerOptions(opts) {
+    registerCollection({ options: opts, headers, dividers }) {
       setState(() => {
         const nextOptions = new Map<string, SelectSearchableOptionRecord>();
         const nextValueToId = new Map<string, string>();
         const nextOrderedIds = opts.map((o) => o.id);
+        const nextHeaders = new Map<string, SelectSearchableHeaderRecord>();
+        const nextDividers = new Map<string, SelectSearchableDividerRecord>();
 
         for (const opt of opts) {
           nextOptions.set(opt.id, opt);
@@ -386,10 +408,20 @@ export function createSelectSearchableStore(): SelectSearchableStore {
           nextValueToId.set(opt.value, opt.id);
         }
 
+        for (const header of headers) {
+          nextHeaders.set(header.rowId, header);
+        }
+
+        for (const divider of dividers) {
+          nextDividers.set(divider.rowId, divider);
+        }
+
         state.options = nextOptions;
         state.valueToId = nextValueToId;
         state.orderedIds = nextOrderedIds;
         state.visibleIds = computeVisibleIds(nextOptions, state.searchQuery);
+        state.headersByRowId = nextHeaders;
+        state.dividersByRowId = nextDividers;
 
         if (state.activeDescendantId && !nextOptions.has(state.activeDescendantId)) {
           state.activeDescendantId = null;
@@ -404,6 +436,8 @@ export function createSelectSearchableStore(): SelectSearchableStore {
           state.valueToId = new Map();
           state.visibleIds = new Set();
           state.orderedIds = [];
+          state.headersByRowId = new Map();
+          state.dividersByRowId = new Map();
           if (state.activeDescendantId) state.activeDescendantId = null;
         });
       };

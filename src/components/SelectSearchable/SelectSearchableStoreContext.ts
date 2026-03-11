@@ -45,6 +45,7 @@ type State = {
   // State
   value: SelectSearchableValue;
   selectedValueSet: ReadonlySet<string>; // Fast lookup for option's isSelected check
+  selectedSingleId: string | null;
   selectedLabels: string[];
   open: boolean;
   activeDescendantId: string | null;
@@ -66,7 +67,7 @@ type State = {
 
   // Registered rows
   options: Map<string, SelectSearchableOptionRecord>;
-  valueToId: Map<string, string>; // helps fast lookup by value
+  valueToIds: Map<string, string[]>; // authored-order option ids by value
   headersByRowId: Map<string, SelectSearchableHeaderRecord>;
   dividersByRowId: Map<string, SelectSearchableDividerRecord>;
 };
@@ -163,19 +164,34 @@ function computeVisibleIds(
 
 function computeSelectedLabels(
   value: SelectSearchableValue,
-  valueToId: Map<string, string>,
+  valueToIds: Map<string, string[]>,
   options: Map<string, SelectSearchableOptionRecord>,
+  selectedSingleId: string | null,
 ): string[] {
   if (value === undefined) return [];
 
-  const values = Array.isArray(value) ? value : [value];
+  if (!Array.isArray(value)) {
+    if (!selectedSingleId) return [];
+    const label = options.get(selectedSingleId)?.label;
+    return label ? [label] : [];
+  }
 
-  return values
+  return value
     .map((selectedValue) => {
-      const id = valueToId.get(String(selectedValue));
+      const id = valueToIds.get(String(selectedValue))?.[0];
       return id ? options.get(id)?.label : undefined;
     })
     .filter(Boolean) as string[];
+}
+
+function computeSelectedSingleId(
+  value: SelectSearchableValue,
+  multiple: boolean,
+  valueToIds: Map<string, string[]>,
+): string | null {
+  if (multiple) return null;
+  if (value === undefined || Array.isArray(value)) return null;
+  return valueToIds.get(String(value))?.[0] ?? null;
 }
 
 function ariaInvalidToBool(value: React.AriaAttributes['aria-invalid']): boolean {
@@ -207,6 +223,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     value: '',
     selectedValueSet: new Set(),
+    selectedSingleId: null,
     selectedLabels: [],
     open: false,
     activeDescendantId: null,
@@ -225,7 +242,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     nativeSelectEl: null,
 
     options: new Map(),
-    valueToId: new Map(),
+    valueToIds: new Map(),
     headersByRowId: new Map(),
     dividersByRowId: new Map(),
   };
@@ -292,8 +309,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
           : state.value;
 
       if (selectedValue !== undefined) {
-        state.activeDescendantId =
-          state.valueToId.get(selectedValue) ?? null;
+        state.activeDescendantId = state.selectedSingleId;
       }
     } else {
       state.activeDescendantId = null;
@@ -335,6 +351,13 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.disabled = p.disabled;
         state.multiple = p.multiple;
+        state.selectedSingleId = computeSelectedSingleId(state.value, p.multiple, state.valueToIds);
+        state.selectedLabels = computeSelectedLabels(
+          state.value,
+          state.valueToIds,
+          state.options,
+          state.selectedSingleId,
+        );
         reconcileActiveDescendant();
       });
     },
@@ -343,7 +366,13 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.value = value;
         state.selectedValueSet = toSelectedSet(value);
-        state.selectedLabels = computeSelectedLabels(value, state.valueToId, state.options);
+        state.selectedSingleId = computeSelectedSingleId(value, state.multiple, state.valueToIds);
+        state.selectedLabels = computeSelectedLabels(
+          value,
+          state.valueToIds,
+          state.options,
+          state.selectedSingleId,
+        );
         reconcileActiveDescendant();
       });
     },
@@ -417,16 +446,16 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     registerCollection({ options: opts, headers, dividers }) {
       setState(() => {
         const nextOptions = new Map<string, SelectSearchableOptionRecord>();
-        const nextValueToId = new Map<string, string>();
+        const nextValueToIds = new Map<string, string[]>();
         const nextOrderedIds = opts.map((o) => o.id);
         const nextHeaders = new Map<string, SelectSearchableHeaderRecord>();
         const nextDividers = new Map<string, SelectSearchableDividerRecord>();
 
-        for (let i = opts.length - 1; i >= 0; i--) {
-          const opt = opts[i];
+        for (const opt of opts) {
           nextOptions.set(opt.id, opt);
-          // Register in reverse so duplicate values resolve to the first authored option.
-          nextValueToId.set(opt.value, opt.id);
+          const ids = nextValueToIds.get(opt.value);
+          if (ids) ids.push(opt.id);
+          else nextValueToIds.set(opt.value, [opt.id]);
         }
 
         for (const header of headers) {
@@ -438,10 +467,16 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         }
 
         state.options = nextOptions;
-        state.valueToId = nextValueToId;
+        state.valueToIds = nextValueToIds;
         state.orderedIds = nextOrderedIds;
         state.visibleIds = computeVisibleIds(nextOptions, state.searchQuery);
-        state.selectedLabels = computeSelectedLabels(state.value, nextValueToId, nextOptions);
+        state.selectedSingleId = computeSelectedSingleId(state.value, state.multiple, nextValueToIds);
+        state.selectedLabels = computeSelectedLabels(
+          state.value,
+          nextValueToIds,
+          nextOptions,
+          state.selectedSingleId,
+        );
         state.headersByRowId = nextHeaders;
         state.dividersByRowId = nextDividers;
 
@@ -455,9 +490,10 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       return () => {
         setState(() => {
           state.options = new Map();
-          state.valueToId = new Map();
+          state.valueToIds = new Map();
           state.visibleIds = new Set();
           state.orderedIds = [];
+          state.selectedSingleId = null;
           state.selectedLabels = [];
           state.headersByRowId = new Map();
           state.dividersByRowId = new Map();
@@ -467,7 +503,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     },
 
     getOptionByValue(value) {
-      const id = state.valueToId.get(value);
+      const id = state.valueToIds.get(value)?.[0];
       if (!id) return undefined;
       const r = state.options.get(id);
       if (!r) return undefined;

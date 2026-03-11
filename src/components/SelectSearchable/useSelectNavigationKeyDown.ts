@@ -45,11 +45,14 @@ export function useSelectNavigationKeyDown() {
       };
 
       const setActiveToCurrentValueIfVisible = () => {
-        const current = asArray(s.value as any);
-        const first = current[0];
-        if (!first) return false;
-
-        const idFromValue = s.valueToId.get(String(first)) ?? null;
+        const idFromValue = s.multiple
+          ? (() => {
+              const current = asArray(s.value as any);
+              const first = current[0];
+              if (!first) return null;
+              return s.valueToIds.get(String(first))?.[0] ?? null;
+            })()
+          : s.selectedSingleId;
         if (!idFromValue) return false;
 
         const opt = s.options.get(idFromValue);

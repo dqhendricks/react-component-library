@@ -11,15 +11,25 @@ type LiProps = React.ComponentPropsWithoutRef<'li'>;
 export type SelectSearchableOptionDividerProps = Omit<
   LiProps,
   'role' | 'aria-hidden' | 'hidden'
-> & {
-  rowId: string;
+>;
+
+export type SelectSearchableOptionDividerInternalProps = {
+  __internalRowId?: string;
 };
 
 export function SelectSearchableOptionDivider({
-  rowId,
+  __internalRowId,
   ...props
-}: SelectSearchableOptionDividerProps) {
+}: SelectSearchableOptionDividerProps & SelectSearchableOptionDividerInternalProps) {
   const store = useSelectSearchableStoreContext();
+
+  if (!__internalRowId) {
+    throw new Error(
+      'SelectSearchable.OptionDivider must be rendered within SelectSearchable.OptionList.',
+    );
+  }
+
+  const rowId = __internalRowId;
 
   const hidden = useSelectSearchableStore(store, (s) => {
     const meta = s.dividersByRowId.get(rowId);

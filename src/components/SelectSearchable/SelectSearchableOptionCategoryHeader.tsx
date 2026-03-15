@@ -11,16 +11,26 @@ type LiProps = React.ComponentPropsWithoutRef<'li'>;
 export type SelectSearchableOptionCategoryHeaderProps = Omit<
   LiProps,
   'role' | 'aria-hidden' | 'hidden'
-> & {
-  rowId: string;
+>;
+
+export type SelectSearchableOptionCategoryHeaderInternalProps = {
+  __internalRowId?: string;
 };
 
 export function SelectSearchableOptionCategoryHeader({
-  rowId,
+  __internalRowId,
   children,
   ...userProps
-}: SelectSearchableOptionCategoryHeaderProps) {
+}: SelectSearchableOptionCategoryHeaderProps & SelectSearchableOptionCategoryHeaderInternalProps) {
   const store = useSelectSearchableStoreContext();
+
+  if (!__internalRowId) {
+    throw new Error(
+      'SelectSearchable.OptionCategoryHeader must be rendered within SelectSearchable.OptionList.',
+    );
+  }
+
+  const rowId = __internalRowId;
 
   const hidden = useSelectSearchableStore(store, (s) => {
     const meta = s.headersByRowId.get(rowId);

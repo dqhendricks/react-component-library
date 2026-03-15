@@ -9,27 +9,37 @@ import {
 } from './SelectSearchableStoreContext';
 import { mergeProps } from '../utils/mergeProps';
 import { extractNodeText } from '../utils/extractNodeText';
-import { SelectSearchableOption, type SelectSearchableOptionProps } from './SelectSearchableOption';
+import {
+  SelectSearchableOption,
+  type SelectSearchableOptionProps,
+  type SelectSearchableOptionInternalProps,
+} from './SelectSearchableOption';
 import {
   SelectSearchableOptionCategoryHeader,
   type SelectSearchableOptionCategoryHeaderProps,
+  type SelectSearchableOptionCategoryHeaderInternalProps,
 } from './SelectSearchableOptionCategoryHeader';
 import {
   SelectSearchableOptionDivider,
   type SelectSearchableOptionDividerProps,
+  type SelectSearchableOptionDividerInternalProps,
 } from './SelectSearchableOptionDivider';
 import { makeDomOptionId } from '../utils/makeDomOptionId';
 
 type UlProps = React.ComponentPropsWithoutRef<'ul'>;
 
-type OptionElement = React.ReactElement<SelectSearchableOptionProps, typeof SelectSearchableOption>;
-type CategoryHeaderElement = React.ReactElement<
-  SelectSearchableOptionCategoryHeaderProps,
-  typeof SelectSearchableOptionCategoryHeader
+type OptionElement = React.ReactElement<
+  SelectSearchableOptionProps & SelectSearchableOptionInternalProps
 >;
-type DividerElement = React.ReactElement<SelectSearchableOptionDividerProps, typeof SelectSearchableOptionDivider>;
+type CategoryHeaderElement = React.ReactElement<
+  SelectSearchableOptionCategoryHeaderProps &
+  SelectSearchableOptionCategoryHeaderInternalProps
+>;
+type DividerElement = React.ReactElement<
+  SelectSearchableOptionDividerProps &
+  SelectSearchableOptionDividerInternalProps
+>;
 type OptionListChild = OptionElement | CategoryHeaderElement | DividerElement;
-
 type OptionListChildren = OptionListChild | OptionListChild[];
 
 export type SelectSearchableOptionListProps = Omit<
@@ -54,33 +64,19 @@ function isDividerElement(node: unknown): node is DividerElement {
 type ParsedRow =
   | {
       type: 'option';
-      index: number;
       rowId: string;
       domId: string;
-      value: string;
-      label: string;
-      disabled?: boolean;
     }
   | {
       type: 'header';
-      index: number;
       rowId: string;
     }
   | {
       type: 'divider';
-      index: number;
       rowId: string;
     };
 
-function assertUniqueRowId(
-  rowType: 'Option' | 'OptionCategoryHeader' | 'OptionDivider',
-  rowId: string | undefined,
-  seenRowIds: Set<string>,
-) {
-  if (!rowId) {
-    throw new Error(`SelectSearchable.${rowType} requires a unique rowId prop.`);
-  }
-
+function assertUniqueStructuralRowId(rowId: string, seenRowIds: Set<string>) {
   if (seenRowIds.has(rowId)) {
     throw new Error(
       `SelectSearchable rowId "${rowId}" is duplicated within the same OptionList. rowId values must be unique.`,
@@ -88,6 +84,61 @@ function assertUniqueRowId(
   }
 
   seenRowIds.add(rowId);
+}
+
+function assertNoDuplicateValueForKeylessOption(
+  value: string,
+  seenValuesForKeylessOptions: Set<string>,
+) {
+  if (seenValuesForKeylessOptions.has(value)) {
+    throw new Error(
+      `SelectSearchable.Option value "${value}" is duplicated for keyless options. Provide a unique, stable React key for duplicate values.`,
+    );
+  }
+
+  seenValuesForKeylessOptions.add(value);
+}
+
+function resolveOptionIdentity(
+  option: OptionElement,
+  listboxId: string,
+  seenValuesForKeylessOptions: Set<string>,
+) {
+  const key = option.key == null ? undefined : String(option.key);
+
+  if (!key) {
+    assertNoDuplicateValueForKeylessOption(option.props.value, seenValuesForKeylessOptions);
+  }
+
+  const rowId = key ? `key:${key}` : `value:${option.props.value}`;
+  const domId = makeDomOptionId(listboxId, rowId);
+
+  return { rowId, domId };
+}
+
+function resolveStructuralRowId(
+  rowType: 'header' | 'divider',
+  element: CategoryHeaderElement | DividerElement,
+  structuralIndex: number,
+  seenRowIds: Set<string>,
+) {
+  const key = element.key == null ? undefined : String(element.key);
+  const rowId = key
+    ? `${rowType}-key:${key}`
+    : `${rowType}-index:${structuralIndex}`;
+
+  assertUniqueStructuralRowId(rowId, seenRowIds);
+  return rowId;
+}
+
+function cloneStructuralChild<T extends CategoryHeaderElement | DividerElement>(
+  child: T,
+  rowId: string,
+) {
+  return React.cloneElement(child, {
+    key: rowId,
+    __internalRowId: rowId,
+  });
 }
 
 export function SelectSearchableOptionList({ children, ...userProps }: SelectSearchableOptionListProps) {
@@ -103,59 +154,66 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
   const hiddenList = !open || disabled;
 
   const collection = useMemo(() => {
-    const arr = React.Children.toArray(children) as OptionListChild[];
     const rows: ParsedRow[] = [];
-    const seenRowIds = new Set<string>();
+    const seenStructuralRowIds = new Set<string>();
+    const seenValuesForKeylessOptions = new Set<string>();
     const options: SelectSearchableOptionRecord[] = [];
+    const renderedChildren: React.ReactNode[] = [];
     let hasNonOptionRows = false;
+    let structuralIndex = 0;
 
-    for (const [index, el] of arr.entries()) {
-      if (isOptionElement(el)) {
-        const props = el.props;
-        assertUniqueRowId('Option', props.rowId, seenRowIds);
+    React.Children.forEach(children as React.ReactNode, (child) => {
+      if (isOptionElement(child)) {
+        const { rowId, domId } = resolveOptionIdentity(child, listboxId, seenValuesForKeylessOptions);
+        const { value, disabled: optionDisabled, children: optionChildren } = child.props;
+        const label = extractNodeText(optionChildren);
 
-        const domId = makeDomOptionId(listboxId, props.rowId);
-        const label = extractNodeText(props.children);
         options.push({
           id: domId,
-          value: props.value,
+          value,
           label,
-          disabled: props.disabled,
+          disabled: optionDisabled,
         });
+
         rows.push({
           type: 'option',
-          index,
-          rowId: props.rowId,
+          rowId,
           domId,
-          label,
-          value: props.value,
-          disabled: props.disabled,
         });
-        continue;
+
+        renderedChildren.push(
+          React.cloneElement(child, {
+            key: rowId,
+            __internalDomId: domId,
+          }),
+        );
+        return;
       }
 
-      if (isCategoryHeaderElement(el)) {
-        const props = (el as CategoryHeaderElement).props;
-        assertUniqueRowId('OptionCategoryHeader', props.rowId, seenRowIds);
+      if (isCategoryHeaderElement(child)) {
+        const rowId = resolveStructuralRowId('header', child, structuralIndex, seenStructuralRowIds);
+        structuralIndex += 1;
         hasNonOptionRows = true;
-        rows.push({ type: 'header', index, rowId: props.rowId });
-        continue;
+        rows.push({ type: 'header', rowId });
+        renderedChildren.push(cloneStructuralChild(child, rowId));
+        return;
       }
 
-      if (isDividerElement(el)) {
-        const props = (el as DividerElement).props;
-        assertUniqueRowId('OptionDivider', props.rowId, seenRowIds);
+      if (isDividerElement(child)) {
+        const rowId = resolveStructuralRowId('divider', child, structuralIndex, seenStructuralRowIds);
+        structuralIndex += 1;
         hasNonOptionRows = true;
-        rows.push({ type: 'divider', index, rowId: props.rowId });
-        continue;
+        rows.push({ type: 'divider', rowId });
+        renderedChildren.push(cloneStructuralChild(child, rowId));
+        return;
       }
-    }
+    });
 
     const headers: SelectSearchableHeaderRecord[] = [];
     const dividers: SelectSearchableDividerRecord[] = [];
 
     if (!hasNonOptionRows) {
-      return { options, headers, dividers };
+      return { options, headers, dividers, renderedChildren };
     }
 
     for (let i = 0; i < rows.length; i++) {
@@ -197,7 +255,7 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
       }
     }
 
-    return { options, headers, dividers };
+    return { options, headers, dividers, renderedChildren };
   }, [children, listboxId]);
 
   // Register selectable rows and structural metadata in one store update.
@@ -229,7 +287,7 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
 
   return (
     <ul {...merged} ref={store.setOptionListEl} data-part="list">
-      {children}
+      {collection.renderedChildren}
     </ul>
   );
 }

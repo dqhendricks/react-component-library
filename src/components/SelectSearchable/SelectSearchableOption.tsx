@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
@@ -6,7 +6,6 @@ import {
   type SelectSearchableValue,
 } from './SelectSearchableStoreContext';
 import { mergeProps } from '../utils/mergeProps';
-import { makeDomOptionId } from '../utils/makeDomOptionId';
 
 type LiProps = React.ComponentPropsWithoutRef<'li'>;
 
@@ -21,11 +20,14 @@ export type SelectSearchableOptionProps = React.PropsWithChildren<
     | 'hidden'
     | 'ref'
   > & {
-    rowId: string; // used to uniquely identify this row within the SelectSearchable context
     value: string;
     disabled?: boolean;
   }
 >;
+
+export type SelectSearchableOptionInternalProps = {
+  __internalDomId?: string;
+};
 
 function asArray(v: SelectSearchableValue | undefined): string[] {
   if (v == null) return [];
@@ -38,16 +40,20 @@ function asArray(v: SelectSearchableValue | undefined): string[] {
  * OptionList owns registration/order; each Option owns its own DOM rendering.
  */
 export const SelectSearchableOption = React.memo(function SelectSearchableOption({
-  rowId,
+  __internalDomId,
   value,
   disabled,
   children,
   ...liProps
-}: SelectSearchableOptionProps) {
+}: SelectSearchableOptionProps & SelectSearchableOptionInternalProps) {
   const store = useSelectSearchableStoreContext();
 
-  const listboxId = useSelectSearchableStore(store, (s) => s.listboxId) ?? 'cs-listbox';
-  const domId = useMemo(() => makeDomOptionId(listboxId, rowId), [listboxId, rowId]);
+  if (!__internalDomId) {
+    throw new Error(
+      'SelectSearchable.Option must be rendered within SelectSearchable.OptionList.',
+    );
+  }
+  const domId = __internalDomId;
 
   // Subscribe to this option's own derived flags only.
   const isSelected = useSelectSearchableStore(store, (s) =>

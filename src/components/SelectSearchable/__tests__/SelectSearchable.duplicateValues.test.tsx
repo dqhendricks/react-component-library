@@ -27,9 +27,9 @@ function renderWithDuplicateValues({
       <SelectSearchable.Dropdown>
         <SelectSearchable.Search placeholder="Search…" />
         <SelectSearchable.OptionList>
-          <SelectSearchable.Option rowId="first-alice" value="alice">Alice First</SelectSearchable.Option>
-          <SelectSearchable.Option rowId="bob" value="bob">Bob</SelectSearchable.Option>
-          <SelectSearchable.Option rowId="second-alice" value="alice">Alice Second</SelectSearchable.Option>
+          <SelectSearchable.Option key="first-alice" value="alice">Alice First</SelectSearchable.Option>
+          <SelectSearchable.Option key="bob" value="bob">Bob</SelectSearchable.Option>
+          <SelectSearchable.Option key="second-alice" value="alice">Alice Second</SelectSearchable.Option>
         </SelectSearchable.OptionList>
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>,

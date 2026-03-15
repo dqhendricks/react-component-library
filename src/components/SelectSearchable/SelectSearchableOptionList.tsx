@@ -49,6 +49,25 @@ export type SelectSearchableOptionListProps = Omit<
   children: OptionListChildren;
 };
 
+function ActiveOptionAutoScroll() {
+  const store = useSelectSearchableStoreContext();
+  const activeDescendantId = useSelectSearchableStore(store, (s) => s.activeDescendantId);
+  const optionListEl = useSelectSearchableStore(store, (s) => s.optionListEl);
+
+  useLayoutEffect(() => {
+    if (!activeDescendantId || !optionListEl) return;
+
+    const escapedId = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+      ? CSS.escape(activeDescendantId)
+      : activeDescendantId;
+
+    const node = optionListEl.querySelector<HTMLElement>(`[data-option-id="${escapedId}"]`);
+    node?.scrollIntoView?.({ block: 'nearest' });
+  }, [activeDescendantId, optionListEl]);
+
+  return null;
+}
+
 function isOptionElement(node: unknown): node is OptionElement {
   return React.isValidElement(node) && node.type === SelectSearchableOption;
 }
@@ -148,8 +167,6 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
   const multiple = useSelectSearchableStore(store, (s) => s.multiple);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
-  const activeDescendantId = useSelectSearchableStore(store, (s) => s.activeDescendantId);
-  const optionListEl = useSelectSearchableStore(store, (s) => s.optionListEl);
 
   const hiddenList = !open || disabled;
 
@@ -263,18 +280,6 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
     return store.registerCollection(collection);
   }, [store, collection]);
 
-  // Keep active option visible.
-  useLayoutEffect(() => {
-    if (!activeDescendantId || !optionListEl) return;
-
-    const escapedId = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
-      ? CSS.escape(activeDescendantId)
-      : activeDescendantId;
-
-    const node = optionListEl.querySelector<HTMLElement>(`[data-option-id="${escapedId}"]`);
-    node?.scrollIntoView?.({ block: 'nearest' });
-  }, [activeDescendantId, optionListEl]);
-
   const ourProps: UlProps = {
     id: listboxId,
     role: 'listbox',
@@ -287,6 +292,7 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
 
   return (
     <ul {...merged} ref={store.setOptionListEl} data-part="list">
+      <ActiveOptionAutoScroll />
       {collection.renderedChildren}
     </ul>
   );

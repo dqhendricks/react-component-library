@@ -129,6 +129,7 @@ export type SelectSearchableStore = {
 
   // order + navigation helpers
   moveActive: (dir: 1 | -1) => void;
+  moveActiveByPrefix: (prefix: string) => void;
 
   // value commit (injected by Root so it can handle controlled/uncontrolled)
   setCommitValue: (fn: ((next: SelectSearchableValue) => void) | null) => void;
@@ -276,6 +277,24 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
       const id = ids[idx];
       if (!isNavigable(id)) continue;
+
+      setState(() => {
+        state.activeDescendantId = id;
+      });
+      return;
+    }
+  }
+
+  function moveActiveByPrefix(prefix: string) {
+    const normalizedPrefix = normalize(prefix);
+    if (!normalizedPrefix) return;
+
+    for (const id of state.orderedIds) {
+      if (!state.visibleIds.has(id)) continue;
+
+      const opt = state.options.get(id);
+      if (!opt || opt.disabled) continue;
+      if (!normalize(opt.label).startsWith(normalizedPrefix)) continue;
 
       setState(() => {
         state.activeDescendantId = id;
@@ -511,6 +530,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     },
 
     moveActive,
+    moveActiveByPrefix,
 
     setCommitValue(fn) {
       commitValueFn = fn;

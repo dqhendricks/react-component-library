@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderBasic } from './harness';
+import { SelectSearchable } from '..';
 
 describe('SelectSearchable (keyboard)', () => {
   it('ArrowDown then Enter selects the first option', async () => {
@@ -60,7 +61,7 @@ describe('SelectSearchable (keyboard)', () => {
     expect(trigger).toHaveTextContent('Bob');
   });
 
-    it('in multiple mode, Enter toggles selection on and off and listbox stays open', async () => {
+  it('in multiple mode, Enter toggles selection on and off and listbox stays open', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();
 
@@ -77,7 +78,7 @@ describe('SelectSearchable (keyboard)', () => {
     await user.keyboard('{Enter}');
 
     expect(onValueChange).toHaveBeenLastCalledWith(
-        expect.arrayContaining(['alice'])
+      expect.arrayContaining(['alice'])
     );
 
     expect(screen.getByRole('listbox')).toBeInTheDocument();
@@ -86,9 +87,71 @@ describe('SelectSearchable (keyboard)', () => {
     await user.keyboard('{Enter}');
 
     expect(onValueChange).toHaveBeenLastCalledWith(
-        expect.not.arrayContaining(['alice'])
+      expect.not.arrayContaining(['alice'])
     );
 
     expect(screen.getByRole('listbox')).toBeInTheDocument();
-    });
+  });
+
+  it('supports trigger-only typeahead prefix navigation and opens the list', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <SelectSearchable.Root onValueChange={() => {}}>
+        <SelectSearchable.Label>Select Food</SelectSearchable.Label>
+        <SelectSearchable.Trigger>
+          <SelectSearchable.TriggerValue placeholder="Choose..." />
+        </SelectSearchable.Trigger>
+        <SelectSearchable.Dropdown>
+          <SelectSearchable.OptionList>
+            <SelectSearchable.Option value="apple">Apple</SelectSearchable.Option>
+            <SelectSearchable.Option value="apricot">Apricot</SelectSearchable.Option>
+            <SelectSearchable.Option value="banana">Banana</SelectSearchable.Option>
+            <SelectSearchable.Option value="broccoli">Broccoli</SelectSearchable.Option>
+          </SelectSearchable.OptionList>
+        </SelectSearchable.Dropdown>
+      </SelectSearchable.Root>,
+    );
+
+    const trigger = screen.getByRole('combobox', { name: 'Select Food' });
+
+    trigger.focus();
+    await user.keyboard('b');
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    expect(trigger).toHaveAttribute('aria-activedescendant');
+    expect(screen.getByRole('option', { name: 'Banana' })).toHaveAttribute('data-active', 'true');
+
+    await user.keyboard('r');
+    expect(screen.getByRole('option', { name: 'Broccoli' })).toHaveAttribute('data-active', 'true');
+  });
+
+  it('does not use trigger typeahead when a search input is present', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <SelectSearchable.Root onValueChange={() => {}}>
+        <SelectSearchable.Label>Select Food</SelectSearchable.Label>
+        <SelectSearchable.Trigger>
+          <SelectSearchable.TriggerValue placeholder="Choose..." />
+        </SelectSearchable.Trigger>
+        <SelectSearchable.Dropdown>
+          <SelectSearchable.Search placeholder="Search..." />
+          <SelectSearchable.OptionList>
+            <SelectSearchable.Option value="apple">Apple</SelectSearchable.Option>
+            <SelectSearchable.Option value="banana">Banana</SelectSearchable.Option>
+          </SelectSearchable.OptionList>
+        </SelectSearchable.Dropdown>
+      </SelectSearchable.Root>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Select Food' });
+
+    await user.click(trigger);
+    const search = screen.getByRole('combobox', { name: 'Select Food' });
+    await user.keyboard('b');
+
+    expect(search).toHaveValue('b');
+    expect(screen.getByRole('option', { name: 'Banana' })).not.toHaveAttribute('data-active', 'true');
+  });
 });

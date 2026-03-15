@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import {
   useSelectSearchableStoreContext,
   type SelectSearchableValue,
@@ -21,8 +21,16 @@ function toggleInArray(arr: string[], next: string) {
   return Array.from(set);
 }
 
+const TYPEAHEAD_RESET_MS = 500;
+
+function isPrintableCharacterKey(e: React.KeyboardEvent<HTMLElement>) {
+  if (e.ctrlKey || e.metaKey || e.altKey) return false;
+  return e.key.length === 1;
+}
+
 export function useSelectNavigationKeyDown() {
   const store = useSelectSearchableStoreContext();
+  const typeaheadRef = useRef({ buffer: '', lastKeyTime: 0 });
 
   return useCallback(
     (e: React.KeyboardEvent<HTMLElement>) => {
@@ -32,6 +40,23 @@ export function useSelectNavigationKeyDown() {
       if (s.disabled) return;
 
       if (!s.orderedIds.length) return;
+
+      if (!s.hasSearch && isPrintableCharacterKey(e)) {
+        const now = Date.now();
+        const nextBuffer =
+          now - typeaheadRef.current.lastKeyTime <= TYPEAHEAD_RESET_MS
+            ? `${typeaheadRef.current.buffer}${e.key}`
+            : e.key;
+
+        typeaheadRef.current = {
+          buffer: nextBuffer,
+          lastKeyTime: now,
+        };
+
+        if (!s.open) store.setOpen(true);
+        store.moveActiveByPrefix(nextBuffer);
+        return;
+      }
 
       const findFirstVisible = () =>
         s.orderedIds.find((id) => s.visibleIds.has(id) && !s.options.get(id)?.disabled) ?? null;

@@ -147,11 +147,21 @@ describe('SelectSearchable (keyboard)', () => {
 
     const trigger = screen.getByRole('button', { name: 'Select Food' });
 
+    trigger.focus();
+    await user.keyboard('b');
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+
     await user.click(trigger);
     const search = screen.getByRole('combobox', { name: 'Select Food' });
+    expect(search).toHaveFocus();
+    expect(search).toHaveValue('');
+    expect(screen.getByRole('option', { name: 'Banana' })).not.toHaveAttribute('data-active', 'true');
+
     await user.keyboard('b');
 
     expect(search).toHaveValue('b');
-    expect(screen.getByRole('option', { name: 'Banana' })).not.toHaveAttribute('data-active', 'true');
+    expect(screen.getByRole('option', { name: 'Banana' })).toHaveAttribute('data-active', 'true');
   });
 });

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useForm, type SubmitHandler } from 'react-hook-form';
 import {
   useFormik,
   FormikProvider,
@@ -1132,7 +1133,6 @@ export const FormikSelectSearchable = ({ name, label, options }: FormikSelectSea
   );
 };
 
-
 // Formik form component that uses reusable FormikSelectSearchable component
 
 interface FormValues {
@@ -1179,3 +1179,123 @@ export const FormikForm = ({ peopleOptions }: { peopleOptions: SelectSearchableO
   },
 };
 
+export const WithReactHookForm: Story = {
+  parameters: {
+    docs: {
+      source: {
+        language: 'tsx',
+        code: `
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { SelectSearchable } from './SelectSearchable';
+import { Chevron } from './Chevron'; // Not included
+
+interface FormValues {
+  person: string;
+}
+
+interface PersonOption {
+  id: string;
+  value: string;
+  label: string;
+}
+
+export const ReactHookFormExample = ({ options }: { options: PersonOption[] }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+    defaultValues: { person: '' },
+    mode: 'onBlur',
+  });
+
+  const onSubmit: SubmitHandler<FormValues> = (values) => {
+    console.log('submitted', values);
+  };
+
+  return (
+    <form
+      noValidate
+      onSubmit={handleSubmit(onSubmit)}
+      style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 240 }}
+    >
+      <SelectSearchable.Root
+        {...register('person', { required: 'Required' })}
+        aria-invalid={!!errors.person}
+      >
+        <SelectSearchable.Label>Select Person*</SelectSearchable.Label>
+        <SelectSearchable.Trigger>
+          <SelectSearchable.TriggerValue placeholder='Choose…' />
+          <Chevron />
+        </SelectSearchable.Trigger>
+
+        <SelectSearchable.Dropdown>
+          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.OptionList>
+            {options.map((option) => (
+              <SelectSearchable.Option key={option.id} value={option.value}>
+                {option.label}
+              </SelectSearchable.Option>
+            ))}
+          </SelectSearchable.OptionList>
+        </SelectSearchable.Dropdown>
+
+        <SelectSearchable.Error hideWhenValid>
+          {errors.person?.message}
+        </SelectSearchable.Error>
+      </SelectSearchable.Root>
+      <button type='submit'>Submit</button>
+    </form>
+  );
+};
+        `.trim(),
+      },
+      description: {
+        story: 'Uses register() to connect the Root ref, name, onChange, and onBlur to React Hook Form, with required validation on blur and submission.',
+      },
+    },
+  },
+  render: function ReactHookFormStory() {
+    type FormValues = { person: string };
+
+    const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
+      defaultValues: { person: '' },
+      mode: 'onBlur',
+    });
+
+    const onSubmit: SubmitHandler<FormValues> = (values) => {
+      console.log('submitted', values);
+    };
+
+    return (
+      <form
+        noValidate
+        onSubmit={handleSubmit(onSubmit)}
+        style={{ display: 'flex', flexDirection: 'column', gap: 10, maxWidth: 240 }}
+      >
+        <SelectSearchable.Root
+          {...register('person', { required: 'Required' })}
+          aria-invalid={!!errors.person}
+        >
+          <SelectSearchable.Label>Select Person*</SelectSearchable.Label>
+          <SelectSearchable.Trigger>
+            <SelectSearchable.TriggerValue placeholder='Choose…' />
+            <Chevron />
+          </SelectSearchable.Trigger>
+
+          <SelectSearchable.Dropdown>
+            <SelectSearchable.Search placeholder='Search…' />
+            <SelectSearchable.OptionList>
+              {peopleOptions.map((option, i) => (
+                <SelectSearchable.Option key={`${option.label}-${i}`} value={option.label}>
+                  {option.label}
+                </SelectSearchable.Option>
+              ))}
+            </SelectSearchable.OptionList>
+          </SelectSearchable.Dropdown>
+
+          <SelectSearchable.Error hideWhenValid>
+            {errors.person?.message}
+          </SelectSearchable.Error>
+        </SelectSearchable.Root>
+        <button type='submit'>Submit</button>
+      </form>
+    );
+  },
+};

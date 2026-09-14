@@ -8,13 +8,13 @@ describe('SelectSearchable (search)', () => {
     const user = userEvent.setup();
     renderBasic();
 
-    await user.click(screen.getByRole('button', { name: 'Select Person' }));
+    await user.click(screen.getByRole('button', { name: /^Select Person(?: |$)/ }));
 
     // Grab Bob while it's still accessible
     const bob = screen.getByRole('option', { name: 'Bob' });
     expect(bob).toBeVisible();
 
-    const search = screen.getByRole('combobox', { name: 'Select Person' });
+    const search = screen.getByRole('combobox', { name: /^Select Person(?: |$)/ });
     await user.type(search, 'al');
 
     // Visible (accessible)
@@ -31,9 +31,9 @@ describe('SelectSearchable (search)', () => {
     const user = userEvent.setup();
     renderBasic();
 
-    await user.click(screen.getByRole('button', { name: 'Select Person' }));
+    await user.click(screen.getByRole('button', { name: /^Select Person(?: |$)/ }));
 
-    const search = screen.getByRole('combobox', { name: 'Select Person' });
+    const search = screen.getByRole('combobox', { name: /^Select Person(?: |$)/ });
 
     await user.type(search, 'al');
     expect(screen.queryByRole('option', { name: 'Bob' })).not.toBeInTheDocument();
@@ -49,9 +49,9 @@ describe('SelectSearchable (search)', () => {
     const user = userEvent.setup();
     renderBasic();
 
-    await user.click(screen.getByRole('button', { name: 'Select Person' }));
+    await user.click(screen.getByRole('button', { name: /^Select Person(?: |$)/ }));
 
-    const search = screen.getByRole('combobox', { name: 'Select Person' });
+    const search = screen.getByRole('combobox', { name: /^Select Person(?: |$)/ });
     await user.type(search, 'AL');
 
     expect(screen.getByRole('option', { name: 'Alice' })).toBeVisible();
@@ -63,11 +63,11 @@ describe('SelectSearchable (search)', () => {
     const user = userEvent.setup();
     renderBasic();
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
 
-    const search = screen.getByRole('combobox', { name: 'Select Person' });
+    const search = screen.getByRole('combobox', { name: /^Select Person(?: |$)/ });
     await user.type(search, 'bob');
 
     expect(screen.queryByRole('option', { name: 'Alice' })).not.toBeInTheDocument();

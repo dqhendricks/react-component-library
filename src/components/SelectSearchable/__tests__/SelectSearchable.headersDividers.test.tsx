@@ -59,8 +59,8 @@ function renderWithRows() {
 
 async function openAndGetSearch() {
   const user = userEvent.setup();
-  await user.click(screen.getByRole('button', { name: 'Select Person' }));
-  const search = screen.getByRole('combobox', { name: 'Select Person' });
+  await user.click(screen.getByRole('button', { name: /^Select Person(?: |$)/ }));
+  const search = screen.getByRole('combobox', { name: /^Select Person(?: |$)/ });
   return { user, search };
 }
 

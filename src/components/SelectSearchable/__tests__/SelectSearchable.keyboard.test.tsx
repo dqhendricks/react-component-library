@@ -11,7 +11,7 @@ describe('SelectSearchable (keyboard)', () => {
 
     renderBasic({ onValueChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     trigger.focus();
     await user.keyboard('{Enter}');
@@ -32,7 +32,7 @@ describe('SelectSearchable (keyboard)', () => {
 
     renderBasic({ onValueChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     expect(screen.getByRole('listbox')).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('SelectSearchable (keyboard)', () => {
 
     renderBasic({ onValueChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
 
@@ -67,7 +67,7 @@ describe('SelectSearchable (keyboard)', () => {
 
     renderBasic({ multiple: true, onValueChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
 
@@ -113,7 +113,7 @@ describe('SelectSearchable (keyboard)', () => {
       </SelectSearchable.Root>,
     );
 
-    const trigger = screen.getByRole('combobox', { name: 'Select Food' });
+    const trigger = screen.getByRole('combobox', { name: /^Select Food(?: |$)/ });
 
     trigger.focus();
     await user.keyboard('b');
@@ -145,7 +145,7 @@ describe('SelectSearchable (keyboard)', () => {
       </SelectSearchable.Root>,
     );
 
-    const trigger = screen.getByRole('button', { name: 'Select Food' });
+    const trigger = screen.getByRole('button', { name: /^Select Food(?: |$)/ });
 
     trigger.focus();
     await user.keyboard('b');
@@ -154,7 +154,7 @@ describe('SelectSearchable (keyboard)', () => {
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
 
     await user.click(trigger);
-    const search = screen.getByRole('combobox', { name: 'Select Food' });
+    const search = screen.getByRole('combobox', { name: /^Select Food(?: |$)/ });
     expect(search).toHaveFocus();
     expect(search).toHaveValue('');
     expect(screen.getByRole('option', { name: 'Banana' })).not.toHaveAttribute('data-active', 'true');

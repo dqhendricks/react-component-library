@@ -57,7 +57,7 @@ type SelectSearchableRootProps = PropsWithChildren<
  * Root container for the SelectSearchable composite component.
  *
  * Renders a visually-custom select while maintaining an underlying native `select`
- * for form compatibility and accessibility.
+ * for form compatibility. Trigger and Search own the exposed accessibility semantics.
  */
 export const SelectSearchableRoot = React.forwardRef<
   HTMLSelectElement,

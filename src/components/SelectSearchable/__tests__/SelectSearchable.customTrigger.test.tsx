@@ -38,7 +38,7 @@ describe('SelectSearchable (custom rendered trigger)', () => {
   it('passes initial render args (closed, no selection, multiple=false)', () => {
     renderWithCustomTrigger({ multiple: false });
 
-    expect(screen.getByRole('button', { name: 'Select Person' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Select Person(?: |$)/ })).toBeInTheDocument();
     expect(screen.getByTestId('open')).toHaveTextContent('false');
     expect(screen.getByTestId('multiple')).toHaveTextContent('false');
     expect(screen.getByTestId('values')).toHaveTextContent('');
@@ -50,7 +50,7 @@ describe('SelectSearchable (custom rendered trigger)', () => {
     const user = userEvent.setup();
     renderWithCustomTrigger();
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     expect(screen.getByTestId('open')).toHaveTextContent('false');
 
@@ -65,7 +65,7 @@ describe('SelectSearchable (custom rendered trigger)', () => {
     const user = userEvent.setup();
     renderWithCustomTrigger({ multiple: false });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));
@@ -82,7 +82,7 @@ describe('SelectSearchable (custom rendered trigger)', () => {
     const user = userEvent.setup();
     renderWithCustomTrigger({ multiple: true });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
 

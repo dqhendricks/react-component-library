@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import {
@@ -108,7 +108,7 @@ const PlaygroundComponent = (args: any) => {
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder="Search…" />
+        <SelectSearchable.Search aria-label="Search people" placeholder="Search…" />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -161,7 +161,7 @@ export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProp
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder='Search…' />
+      <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -270,37 +270,37 @@ export const MySelectSearchable = ({ options, multiple }: MySelectSearchableProp
     'aria-label': {
       control: false,
       description:
-        'Accessible name for the control when no visible label or aria-labelledby is provided. Forwarded to internal focusable elements.',
+        'Shared field name, overriding Label unless Root aria-labelledby is supplied. Local Trigger/Search naming takes precedence. Text is preserved verbatim.',
       table: { type: { summary: 'string' } },
     },
     'aria-labelledby': {
       control: false,
       description:
-        'Space-separated id reference(s) of element(s) that label the control. Forwarded to internal focusable elements. Prefer when using a visible `<label>`.',
+        'Shared field-name ID references, overriding Root aria-label and Label. Local Trigger/Search naming replaces this source.',
       table: { type: { summary: 'string' } },
     },
     'aria-description': {
       control: false,
       description:
-        'Additional accessible description text. Forwarded to internal focusable elements. Screen reader support varies.',
+        'Shared description text, overridden by local aria-description. Text is preserved verbatim; aria-describedby takes precedence in browser description calculation.',
       table: { type: { summary: 'string' } },
     },
     'aria-describedby': {
       control: false,
       description:
-        'Space-separated id reference(s) of element(s) that describe the control (e.g., help or error text). Forwarded to internal focusable elements.',
+        'Shared description ID references. A local aria-describedby replaces these; the rendered Error ID is appended while invalid.',
       table: { type: { summary: 'string' } },
     },
     'aria-invalid': {
       control: false,
       description:
-        'Marks the control as invalid. Applied to the combobox element (Search when present, otherwise Trigger).',
+        'Root-owned invalid state, applied to Trigger and Search. Also exposes data-invalid on the component parts.',
       table: { type: { summary: 'boolean | "true" | "false" | "grammar" | "spelling"' } },
     },
     'aria-errormessage': {
       control: false,
       description:
-        'Id reference of the element containing the error message. When aria-invalid is true, the id is merged into aria-describedby and applied to internal focusable elements.',
+        'External error ID references, applied as aria-errormessage only while invalid. Local values override Root; the same IDs are excluded from aria-describedby.',
       table: { type: { summary: 'string' } },
     },
 
@@ -336,7 +336,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder='Search…' />
+      <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -362,7 +362,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -398,7 +398,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder='Search…' />
+      <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -425,7 +425,7 @@ export const MySelectSearchable = ({ options, onValueChange, error }: MySelectSe
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -532,7 +532,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
     </SelectSearchable.Trigger>
 
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder='Search…' />
+      <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
       <SelectSearchable.OptionList>
         {options.map((option) => (
           <SelectSearchable.Option key={option.id} value={option.value}>
@@ -574,7 +574,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           {peopleOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -681,7 +681,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown className='demoSelectDropdown'>
-          <SelectSearchable.Search
+          <SelectSearchable.Search aria-label="Search people"
             className='demoSelectSearchInput'
             placeholder='Search…'
           />
@@ -785,7 +785,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
           </SelectSearchable.Trigger>
 
           <SelectSearchable.Dropdown className='demoSelectDropdown'>
-            <SelectSearchable.Search className='demoSelectSearchInput' placeholder='Search…' />
+            <SelectSearchable.Search aria-label="Search people" className='demoSelectSearchInput' placeholder='Search…' />
             <SelectSearchable.OptionList>
               {peopleOptions.map((o, i) => (
                 <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -846,7 +846,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown>
-          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
               <SelectSearchable.Option key={option.id} value={option.value}>
@@ -888,7 +888,7 @@ export const MySelectSearchable = ({ options, error }: MySelectSearchableProps) 
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown>
-          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
               <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -921,7 +921,7 @@ export const MySelectSearchable = () => {
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
           <SelectSearchable.Option value='apple'>Apple</SelectSearchable.Option>
@@ -950,7 +950,7 @@ export const MySelectSearchable = () => {
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           <SelectSearchable.OptionCategoryHeader>Fruits</SelectSearchable.OptionCategoryHeader>
           <SelectSearchable.Option value='apple'>Apple</SelectSearchable.Option>
@@ -977,7 +977,7 @@ const LargeDataSet3000Component = () => {
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           {largeOptions.map((o, i) => (
             <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -1013,7 +1013,7 @@ const MySelectSearchable = () => {
       </SelectSearchable.Trigger>
 
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           {options.map((option, i) => (
             <SelectSearchable.Option key={\`\${option.label}-\${i}\`} value={option.label}>
@@ -1050,7 +1050,7 @@ function FormikSelectSearchable({ name, label }: { name: string, label: string }
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown>
-          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
           <SelectSearchable.OptionList>
             {peopleOptions.map((o, i) => (
               <SelectSearchable.Option key={`${o.label}-${i}`} value={o.label}>
@@ -1115,7 +1115,7 @@ export const FormikSelectSearchable = ({ name, label, options }: FormikSelectSea
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown>
-          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
               <SelectSearchable.Option key={option.id} value={option.value}>
@@ -1226,7 +1226,7 @@ export const ReactHookFormExample = ({ options }: { options: PersonOption[] }) =
         </SelectSearchable.Trigger>
 
         <SelectSearchable.Dropdown>
-          <SelectSearchable.Search placeholder='Search…' />
+          <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
           <SelectSearchable.OptionList>
             {options.map((option) => (
               <SelectSearchable.Option key={option.id} value={option.value}>
@@ -1280,7 +1280,7 @@ export const ReactHookFormExample = ({ options }: { options: PersonOption[] }) =
           </SelectSearchable.Trigger>
 
           <SelectSearchable.Dropdown>
-            <SelectSearchable.Search placeholder='Search…' />
+            <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
             <SelectSearchable.OptionList>
               {peopleOptions.map((option, i) => (
                 <SelectSearchable.Option key={`${option.label}-${i}`} value={option.label}>
@@ -1318,7 +1318,7 @@ export const DuplicateValuesExample = () => (
       <SelectSearchable.TriggerValue placeholder='Choose…' />
     </SelectSearchable.Trigger>
     <SelectSearchable.Dropdown>
-      <SelectSearchable.Search placeholder='Search…' />
+      <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
       <SelectSearchable.OptionList>
         <SelectSearchable.Option key='original' value='alice'>Alice</SelectSearchable.Option>
         <SelectSearchable.Option key='copy' value='alice'>Alice from API copy</SelectSearchable.Option>
@@ -1339,7 +1339,7 @@ export const DuplicateValuesExample = () => (
         <SelectSearchable.TriggerValue placeholder='Choose…' />
       </SelectSearchable.Trigger>
       <SelectSearchable.Dropdown>
-        <SelectSearchable.Search placeholder='Search…' />
+        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
         <SelectSearchable.OptionList>
           <SelectSearchable.Option key='original' value='alice'>Alice</SelectSearchable.Option>
           <SelectSearchable.Option key='copy' value='alice'>Alice from API copy</SelectSearchable.Option>
@@ -1349,4 +1349,72 @@ export const DuplicateValuesExample = () => (
       </SelectSearchable.Dropdown>
     </SelectSearchable.Root>
   ),
+};
+
+
+export const LocalizedLabels: Story = {
+  parameters: {
+    docs: {
+      description: { story: "Complete translated strings give the trigger and Search distinct names. The trigger includes its visible selection; Search overrides both the shared name and shared help text. The application supplies translations, with no localization dependency in the component." },
+      source: { language: 'tsx', code: `
+import { useId } from 'react';
+import { SelectSearchable } from './SelectSearchable';
+
+export function LocalizedSelect() {
+  const helpId = useId();
+  const searchHelpId = useId();
+  return (
+    <div style={{ maxWidth: 280 }}>
+      <p id={helpId}>W?hlen Sie eine Person.</p>
+      <p id={searchHelpId}>Nach Namen filtern.</p>
+      <SelectSearchable.Root defaultValue='alice' aria-describedby={helpId}>
+        <SelectSearchable.Label>Zust?ndige Person</SelectSearchable.Label>
+        <SelectSearchable.Trigger>
+          <SelectSearchable.TriggerValue placeholder='Bitte w?hlen?' />
+        </SelectSearchable.Trigger>
+        <SelectSearchable.Dropdown>
+          <SelectSearchable.Search
+            aria-label='Personen suchen'
+            aria-describedby={searchHelpId}
+            placeholder='Name eingeben?'
+          />
+          <SelectSearchable.OptionList>
+            <SelectSearchable.Option value='alice'>Alice</SelectSearchable.Option>
+            <SelectSearchable.Option value='bob'>Bob</SelectSearchable.Option>
+          </SelectSearchable.OptionList>
+        </SelectSearchable.Dropdown>
+      </SelectSearchable.Root>
+    </div>
+  );
+}
+`.trim() },
+    },
+  },
+  render: function LocalizedLabelsStory() {
+  const helpId = useId();
+  const searchHelpId = useId();
+  return (
+    <div style={{ maxWidth: 280 }}>
+      <p id={helpId}>W?hlen Sie eine Person.</p>
+      <p id={searchHelpId}>Nach Namen filtern.</p>
+      <SelectSearchable.Root defaultValue='alice' aria-describedby={helpId}>
+        <SelectSearchable.Label>Zust?ndige Person</SelectSearchable.Label>
+        <SelectSearchable.Trigger>
+          <SelectSearchable.TriggerValue placeholder='Bitte w?hlen?' />
+        </SelectSearchable.Trigger>
+        <SelectSearchable.Dropdown>
+          <SelectSearchable.Search
+            aria-label='Personen suchen'
+            aria-describedby={searchHelpId}
+            placeholder='Name eingeben?'
+          />
+          <SelectSearchable.OptionList>
+            <SelectSearchable.Option value='alice'>Alice</SelectSearchable.Option>
+            <SelectSearchable.Option value='bob'>Bob</SelectSearchable.Option>
+          </SelectSearchable.OptionList>
+        </SelectSearchable.Dropdown>
+      </SelectSearchable.Root>
+    </div>
+  );
+  },
 };

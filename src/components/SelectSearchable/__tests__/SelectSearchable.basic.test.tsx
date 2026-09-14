@@ -8,7 +8,7 @@ describe('SelectSearchable (basic)', () => {
     renderBasic();
 
     expect(screen.getByText('Select Person')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Select Person' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Select Person(?: |$)/ })).toBeInTheDocument();
   });
 
   it('opens and shows options', async () => {
@@ -20,7 +20,7 @@ describe('SelectSearchable (basic)', () => {
       'listbox should not be accessible before opening',
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Select Person' }));
+    await user.click(screen.getByRole('button', { name: /^Select Person(?: |$)/ }));
     expect(screen.getByRole('listbox')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Alice' })).toBeInTheDocument();
   });
@@ -29,7 +29,7 @@ describe('SelectSearchable (basic)', () => {
     const user = userEvent.setup();
     renderBasic();
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));
@@ -44,7 +44,7 @@ describe('SelectSearchable (basic)', () => {
 
     renderBasic({ onValueChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));
@@ -58,7 +58,7 @@ describe('SelectSearchable (basic)', () => {
 
     renderBasic({ onChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
@@ -23,10 +23,9 @@ export function SelectSearchableError({
   const errorId = useSelectSearchableStore(store, (s) => s.errorId);
   const ariaInvalidBool = useSelectSearchableStore(store, (s) => s.ariaInvalidBool);
 
-  // Mark that an error element is present while mounted.
-  useEffect(() => {
-    store.setHasError(true);
-    return () => store.setHasError(false);
+  // Register the actual DOM element, including hideWhenValid transitions.
+  const errorRef = useCallback((el: HTMLParagraphElement | null) => {
+    store.setHasError(el !== null);
   }, [store]);
 
   if (hideWhenValid && !ariaInvalidBool) return null;
@@ -40,6 +39,7 @@ export function SelectSearchableError({
   return (
     <p
       {...merged}
+      ref={errorRef}
       id={errorId}
       data-part="error"
       data-invalid={ariaInvalidBool ? 'true' : undefined}

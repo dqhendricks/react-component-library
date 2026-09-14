@@ -8,7 +8,7 @@ describe('SelectSearchable (multiple)', () => {
     const user = userEvent.setup();
     renderBasic({ multiple: true });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));
@@ -20,7 +20,7 @@ describe('SelectSearchable (multiple)', () => {
     const user = userEvent.setup();
     renderBasic({ multiple: true });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));
@@ -34,7 +34,7 @@ describe('SelectSearchable (multiple)', () => {
     const user = userEvent.setup();
     renderBasic({ multiple: true });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     const alice = screen.getByRole('option', { name: 'Alice' });
@@ -52,7 +52,7 @@ describe('SelectSearchable (multiple)', () => {
 
     renderBasic({ multiple: true, onValueChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));
@@ -70,7 +70,7 @@ describe('SelectSearchable (multiple)', () => {
 
     renderBasic({ multiple: true, onChange });
 
-    const trigger = screen.getByRole('button', { name: 'Select Person' });
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 
     await user.click(trigger);
     await user.click(screen.getByRole('option', { name: 'Alice' }));

@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useMemo } from 'react';
+import React, { forwardRef, useCallback, useMemo, useId } from 'react';
 import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
@@ -8,7 +8,7 @@ import {
 import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
 import { assignRef } from '../utils/assignRef';
-import { useMergeAriaAttributes } from '../utils/useMergeAriaAttributes';
+import { resolveAriaAttributes, hasAccessibleName } from '../utils/resolveAriaAttributes';
 
 export type SelectSearchableTriggerRenderArgs = {
   selectedValues: string[];
@@ -52,26 +52,15 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
   ) {
     const store = useSelectSearchableStoreContext();
 
-    const labelId = useSelectSearchableStore(store, (s) => s.labelId);
-    const errorId = useSelectSearchableStore(store, (s) => s.errorId);
     const triggerId = useSelectSearchableStore(store, (s) => s.triggerId);
-    const dropdownId = useSelectSearchableStore(store, (s) => s.dropdownId);
     const listboxId = useSelectSearchableStore(store, (s) => s.listboxId);
     const disabled = useSelectSearchableStore(store, (s) => s.disabled);
     const open = useSelectSearchableStore(store, (s) => s.open);
     const value = useSelectSearchableStore(store, (s) => s.value);
     const selectedLabels = useSelectSearchableStore(store, (s) => s.selectedLabels);
     const multiple = useSelectSearchableStore(store, (s) => s.multiple);
-    const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
-    const hasError = useSelectSearchableStore(store, (s) => s.hasError);
     const hasSearch = useSelectSearchableStore(store, (s) => s.hasSearch);
-    const ariaLabelRoot = useSelectSearchableStore(store, (s) => s.ariaLabel);
-    const ariaLabelledByRoot = useSelectSearchableStore(store, (s) => s.ariaLabelledBy);
-    const ariaDescriptionRoot = useSelectSearchableStore(store, (s) => s.ariaDescription);
-    const ariaDescribedByRoot = useSelectSearchableStore(store, (s) => s.ariaDescribedBy);
-    const ariaInvalid = useSelectSearchableStore(store, (s) => s.ariaInvalid);
     const ariaInvalidBool = useSelectSearchableStore(store, (s) => s.ariaInvalidBool);
-    const ariaErrorMessageRoot = useSelectSearchableStore(store, (s) => s.ariaErrorMessage);
     const activeDescendantId =
       useSelectSearchableStore(store, (s) => s.activeDescendantId) ?? undefined;
 
@@ -85,26 +74,24 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       [store, ref],
     );
 
-    const {
-      ariaLabelMerged,
-      ariaLabelledByMerged,
-      ariaDescriptionMerged,
-      ariaDescribedByMerged,
-    } = useMergeAriaAttributes({
-      ariaInvalidBool,
-      ariaLabelProp,
-      ariaLabelRoot,
-      ariaLabelledByProp,
-      ariaLabelledByRoot,
-      ariaLabelledBySubComponent: hasLabel ? labelId : undefined,
-      ariaDescriptionProp,
-      ariaDescriptionRoot,
-      ariaDescribedByProp,
-      ariaDescribedByRoot,
-      ariaErrorMessageProp,
-      ariaErrorMessageRoot,
-      ariaErrorMessageSubComponent: hasError ? errorId : undefined,
-    });
+    const field = useSelectSearchableStore(store, s => s.fieldAccessibility);
+    const localAria = {
+      'aria-label': ariaLabelProp,
+      'aria-labelledby': ariaLabelledByProp,
+      'aria-description': ariaDescriptionProp,
+      'aria-describedby': ariaDescribedByProp,
+      'aria-errormessage': ariaErrorMessageProp,
+    };
+    const aria = resolveAriaAttributes(field, localAria);
+    const contentId = useId();
+    const fieldNameId = useId();
+    // Include visible content in the searchable button's default name.
+    // Explicit local naming is a complete override, including for custom triggers.
+    const includeContent = hasSearch && !hasAccessibleName(localAria) && hasAccessibleName(field);
+    if (includeContent) {
+      aria['aria-labelledby'] = (field['aria-labelledby'] ?? fieldNameId) + ' ' + contentId;
+      aria['aria-label'] = undefined;
+    }
 
     const ourButtonProps: React.ComponentPropsWithoutRef<'button'> = {
       id: triggerId,
@@ -120,13 +107,9 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
       role: hasSearch ? undefined : 'combobox',
       'aria-haspopup': 'listbox',
       'aria-expanded': open,
-      'aria-controls': open ? (hasSearch ? dropdownId : listboxId) : undefined,
+      'aria-controls': open ? listboxId : undefined,
       'aria-activedescendant': hasSearch ? undefined : activeDescendantId,
-      'aria-invalid': hasSearch ? undefined : ariaInvalid,
-      'aria-label': ariaLabelMerged,
-      'aria-labelledby': ariaLabelledByMerged,
-      'aria-description': ariaDescriptionMerged,
-      'aria-describedby': ariaDescribedByMerged,
+      ...aria,
       onKeyDown,
     };
 
@@ -155,7 +138,10 @@ export const SelectSearchableTrigger = forwardRef<HTMLButtonElement, SelectSearc
         data-state={open ? 'open' : 'closed'}
         data-invalid={ariaInvalidBool ? 'true' : undefined}
       >
-        {content}
+        {includeContent && field['aria-label'] && (
+          <span id={fieldNameId} hidden>{field['aria-label']}</span>
+        )}
+        <span id={contentId} style={{ display: 'contents' }}>{content}</span>
       </button>
     );
   },

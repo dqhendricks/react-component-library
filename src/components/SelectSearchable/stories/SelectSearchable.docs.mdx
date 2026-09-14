@@ -42,11 +42,13 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   ### Labelling
 
-  In most cases, you should use the `Label` and `Error` subcomponents. It automatically associates a visible label and error with both internal focusable elements.
+  Use one `Label` and one optional `Error` per Root. Give Search its own complete,
+  localized name, for example `aria-label="Search people"`. Placeholders are separate
+  hints and should not be used as a substitute for an accessible name.
 
   If you need manual control, you may provide ARIA attributes directly.
 
-  The following attributes can be set on the **Root** and will be forwarded to internal focusable elements:
+  The following attributes can be set on **Root** as shared defaults:
 
   - `aria-labelledby`
   - `aria-label`
@@ -56,23 +58,56 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   These attributes may also be provided directly on `Trigger` or `Search`.
 
-  If attributes are provided in multiple places (Root + subcomponent), their values are merged (duplicates removed) before being applied.
+  Naming uses exclusive precedence: local Trigger/Search naming, then Root naming,
+  then Label. A source supplies either `aria-labelledby` or `aria-label`; if it
+  supplies both, `aria-labelledby` wins. Empty or whitespace-only names fall back
+  to the next source. Names from different sources are never concatenated.
+
+  A local `aria-label` suppresses inherited `aria-labelledby`. Search falls back
+  to the field name for compatibility, but a specific localized Search name is recommended.
+  Translate complete strings in your application; the component does not prepend
+  English words or extract text from Label to build a Search name.
+
+  The searchable Trigger's default name includes the field name and visible trigger
+  content (selection or placeholder). An explicit local Trigger name is a complete
+  override; include the displayed selection in that name if appropriate. Decorative
+  icons should have `aria-hidden="true"`. Custom trigger content is included as well.
+  The select-only combobox retains its field name without automatically appending content.
+
+  Local `aria-description` replaces the shared string. Local `aria-describedby`
+  replaces the shared ID list, then the rendered Error ID is appended when invalid.
+  An empty local description or ID list suppresses the shared default. Supplied text
+  and ID lists are preserved, including repeated IDs. The automatic Error ID is added
+  only if absent, and error IDs are excluded from descriptions when already referenced
+  by `aria-errormessage`. Browsers prioritize
+  `aria-describedby` over `aria-description`, so use the former for visible help text.
 
   ### Validation
 
   When `aria-invalid` is set on the Root:
 
-  - The invalid state is applied to the combobox element.
-  - Any `Error` sub component or referenced `aria-errormessage` id is automatically included in `aria-describedby` so that error text is announced when either focusable element receives focus.
+  - Root owns invalid state, which is applied to both Trigger and Search.
+  - A rendered Error is referenced through `aria-describedby` while invalid.
+  - Explicit `aria-errormessage` remains that attribute, with local values overriding Root. It is omitted while valid, not converted to `aria-describedby`.
+  - IDs used by `aria-errormessage` are excluded from `aria-describedby` to avoid attaching the same error twice.
+  - Consumers must provide the elements referenced by explicit external IDs.
 
   ### Styling Invalid
 
   For styling invalid state, SelectSearchable exposes a `data-invalid` attribute on internal parts (e.g. Label / Trigger / Search / Dropdown / Error).  
-  Prefer using `data-invalid` as a visual hook rather than styling based on `aria-invalid`, since `aria-invalid` is only applied to the combobox element.
+  Prefer `data-invalid` as the consistent styling hook across interactive and non-interactive parts.
 
 </details>
 
 <Controls of={RootStories.Playground} />
+
+<Canvas of={RootStories.LocalizedLabels} />
+
+Migration from the previous merge behavior: local names now replace inherited names;
+local descriptions replace shared defaults. Explicit error references remain on
+`aria-errormessage`. Searchable trigger names now include visible content unless
+locally overridden. Update exact accessible-name queries accordingly. Provide one
+Trigger, one OptionList, and at most one Label, Search, and Error per Root.
 
 
 <a id="label" />
@@ -90,7 +125,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   The Label:
 
   - Automatically links to the internal control via `htmlFor`.
-  - Provides an accessible name for both internal focusable elements (Trigger and Search).
+  - Provides the fallback field name when Root or a subcomponent does not supply its own name.
   - Requires no manual `id` or `aria-labelledby` wiring.
 
   ### Controlled props (cannot be overridden):
@@ -104,8 +139,8 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   When mounted, the Label registers itself with the Root so that:
 
-  - It is included in `aria-labelledby` for internal focusable elements.
-  - Manual `aria-labelledby` values provided on Root or subcomponents are merged automatically.
+  - Its ID supplies the fallback `aria-labelledby`.
+  - Explicit Root or local naming replaces this fallback instead of merging with it.
 
   ### Styling
 
@@ -136,9 +171,10 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   ### Accessibility
 
-  When mounted:
+  When its paragraph is rendered:
 
-  - The error message `id` is merged into `aria-describedby` when `aria-invalid` is true.
+  - Its ID is appended to `aria-describedby` when invalid, unless the same ID is already used by `aria-errormessage`.
+  - Hiding or unmounting the paragraph removes its automatic reference.
   - Screen readers can announce the error message when the control receives focus.
 
   ### Visibility
@@ -183,7 +219,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   - `aria-activedescendant`
   - `aria-invalid`
 
-  The Trigger’s `id` is stable and derived from the Root `id`, using the suffix `--control`.
+  The Trigger uses the Root `id`, or a generated ID when none is supplied.
 
   ### Children
 
@@ -230,7 +266,7 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   - When no value is selected, it renders `placeholder` (default: "Select…").
   - In non-multiple mode, it renders the selected option label.
-  - In multiple mode, it renders a summary (e.g. "3 selected").
+  - In multiple mode, it joins the selected labels with commas.
 
   ### Controlled props (cannot be overridden):
 
@@ -307,6 +343,10 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   - `defaultValue`
   - `autoFocus`
   - `aria-invalid`
+  - `aria-expanded`
+  - `aria-controls`
+  - `aria-activedescendant`
+  - `aria-autocomplete`
 
   The Search input is controlled by the Root context and manages its own combobox semantics.
 
@@ -320,8 +360,9 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   ### Accessibility
 
   - Uses `role="combobox"` with `aria-controls` pointing to the listbox.
-  - Labels and descriptions provided on Root and/or Search are merged before being applied.
-  - When invalid, the error message id is merged into `aria-describedby` so it can be announced on focus.
+  - Local naming replaces inherited naming. Supply a complete translated `aria-label` or an external `aria-labelledby`.
+  - Local descriptions override shared defaults; the rendered Error ID is appended while invalid.
+  - Root owns `aria-invalid`; Search exposes the same `data-invalid` styling hook.
 
   ### Styling
 

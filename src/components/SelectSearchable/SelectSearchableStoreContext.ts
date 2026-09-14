@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { resolveAccessibleName, type FieldAccessibility } from '../utils/resolveAriaAttributes';
 
 export type SelectSearchableValue = string | string[] | undefined;
 
@@ -30,6 +31,7 @@ type State = {
   listboxId?: string;
 
   // A11y
+  fieldAccessibility: FieldAccessibility;
   ariaLabel?: string;
   ariaLabelledBy?: string;
   ariaDescription?: string;
@@ -205,6 +207,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   let commitValueFn: ((next: SelectSearchableValue) => void) | null = null;
 
   const state: State = {
+    fieldAccessibility: {},
     labelId: undefined,
     errorId: undefined,
     triggerId: undefined,
@@ -249,6 +252,25 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   };
 
   function emit() {
+    const next: FieldAccessibility = {
+      ...resolveAccessibleName(
+        { 'aria-label': state.ariaLabel, 'aria-labelledby': state.ariaLabelledBy },
+        { 'aria-labelledby': state.hasLabel ? state.labelId : undefined },
+      ),
+      'aria-description': state.ariaDescription,
+      'aria-describedby': state.ariaDescribedBy,
+      'aria-errormessage': state.ariaErrorMessage,
+      'aria-invalid': state.ariaInvalid,
+      errorId: state.hasError ? state.errorId : undefined,
+    };
+    // Cache the shared snapshot so unrelated navigation updates do not rerender consumers.
+    const keys: (keyof FieldAccessibility)[] = [
+      'aria-label', 'aria-labelledby', 'aria-description', 'aria-describedby',
+      'aria-errormessage', 'aria-invalid', 'errorId',
+    ];
+    if (keys.some(key => next[key] !== state.fieldAccessibility[key])) {
+      state.fieldAccessibility = next;
+    }
     for (const l of listeners) l();
   }
 

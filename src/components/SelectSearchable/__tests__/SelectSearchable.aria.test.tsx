@@ -8,12 +8,12 @@ function getLabelEl() {
 }
 
 function getTrigger() {
-  return screen.getByRole('button', { name: 'Select Person' });
+  return screen.getByRole('button', { name: /^Select Person(?: |$)/ });
 }
 
 function getSearch() {
-  // Your search input uses role="combobox" and should be labelled too.
-  return screen.getByRole('combobox', { name: 'Select Person' });
+  // Without a local name, Search falls back to the field label.
+  return screen.getByRole('combobox', { name: /^Select Person(?: |$)/ });
 }
 
 function getErrorEl() {
@@ -52,7 +52,7 @@ describe('SelectSearchable (aria)', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('when aria-invalid is true, error becomes visible and is referenced by describedby/errormessage', async () => {
+  it('when aria-invalid is true, error becomes visible and is referenced by describedby', async () => {
     const user = userEvent.setup();
 
     renderBasic({ 'aria-invalid': true });
@@ -67,23 +67,13 @@ describe('SelectSearchable (aria)', () => {
     const errorId = error.getAttribute('id');
     expect(errorId, 'Error element should have an id').toBeTruthy();
 
-    // Trigger should reference it (either via aria-describedby merge, or aria-errormessage)
-    const describedBy = trigger.getAttribute('aria-describedby') ?? '';
-    const errorMessage = trigger.getAttribute('aria-errormessage') ?? '';
-    expect(
-      describedBy.split(/\s+/).includes(errorId!) || errorMessage === errorId,
-      'Trigger should reference the error via aria-describedby and/or aria-errormessage',
-    ).toBe(true);
+    expect(trigger).toHaveAttribute('aria-describedby', errorId);
+    expect(trigger).not.toHaveAttribute('aria-errormessage');
 
-    // Open and ensure search is also wired (your code says: applied to internal focusables)
     await user.click(trigger);
 
     const search = getSearch();
-    const searchDescribedBy = search.getAttribute('aria-describedby') ?? '';
-    const searchErrorMessage = search.getAttribute('aria-errormessage') ?? '';
-    expect(
-      searchDescribedBy.split(/\s+/).includes(errorId!) || searchErrorMessage === errorId,
-      'Search combobox should reference the error when aria-invalid is true',
-    ).toBe(true);
+    expect(search).toHaveAttribute('aria-describedby', errorId);
+    expect(search).not.toHaveAttribute('aria-errormessage');
   });
 });

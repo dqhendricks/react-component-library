@@ -6,7 +6,7 @@ import {
 } from './SelectSearchableStoreContext';
 import { useSelectNavigationKeyDown } from './useSelectNavigationKeyDown';
 import { mergeProps } from '../utils/mergeProps';
-import { useMergeAriaAttributes } from '../utils/useMergeAriaAttributes';
+import { resolveAriaAttributes } from '../utils/resolveAriaAttributes';
 
 export type SelectSearchableSearchProps = Omit<
   React.ComponentPropsWithoutRef<'input'>,
@@ -15,6 +15,10 @@ export type SelectSearchableSearchProps = Omit<
   | 'defaultValue'
   | 'autoFocus'
   | 'aria-invalid'
+  | 'aria-expanded'
+  | 'aria-controls'
+  | 'aria-activedescendant'
+  | 'aria-autocomplete'
 >;
 
 export function SelectSearchableSearch({
@@ -28,43 +32,22 @@ export function SelectSearchableSearch({
 }: SelectSearchableSearchProps) {
   const store = useSelectSearchableStoreContext();
 
-  const labelId = useSelectSearchableStore(store, (s) => s.labelId);
-  const errorId = useSelectSearchableStore(store, (s) => s.errorId);
   const listboxId = useSelectSearchableStore(store, s => s.listboxId);
   const open = useSelectSearchableStore(store, (s) => s.open);
   const disabled = useSelectSearchableStore(store, (s) => s.disabled);
   const searchQuery = useSelectSearchableStore(store, (s) => s.searchQuery);
   const activeDescendantId = useSelectSearchableStore(store, s => s.activeDescendantId) ?? undefined;
-  const hasLabel = useSelectSearchableStore(store, (s) => s.hasLabel);
-  const hasError = useSelectSearchableStore(store, (s) => s.hasError);
-  const ariaLabelRoot = useSelectSearchableStore(store, s => s.ariaLabel);
-  const ariaLabelledByRoot = useSelectSearchableStore(store, s => s.ariaLabelledBy);
-  const ariaDescriptionRoot = useSelectSearchableStore(store, s => s.ariaDescription);
-  const ariaDescribedByRoot = useSelectSearchableStore(store, s => s.ariaDescribedBy);
-  const ariaInvalid = useSelectSearchableStore(store, s => s.ariaInvalid);
   const ariaInvalidBool = useSelectSearchableStore(store, s => s.ariaInvalidBool);
-  const ariaErrorMessageRoot = useSelectSearchableStore(store, s => s.ariaErrorMessage);
 
-  const {
-    ariaLabelMerged,
-    ariaLabelledByMerged,
-    ariaDescriptionMerged,
-    ariaDescribedByMerged,
-  } = useMergeAriaAttributes({
-    ariaInvalidBool,
-    ariaLabelProp,
-    ariaLabelRoot,
-    ariaLabelledByProp,
-    ariaLabelledByRoot,
-    ariaLabelledBySubComponent: hasLabel ? labelId : undefined,
-    ariaDescriptionProp,
-    ariaDescriptionRoot,
-    ariaDescribedByProp,
-    ariaDescribedByRoot,
-    ariaErrorMessageProp,
-    ariaErrorMessageRoot,
-    ariaErrorMessageSubComponent: hasError ? errorId : undefined,
-  });
+  const field = useSelectSearchableStore(store, s => s.fieldAccessibility);
+  const localAria = {
+    'aria-label': ariaLabelProp,
+    'aria-labelledby': ariaLabelledByProp,
+    'aria-description': ariaDescriptionProp,
+    'aria-describedby': ariaDescribedByProp,
+    'aria-errormessage': ariaErrorMessageProp,
+  };
+  const aria = resolveAriaAttributes(field, localAria);
 
   // Derived visibility is computed once per query in the store;
   // we just use it here to pick the first visible option.
@@ -114,11 +97,7 @@ export function SelectSearchableSearch({
     'aria-controls': listboxId,
     'aria-activedescendant': activeDescendantId,
     'aria-autocomplete': 'list',
-    'aria-invalid': ariaInvalid,
-    'aria-label': ariaLabelMerged,
-    'aria-labelledby': ariaLabelledByMerged,
-    'aria-description': ariaDescriptionMerged,
-    'aria-describedby': ariaDescribedByMerged,
+    ...aria,
     onKeyDown,
   };
 
@@ -131,6 +110,7 @@ export function SelectSearchableSearch({
         {...merged}
         // Consumer styling hooks
         data-part='search'
+        data-invalid={ariaInvalidBool ? 'true' : undefined}
       />
     </>
   );

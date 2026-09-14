@@ -31,7 +31,7 @@ function duplicateOptions() {
 
 async function open() {
   const user = userEvent.setup();
-  await user.click(screen.getByRole('button', { name: 'Person' }));
+  await user.click(screen.getByRole('button', { name: /^Person(?: |$)/ }));
   return user;
 }
 
@@ -45,7 +45,7 @@ describe('SelectSearchable duplicate values: first wins', () => {
     expect(screen.getAllByRole('option')).toHaveLength(2);
     expect(screen.getByRole('option', { name: 'Alice First' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.queryByText('Alice Second')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Person' })).toHaveTextContent('Alice First');
+    expect(screen.getByRole('button', { name: /^Person(?: |$)/ })).toHaveTextContent('Alice First');
     expect(new FormData(screen.getByTestId('form') as HTMLFormElement).getAll('person')).toEqual(['alice']);
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('duplicate option value "alice"'));
   });
@@ -111,7 +111,7 @@ describe('SelectSearchable duplicate values: first wins', () => {
     await open();
     const originalId = screen.getByRole('option', { name: 'Alice First' }).id;
     rerender(<Example value="alice">{[items[1], items[0], items[2]]}</Example>);
-    expect(screen.getByRole('button', { name: 'Person' })).toHaveTextContent('Alice Second');
+    expect(screen.getByRole('button', { name: /^Person(?: |$)/ })).toHaveTextContent('Alice Second');
     expect(screen.queryByText('Alice First')).not.toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Alice Second' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByRole('option', { name: 'Alice Second' })).toHaveAttribute('id', originalId);
@@ -123,7 +123,7 @@ describe('SelectSearchable duplicate values: first wins', () => {
       <S.Option value="alice">Alice Enabled</S.Option>
     </Example>);
     await open();
-    expect(screen.getByRole('button', { name: 'Person' })).toHaveTextContent('Alice Disabled');
+    expect(screen.getByRole('button', { name: /^Person(?: |$)/ })).toHaveTextContent('Alice Disabled');
     expect(screen.queryByText('Alice Enabled')).not.toBeInTheDocument();
     expect(screen.queryAllByRole('option')).toHaveLength(0);
   });
@@ -152,7 +152,7 @@ describe('SelectSearchable duplicate values: first wins', () => {
       <Example><S.Option value="alice">Alice</S.Option></Example>
     </>);
     const user = userEvent.setup();
-    const triggers = screen.getAllByRole('button', { name: 'Person' });
+    const triggers = screen.getAllByRole('button', { name: /^Person(?: |$)/ });
     await user.click(triggers[0]);
     await user.keyboard('{ArrowDown}');
     const firstOption = screen.getByRole('option');

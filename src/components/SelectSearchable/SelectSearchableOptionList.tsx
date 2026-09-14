@@ -265,8 +265,11 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
 
   // Register selectable rows and structural metadata in one store update.
   useLayoutEffect(() => {
-    return store.registerCollection(collection);
+    store.registerCollection(collection);
   }, [store, collection]);
+
+  // Preserve navigation during collection updates; clear only on unmount.
+  useLayoutEffect(() => store.clearCollection, [store]);
 
   const ourProps: UlProps = {
     id: listboxId,

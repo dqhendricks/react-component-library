@@ -1300,58 +1300,6 @@ export const ReactHookFormExample = ({ options }: { options: PersonOption[] }) =
   },
 };
 
-export const DuplicateValues: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story: 'The first option for each value wins, even when duplicates have different React keys. Alice from the API copy is ignored; both Alex options remain because their values differ. Development logs one warning per duplicate value per mounted list.',
-      },
-      source: {
-        language: 'tsx',
-        code: `
-import { SelectSearchable } from './SelectSearchable';
-
-export const DuplicateValuesExample = () => (
-  <SelectSearchable.Root onValueChange={(value) => console.log(value)}>
-    <SelectSearchable.Label>Select Person</SelectSearchable.Label>
-    <SelectSearchable.Trigger>
-      <SelectSearchable.TriggerValue placeholder='Choose…' />
-    </SelectSearchable.Trigger>
-    <SelectSearchable.Dropdown>
-      <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
-      <SelectSearchable.OptionList>
-        <SelectSearchable.Option key='original' value='alice'>Alice</SelectSearchable.Option>
-        <SelectSearchable.Option key='copy' value='alice'>Alice from API copy</SelectSearchable.Option>
-        <SelectSearchable.Option value='alex-1'>Alex</SelectSearchable.Option>
-        <SelectSearchable.Option value='alex-2'>Alex</SelectSearchable.Option>
-      </SelectSearchable.OptionList>
-    </SelectSearchable.Dropdown>
-  </SelectSearchable.Root>
-);
-        `.trim(),
-      },
-    },
-  },
-  render: () => (
-    <SelectSearchable.Root onValueChange={(value) => console.log(value)}>
-      <SelectSearchable.Label>Select Person</SelectSearchable.Label>
-      <SelectSearchable.Trigger style={{ maxWidth: 240 }}>
-        <SelectSearchable.TriggerValue placeholder='Choose…' />
-      </SelectSearchable.Trigger>
-      <SelectSearchable.Dropdown>
-        <SelectSearchable.Search aria-label="Search people" placeholder='Search…' />
-        <SelectSearchable.OptionList>
-          <SelectSearchable.Option key='original' value='alice'>Alice</SelectSearchable.Option>
-          <SelectSearchable.Option key='copy' value='alice'>Alice from API copy</SelectSearchable.Option>
-          <SelectSearchable.Option value='alex-1'>Alex</SelectSearchable.Option>
-          <SelectSearchable.Option value='alex-2'>Alex</SelectSearchable.Option>
-        </SelectSearchable.OptionList>
-      </SelectSearchable.Dropdown>
-    </SelectSearchable.Root>
-  ),
-};
-
-
 export const LocalizedLabels: Story = {
   parameters: {
     docs: {

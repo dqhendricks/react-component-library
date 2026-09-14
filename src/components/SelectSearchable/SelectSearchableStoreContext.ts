@@ -124,7 +124,8 @@ export type SelectSearchableStore = {
     options: SelectSearchableOptionRecord[];
     headers: SelectSearchableHeaderRecord[];
     dividers: SelectSearchableDividerRecord[];
-  }) => () => void;
+  }) => void;
+  clearCollection: () => void;
 
   // queries/helpers
   getOptionByValue: (value: string) => SelectSearchableOptionRecord | undefined;
@@ -526,20 +527,20 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
         reconcileActiveDescendant();
       });
+    },
 
-      return () => {
-        setState(() => {
-          state.options = new Map();
-          state.valueToId = new Map();
-          state.visibleIds = new Set();
-          state.orderedIds = [];
-          state.selectedSingleId = null;
-          state.selectedLabels = [];
-          state.headersByRowId = new Map();
-          state.dividersByRowId = new Map();
-          if (state.activeDescendantId) state.activeDescendantId = null;
-        });
-      };
+    clearCollection() {
+      setState(() => {
+        state.options = new Map();
+        state.valueToId = new Map();
+        state.visibleIds = new Set();
+        state.orderedIds = [];
+        state.selectedSingleId = null;
+        state.selectedLabels = [];
+        state.headersByRowId = new Map();
+        state.dividersByRowId = new Map();
+        state.activeDescendantId = null;
+      });
     },
 
     getOptionByValue(value) {

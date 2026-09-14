@@ -31,6 +31,19 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   SelectSearchable renders a visually hidden native `<select>` element for form submission and native integration.
 
+  ### Controlled and Uncontrolled Values
+
+  A defined `value` makes Root controlled. Omitting `value` or passing `undefined`
+  makes it uncontrolled, with `defaultValue` providing the initial selection.
+  Keep the same mode throughout the component's mounted lifetime; switching modes
+  produces a development warning.
+
+  To clear a controlled selection, use `''` in single mode or `[]` in multiple mode.
+  Setting `value` to `undefined` switches to internal state and may restore an earlier
+  uncontrolled selection; it does not clear the controlled value. If your application
+  stores an empty selection as `undefined`, pass `value={value ?? ''}` or
+  `value={value ?? []}` as appropriate. `null` is not a supported value.
+
   ### Focus Management
 
   SelectSearchable contains two internal focusable elements:
@@ -394,8 +407,6 @@ Headers and dividers are evaluated after duplicates are removed, so sections wit
 remaining options are hidden. Prefer stable database IDs as values, and keep React
 keys unique and stable when mapping arrays. This policy deduplicates option rows;
 it does not normalize duplicate entries in a consumer-supplied selection array.
-
-<Canvas of={RootStories.DuplicateValues} />
 
 <details>
   <summary>Click to expand details</summary>

@@ -44,6 +44,7 @@ type SelectSearchableRootProps = PropsWithChildren<
     | 'aria-errormessage'
   > & {
     multiple?: boolean;
+    /** Undefined uses internal state; keep control mode consistent while mounted. */
     value?: SelectSearchableValue;
     defaultValue?: SelectSearchableValue;
     onValueChange?: (value: SelectSearchableValue) => void;
@@ -99,7 +100,18 @@ export const SelectSearchableRoot = React.forwardRef<
   const listboxId = `${triggerId}--listbox`;
   const nativeSelectId = `${triggerId}--native`;
 
-  const isControlled = controlledValue != null;
+  const isControlled = controlledValue !== undefined;
+  const wasControlledRef = useRef(isControlled);
+  useEffect(() => {
+    if (import.meta.env.DEV && wasControlledRef.current !== isControlled) {
+      const from = wasControlledRef.current ? 'controlled' : 'uncontrolled';
+      const to = isControlled ? 'controlled' : 'uncontrolled';
+      console.warn(
+        `SelectSearchable.Root is changing from ${from} to ${to}. Components should not switch from controlled to uncontrolled (or vice versa). Decide between using a controlled or uncontrolled value for the lifetime of the component.`,
+      );
+    }
+    wasControlledRef.current = isControlled;
+  }, [isControlled]);
   const [uncontrolledValue, setUncontrolledValue] = useState<SelectSearchableValue>(defaultValue);
   const value = (isControlled ? controlledValue : uncontrolledValue) as SelectSearchableValue;
 

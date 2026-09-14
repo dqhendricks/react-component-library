@@ -75,7 +75,7 @@ export function useSelectNavigationKeyDown() {
               const current = asArray(s.value as any);
               const first = current[0];
               if (!first) return null;
-              return s.valueToIds.get(String(first))?.[0] ?? null;
+              return s.valueToId.get(String(first)) ?? null;
             })()
           : s.selectedSingleId;
         if (!idFromValue) return false;

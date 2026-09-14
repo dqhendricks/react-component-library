@@ -339,6 +339,23 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
 **SelectSearchable.OptionList** renders the listbox container that holds selectable options.
 
+Option values use **first wins** within each OptionList, in both single and multiple
+selection. Comparison is exact and case-sensitive. Later options with the same value
+are ignored, regardless of React keys; they are not rendered, searched, or navigated.
+The first option supplies the label and disabled state, even if a later duplicate is enabled.
+If the supplied order changes, the new first occurrence wins.
+
+In development, a console warning is emitted once per duplicate value per mounted
+OptionList. Production silently applies the same first-wins policy. Duplicate values
+do not throw. Duplicate labels with distinct values are supported normally.
+
+Headers and dividers are evaluated after duplicates are removed, so sections with no
+remaining options are hidden. Prefer stable database IDs as values, and keep React
+keys unique and stable when mapping arrays. This policy deduplicates option rows;
+it does not normalize duplicate entries in a consumer-supplied selection array.
+
+<Canvas of={RootStories.DuplicateValues} />
+
 <details>
   <summary>Click to expand details</summary>
 
@@ -396,7 +413,10 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
   - `hidden`
   - `ref`
 
-  The DOM `id` is generated automatically from internal option identity to ensure uniqueness and correct `aria-activedescendant` behavior.
+  The DOM `id` combines the owning listbox's ID with the encoded option value.
+  Identical values in different selects have distinct IDs. Within a listbox, the ID
+  stays stable when React keys change or another duplicate becomes the first occurrence.
+  React keys control reconciliation independently of DOM IDs.
 
   ### Accessibility
 
@@ -452,9 +472,9 @@ Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [
 
   ### Identity requirements
 
-  - Each option must have a unique, stable identity via either a unique, stable React `key` or a unique, stable `value`.
-  - If duplicate `value`s are used, each duplicate option must provide a unique, stable React `key`.
-  - Invalid identity configuration throws at runtime.
+  - React keys should be unique and stable when mapping arrays.
+  - Duplicate option values use the OptionList first-wins policy, with or without keys.
+  - Duplicate structural row identities (headers/dividers) remain invalid.
 
   ### Controlled props (cannot be overridden)
 

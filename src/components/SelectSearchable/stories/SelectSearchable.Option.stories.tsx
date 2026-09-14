@@ -12,7 +12,7 @@ const meta = {
     value: {
       control: false,
       description:
-        'Value committed to the control when this option is selected.',
+        'Value committed when selected. The first option with a value wins within an OptionList; later duplicates are ignored with a development warning. Duplicate labels with distinct values are allowed.',
       table: { type: { summary: 'string' } },
       type: { name: 'string', required: true },
     },

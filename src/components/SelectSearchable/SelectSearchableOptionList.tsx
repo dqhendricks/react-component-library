@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
@@ -83,7 +83,6 @@ function isDividerElement(node: unknown): node is DividerElement {
 type ParsedRow =
   | {
       type: 'option';
-      rowId: string;
       domId: string;
     }
   | {
@@ -103,36 +102,6 @@ function assertUniqueStructuralRowId(rowId: string, seenRowIds: Set<string>) {
   }
 
   seenRowIds.add(rowId);
-}
-
-function assertNoDuplicateValueForKeylessOption(
-  value: string,
-  seenValuesForKeylessOptions: Set<string>,
-) {
-  if (seenValuesForKeylessOptions.has(value)) {
-    throw new Error(
-      `SelectSearchable.Option value "${value}" is duplicated for keyless options. Provide a unique, stable React key for duplicate values.`,
-    );
-  }
-
-  seenValuesForKeylessOptions.add(value);
-}
-
-function resolveOptionIdentity(
-  option: OptionElement,
-  listboxId: string,
-  seenValuesForKeylessOptions: Set<string>,
-) {
-  const key = option.key == null ? undefined : String(option.key);
-
-  if (!key) {
-    assertNoDuplicateValueForKeylessOption(option.props.value, seenValuesForKeylessOptions);
-  }
-
-  const rowId = key ? `key:${key}` : `value:${option.props.value}`;
-  const domId = makeDomOptionId(listboxId, rowId);
-
-  return { rowId, domId };
 }
 
 function resolveStructuralRowId(
@@ -173,7 +142,8 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
   const collection = useMemo(() => {
     const rows: ParsedRow[] = [];
     const seenStructuralRowIds = new Set<string>();
-    const seenValuesForKeylessOptions = new Set<string>();
+    const seenValues = new Set<string>();
+    const duplicateValues = new Set<string>();
     const options: SelectSearchableOptionRecord[] = [];
     const renderedChildren: React.ReactNode[] = [];
     let hasNonOptionRows = false;
@@ -181,8 +151,14 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
 
     React.Children.forEach(children as React.ReactNode, (child) => {
       if (isOptionElement(child)) {
-        const { rowId, domId } = resolveOptionIdentity(child, listboxId, seenValuesForKeylessOptions);
         const { value, disabled: optionDisabled, children: optionChildren } = child.props;
+        // Deduplicate before parsing structural rows, searching, or registering options.
+        if (seenValues.has(value)) {
+          duplicateValues.add(value);
+          return;
+        }
+        seenValues.add(value);
+        const domId = makeDomOptionId(listboxId, value);
         const label = extractNodeText(optionChildren);
 
         options.push({
@@ -194,13 +170,12 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
 
         rows.push({
           type: 'option',
-          rowId,
           domId,
         });
 
         renderedChildren.push(
           React.cloneElement(child, {
-            key: rowId,
+            key: `option:${child.key ?? value}`,
             __internalDomId: domId,
           }),
         );
@@ -230,7 +205,7 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
     const dividers: SelectSearchableDividerRecord[] = [];
 
     if (!hasNonOptionRows) {
-      return { options, headers, dividers, renderedChildren };
+      return { options, headers, dividers, renderedChildren, duplicateValues };
     }
 
     for (let i = 0; i < rows.length; i++) {
@@ -272,8 +247,21 @@ export function SelectSearchableOptionList({ children, ...userProps }: SelectSea
       }
     }
 
-    return { options, headers, dividers, renderedChildren };
+    return { options, headers, dividers, renderedChildren, duplicateValues };
   }, [children, listboxId]);
+
+  // Warn once per duplicate value per mounted list, including under StrictMode.
+  const warnedValues = useRef(new Set<string>());
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    for (const value of collection.duplicateValues) {
+      if (warnedValues.current.has(value)) continue;
+      warnedValues.current.add(value);
+      console.warn(
+        `SelectSearchable.OptionList: duplicate option value ${JSON.stringify(value)}. The first option wins; additional options with this value are ignored.`,
+      );
+    }
+  }, [collection]);
 
   // Register selectable rows and structural metadata in one store update.
   useLayoutEffect(() => {

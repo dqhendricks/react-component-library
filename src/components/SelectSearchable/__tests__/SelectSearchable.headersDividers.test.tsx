@@ -125,22 +125,5 @@ describe('SelectSearchable (headers/dividers visibility)', () => {
   });
 
 
-  it('throws when duplicate option values are missing keys', () => {
-    expect(() =>
-      render(
-        <SelectSearchable.Root onValueChange={() => {}}>
-          <SelectSearchable.Trigger>
-            <SelectSearchable.TriggerValue />
-          </SelectSearchable.Trigger>
-          <SelectSearchable.Dropdown>
-            <SelectSearchable.OptionList>
-              <SelectSearchable.Option value="apple">Apple A</SelectSearchable.Option>
-              <SelectSearchable.Option value="apple">Apple B</SelectSearchable.Option>
-            </SelectSearchable.OptionList>
-          </SelectSearchable.Dropdown>
-        </SelectSearchable.Root>,
-      ),
-    ).toThrow(/duplicated for keyless options/i);
-  });
 });
 

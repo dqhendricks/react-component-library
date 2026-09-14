@@ -5,6 +5,28 @@ import { renderBasic } from './harness';
 import { SelectSearchable } from '..';
 
 describe('SelectSearchable (keyboard)', () => {
+  it('ArrowUp with no active option activates the last option without selecting it', async () => {
+    const user = userEvent.setup();
+    const onValueChange = vi.fn();
+
+    renderBasic({ onValueChange });
+
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
+    trigger.focus();
+    await user.keyboard('{ArrowUp}');
+
+    const lastOption = screen.getByRole('option', { name: 'Alex' });
+    expect(lastOption).toHaveAttribute('data-active', 'true');
+    expect(lastOption).toHaveAttribute('aria-selected', 'false');
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    await user.keyboard('{Enter}');
+
+    expect(onValueChange).toHaveBeenCalledWith('alex');
+    expect(trigger).toHaveTextContent('Alex');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+  });
+
   it('ArrowDown then Enter selects the first option', async () => {
     const user = userEvent.setup();
     const onValueChange = vi.fn();

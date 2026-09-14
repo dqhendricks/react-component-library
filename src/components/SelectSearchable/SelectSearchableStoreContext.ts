@@ -291,7 +291,8 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     const ids = state.orderedIds;
     if (!ids.length) return;
 
-    const currentIndex = state.activeDescendantId ? ids.indexOf(state.activeDescendantId) : -1;
+    const edgeIndex = dir === -1 ? ids.length : -1;
+    const currentIndex = state.activeDescendantId ? ids.indexOf(state.activeDescendantId) : edgeIndex;
 
     for (let step = 1; step <= ids.length; step++) {
       let idx = currentIndex + dir * step;

@@ -159,7 +159,7 @@ export const SelectSearchableRoot = React.forwardRef<
       store.setOpen(false);
       store.getSnapshot().triggerEl?.focus();
     }
-  }, [disabled, isControlled, multiple, onValueChange]);
+  }, [disabled, isControlled, multiple, name, onValueChange, onChange]);
 
   useEffect(() => {
     store.setCommitValue(commitValue);

@@ -1,9 +1,43 @@
 import { describe, it, expect } from 'vitest';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderBasic } from './harness';
+import { SelectSearchable as S } from '..';
 
 describe('SelectSearchable (search)', () => {
+  it('refreshes search text when a label changes while preserving the mounted option', async () => {
+    const user = userEvent.setup();
+    const view = (label: string) => (
+      <S.Root defaultValue="person">
+        <S.Trigger><S.TriggerValue /></S.Trigger>
+        <S.Dropdown>
+          <S.Search aria-label="Search people" />
+          <S.OptionList>
+            <S.Option value="person" className="custom-option">{label}</S.Option>
+          </S.OptionList>
+        </S.Dropdown>
+      </S.Root>
+    );
+    const { rerender } = render(view('  ALICE  '));
+    await user.click(screen.getByRole('button'));
+    const option = screen.getByRole('option', { name: 'ALICE' });
+    const search = screen.getByRole('combobox');
+    await user.type(search, ' AL ');
+    expect(option).toBeVisible();
+
+    rerender(view('  BOB  '));
+    expect(option).toBeInTheDocument();
+    expect(option).not.toBeVisible();
+    expect(option).toHaveClass('custom-option');
+    expect(screen.getByRole('button')).toHaveTextContent('BOB');
+
+    await user.clear(search);
+    await user.type(search, ' bO ');
+    expect(screen.getByRole('option', { name: 'BOB' })).toBe(option);
+    expect(option).toHaveAttribute('aria-selected', 'true');
+    expect(option).toHaveAttribute('data-active', 'true');
+  });
+
   it('typing filters visible options (filtered ones become hidden)', async () => {
     const user = userEvent.setup();
     renderBasic();

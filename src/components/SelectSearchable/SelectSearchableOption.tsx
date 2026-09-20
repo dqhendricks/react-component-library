@@ -2,7 +2,8 @@ import React, { useCallback } from 'react';
 import styles from './SelectSearchable.module.css';
 import {
   useSelectSearchableStoreContext,
-  useSelectSearchableStore,
+  useSelectSearchableOptionFlags,
+  optionFlags,
   type SelectSearchableValue,
 } from './SelectSearchableStoreContext';
 import { mergeProps } from '../utils/mergeProps';
@@ -55,14 +56,10 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
   }
   const domId = __internalDomId;
 
-  // Subscribe to this option's own derived flags only.
-  const isSelected = useSelectSearchableStore(store, (s) =>
-    s.multiple
-      ? s.selectedValueSet.has(value)
-      : s.value === value,
-  );
-  const isActive = useSelectSearchableStore(store, (s) => s.activeDescendantId === domId);
-  const hidden = useSelectSearchableStore(store, (s) => !s.visibleIds.has(domId));
+  const flags = useSelectSearchableOptionFlags(store, domId);
+  const isSelected = Boolean(flags & optionFlags.selected);
+  const isActive = Boolean(flags & optionFlags.active);
+  const hidden = Boolean(flags & optionFlags.hidden);
 
   const setActive = useCallback(() => {
     if (disabled) return;

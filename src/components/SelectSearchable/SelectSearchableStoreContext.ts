@@ -10,6 +10,10 @@ export type SelectSearchableOptionRecord = {
   disabled?: boolean;
 };
 
+type RegisteredOption = SelectSearchableOptionRecord & {
+  normalizedLabel: string;
+};
+
 type State = {
   // Identity / wiring
   labelId?: string;
@@ -54,7 +58,7 @@ type State = {
   nativeSelectEl: HTMLSelectElement | null;
 
   // Registered options
-  options: Map<string, SelectSearchableOptionRecord>;
+  options: Map<string, RegisteredOption>;
   valueToId: Map<string, string>; // one retained option id per value
 };
 
@@ -63,6 +67,7 @@ type Listener = () => void;
 export type SelectSearchableStore = {
   // subscribe/get
   subscribe: (l: Listener) => () => void;
+  subscribeOption: (id: string, l: Listener) => () => void;
   getSnapshot: () => State;
 
   // identity
@@ -119,26 +124,33 @@ export type SelectSearchableStore = {
 
 const normalize = (s: string) => s.trim().toLowerCase();
 
+export const optionFlags = { selected: 1, active: 2, hidden: 4 } as const;
+
+function getOptionFlags(s: State, id: string): number {
+  const option = s.options.get(id);
+  const selected = option && (s.multiple
+    ? s.selectedValueSet.has(option.value)
+    : s.value === option.value);
+  return (selected ? optionFlags.selected : 0)
+    | (s.activeDescendantId === id ? optionFlags.active : 0)
+    | (!s.visibleIds.has(id) ? optionFlags.hidden : 0);
+}
+
 function toSelectedSet(value: SelectSearchableValue): ReadonlySet<string> {
   if (value === undefined) return new Set();
   return Array.isArray(value) ? new Set(value) : new Set([value]);
 }
 
-function matchesSearch(query: string, label: string) {
-  const q = normalize(query);
-  if (!q) return true;
-  return normalize(label).includes(q);
-}
-
 function computeVisibleIds(
-  options: Map<string, SelectSearchableOptionRecord>,
+  options: Map<string, RegisteredOption>,
   searchQuery: string,
 ): Set<string> {
   const next = new Set<string>();
+  const query = normalize(searchQuery);
 
   for (const [id, opt] of options) {
     if (opt.disabled) continue;
-    if (matchesSearch(searchQuery, opt.label)) next.add(id);
+    if (!query || opt.normalizedLabel.includes(query)) next.add(id);
   }
 
   return next;
@@ -173,6 +185,7 @@ function ariaInvalidToBool(value: React.AriaAttributes['aria-invalid']): boolean
 
 export function createSelectSearchableStore(): SelectSearchableStore {
   const listeners = new Set<Listener>();
+  const optionListeners = new Map<string, Set<Listener>>();
 
   let commitValueFn: ((next: SelectSearchableValue) => void) | null = null;
 
@@ -244,7 +257,43 @@ export function createSelectSearchableStore(): SelectSearchableStore {
   }
 
   function setState(mut: () => void) {
+    // Collections are replaced, so a shallow copy preserves the previous flags.
+    const previous = { ...state };
     mut();
+    const affected = new Set<string>();
+    if (previous.activeDescendantId !== state.activeDescendantId) {
+      if (previous.activeDescendantId) affected.add(previous.activeDescendantId);
+      if (state.activeDescendantId) affected.add(state.activeDescendantId);
+    }
+    if (previous.options !== state.options) {
+      // Registration/removal can change any subscribed row's value or visibility.
+      for (const id of optionListeners.keys()) affected.add(id);
+    } else {
+      if (previous.visibleIds !== state.visibleIds) {
+        for (const id of previous.visibleIds) {
+          if (!state.visibleIds.has(id)) affected.add(id);
+        }
+        for (const id of state.visibleIds) {
+          if (!previous.visibleIds.has(id)) affected.add(id);
+        }
+      }
+      if (previous.value !== state.value || previous.multiple !== state.multiple) {
+        for (const snapshot of [previous, state]) {
+          const values = snapshot.multiple
+            ? snapshot.selectedValueSet
+            : typeof snapshot.value === 'string' ? [snapshot.value] : [];
+          for (const value of values) {
+            const id = snapshot.valueToId.get(value);
+            if (id) affected.add(id);
+          }
+        }
+      }
+    }
+    // Resolve changes before invoking listeners, which may trigger further updates.
+    const changed = [...affected].filter(id => getOptionFlags(previous, id) !== getOptionFlags(state, id));
+    for (const id of changed) {
+      optionListeners.get(id)?.forEach(listener => listener());
+    }
     emit();
   }
 
@@ -286,7 +335,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
       const opt = state.options.get(id);
       if (!opt || opt.disabled) continue;
-      if (!normalize(opt.label).startsWith(normalizedPrefix)) continue;
+      if (!opt.normalizedLabel.startsWith(normalizedPrefix)) continue;
 
       setState(() => {
         state.activeDescendantId = id;
@@ -341,6 +390,18 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     subscribe(l) {
       listeners.add(l);
       return () => listeners.delete(l);
+    },
+    subscribeOption(id, listener) {
+      let subscribers = optionListeners.get(id);
+      if (!subscribers) {
+        subscribers = new Set();
+        optionListeners.set(id, subscribers);
+      }
+      subscribers.add(listener);
+      return () => {
+        subscribers.delete(listener);
+        if (!subscribers.size) optionListeners.delete(id);
+      };
     },
     getSnapshot() {
       return state;
@@ -455,12 +516,12 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     registerCollection({ options: opts }) {
       setState(() => {
-        const nextOptions = new Map<string, SelectSearchableOptionRecord>();
+        const nextOptions = new Map<string, RegisteredOption>();
         const nextValueToId = new Map<string, string>();
         const nextOrderedIds = opts.map((o) => o.id);
 
         for (const opt of opts) {
-          nextOptions.set(opt.id, opt);
+          nextOptions.set(opt.id, { ...opt, normalizedLabel: normalize(opt.label) });
           nextValueToId.set(opt.value, opt.id);
         }
 
@@ -517,6 +578,12 @@ export function useSelectSearchableStore<T>(
     () => selector(store.getSnapshot()),
     () => selector(store.getSnapshot()),
   );
+}
+
+export function useSelectSearchableOptionFlags(store: SelectSearchableStore, id: string): number {
+  const subscribe = React.useCallback((listener: Listener) => store.subscribeOption(id, listener), [store, id]);
+  const getSnapshot = () => getOptionFlags(store.getSnapshot(), id);
+  return React.useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
 // Context that holds the per-root store instance

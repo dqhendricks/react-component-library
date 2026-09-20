@@ -15,7 +15,6 @@ type State = {
   labelId?: string;
   errorId?: string;
   triggerId?: string;
-  dropdownId?: string;
   listboxId?: string;
 
   // A11y
@@ -35,7 +34,6 @@ type State = {
   // State
   value: SelectSearchableValue;
   selectedValueSet: ReadonlySet<string>; // Fast lookup for option's isSelected check
-  selectedSingleId: string | null;
   selectedLabels: string[];
   open: boolean;
   activeDescendantId: string | null;
@@ -72,7 +70,6 @@ export type SelectSearchableStore = {
     labelId: string;
     errorId: string;
     triggerId: string;
-    dropdownId: string;
     listboxId: string;
   }) => void;
 
@@ -110,9 +107,6 @@ export type SelectSearchableStore = {
     options: SelectSearchableOptionRecord[];
   }) => void;
   clearCollection: () => void;
-
-  // queries/helpers
-  getOptionByValue: (value: string) => SelectSearchableOptionRecord | undefined;
 
   // order + navigation helpers
   moveActive: (dir: 1 | -1) => void;
@@ -154,13 +148,14 @@ function computeSelectedLabels(
   value: SelectSearchableValue,
   valueToId: Map<string, string>,
   options: Map<string, SelectSearchableOptionRecord>,
-  selectedSingleId: string | null,
+  multiple: boolean,
 ): string[] {
   if (value === undefined) return [];
 
   if (!Array.isArray(value)) {
-    if (!selectedSingleId) return [];
-    const label = options.get(selectedSingleId)?.label;
+    if (multiple) return [];
+    const id = valueToId.get(value);
+    const label = id ? options.get(id)?.label : undefined;
     return label ? [label] : [];
   }
 
@@ -170,16 +165,6 @@ function computeSelectedLabels(
       return id ? options.get(id)?.label : undefined;
     })
     .filter(Boolean) as string[];
-}
-
-function computeSelectedSingleId(
-  value: SelectSearchableValue,
-  multiple: boolean,
-  valueToId: Map<string, string>,
-): string | null {
-  if (multiple) return null;
-  if (value === undefined || Array.isArray(value)) return null;
-  return valueToId.get(String(value)) ?? null;
 }
 
 function ariaInvalidToBool(value: React.AriaAttributes['aria-invalid']): boolean {
@@ -196,7 +181,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     labelId: undefined,
     errorId: undefined,
     triggerId: undefined,
-    dropdownId: undefined,
     listboxId: undefined,
 
     ariaLabel: undefined,
@@ -212,7 +196,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     value: '',
     selectedValueSet: new Set(),
-    selectedSingleId: null,
     selectedLabels: [],
     open: false,
     activeDescendantId: null,
@@ -234,7 +217,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     valueToId: new Map(),
   };
 
-  function emit() {
+  function updateFieldAccessibility() {
     const next: FieldAccessibility = {
       ...resolveAccessibleName(
         { 'aria-label': state.ariaLabel, 'aria-labelledby': state.ariaLabelledBy },
@@ -254,6 +237,9 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     if (keys.some(key => next[key] !== state.fieldAccessibility[key])) {
       state.fieldAccessibility = next;
     }
+  }
+
+  function emit() {
     for (const l of listeners) l();
   }
 
@@ -334,11 +320,21 @@ export function createSelectSearchableStore(): SelectSearchableStore {
           : state.value;
 
       if (selectedValue !== undefined) {
-        state.activeDescendantId = state.selectedSingleId;
+        state.activeDescendantId = state.valueToId.get(selectedValue) ?? null;
       }
     } else {
       state.activeDescendantId = null;
     }
+  }
+
+  function updateSelection() {
+    state.selectedLabels = computeSelectedLabels(
+      state.value,
+      state.valueToId,
+      state.options,
+      state.multiple,
+    );
+    reconcileActiveDescendant();
   }
 
   const store: SelectSearchableStore = {
@@ -355,8 +351,8 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.labelId = p.labelId;
         state.errorId = p.errorId;
         state.triggerId = p.triggerId;
-        state.dropdownId = p.dropdownId;
         state.listboxId = p.listboxId;
+        updateFieldAccessibility();
       });
     },
 
@@ -369,6 +365,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.ariaInvalid = p.ariaInvalid;
         state.ariaInvalidBool = ariaInvalidToBool(p.ariaInvalid);
         state.ariaErrorMessage = p.ariaErrorMessage;
+        updateFieldAccessibility();
       });
     },
 
@@ -376,14 +373,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.disabled = p.disabled;
         state.multiple = p.multiple;
-        state.selectedSingleId = computeSelectedSingleId(state.value, p.multiple, state.valueToId);
-        state.selectedLabels = computeSelectedLabels(
-          state.value,
-          state.valueToId,
-          state.options,
-          state.selectedSingleId,
-        );
-        reconcileActiveDescendant();
+        updateSelection();
       });
     },
 
@@ -391,14 +381,7 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       setState(() => {
         state.value = value;
         state.selectedValueSet = toSelectedSet(value);
-        state.selectedSingleId = computeSelectedSingleId(value, state.multiple, state.valueToId);
-        state.selectedLabels = computeSelectedLabels(
-          value,
-          state.valueToId,
-          state.options,
-          state.selectedSingleId,
-        );
-        reconcileActiveDescendant();
+        updateSelection();
       });
     },
 
@@ -417,12 +400,14 @@ export function createSelectSearchableStore(): SelectSearchableStore {
     setHasLabel(has) {
       setState(() => {
         state.hasLabel = has;
+        updateFieldAccessibility();
       });
     },
 
     setHasError(has) {
       setState(() => {
         state.hasError = has;
+        updateFieldAccessibility();
       });
     },
 
@@ -483,19 +468,12 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.valueToId = nextValueToId;
         state.orderedIds = nextOrderedIds;
         state.visibleIds = computeVisibleIds(nextOptions, state.searchQuery);
-        state.selectedSingleId = computeSelectedSingleId(state.value, state.multiple, nextValueToId);
-        state.selectedLabels = computeSelectedLabels(
-          state.value,
-          nextValueToId,
-          nextOptions,
-          state.selectedSingleId,
-        );
 
         if (state.activeDescendantId && !nextOptions.has(state.activeDescendantId)) {
           state.activeDescendantId = null;
         }
 
-        reconcileActiveDescendant();
+        updateSelection();
       });
     },
 
@@ -505,18 +483,9 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.valueToId = new Map();
         state.visibleIds = new Set();
         state.orderedIds = [];
-        state.selectedSingleId = null;
         state.selectedLabels = [];
         state.activeDescendantId = null;
       });
-    },
-
-    getOptionByValue(value) {
-      const id = state.valueToId.get(value);
-      if (!id) return undefined;
-      const r = state.options.get(id);
-      if (!r) return undefined;
-      return r;
     },
 
     moveActive,

@@ -77,7 +77,7 @@ export function useSelectNavigationKeyDown() {
               if (!first) return null;
               return s.valueToId.get(String(first)) ?? null;
             })()
-          : s.selectedSingleId;
+          : typeof s.value === 'string' ? s.valueToId.get(s.value) ?? null : null;
         if (!idFromValue) return false;
 
         const opt = s.options.get(idFromValue);

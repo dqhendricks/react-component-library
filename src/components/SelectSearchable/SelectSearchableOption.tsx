@@ -59,7 +59,7 @@ export const SelectSearchableOption = React.memo(function SelectSearchableOption
   const isSelected = useSelectSearchableStore(store, (s) =>
     s.multiple
       ? s.selectedValueSet.has(value)
-      : s.selectedSingleId === domId,
+      : s.value === value,
   );
   const isActive = useSelectSearchableStore(store, (s) => s.activeDescendantId === domId);
   const hidden = useSelectSearchableStore(store, (s) => !s.visibleIds.has(domId));

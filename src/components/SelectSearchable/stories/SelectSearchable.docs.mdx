@@ -15,7 +15,7 @@ selection, custom triggers, and large option sets.
 
 <Canvas of={RootStories.Playground} />
 
-Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [TriggerValue](#triggervalue), [Dropdown](#dropdown), [OptionList](#optionlist), [Option](#option), [OptionCategoryHeader](#optioncategoryheader), [OptionDivider](#optiondivider)
+Jump to: [Root](#root), [Label](#label), [Error](#error), [Trigger](#trigger), [TriggerValue](#triggervalue), [Dropdown](#dropdown), [OptionList](#optionlist), [Option](#option)
 
 <a id="root" />
 ## SelectSearchable.Root
@@ -403,8 +403,7 @@ In development, a console warning is emitted once per duplicate value per mounte
 OptionList. Production silently applies the same first-wins policy. Duplicate values
 do not throw. Duplicate labels with distinct values are supported normally.
 
-Headers and dividers are evaluated after duplicates are removed, so sections with no
-remaining options are hidden. Prefer stable database IDs as values, and keep React
+Prefer stable database IDs as values, and keep React
 keys unique and stable when mapping arrays. This policy deduplicates option rows;
 it does not normalize duplicate entries in a consumer-supplied selection array.
 
@@ -502,103 +501,3 @@ it does not normalize duplicate entries in a consumer-supplied selection array.
 </details>
 
 <Controls of={OptionStories.Default} />
-
-
-<a id="optioncategoryheader" />
-## SelectSearchable.OptionCategoryHeader
-
-<div className="topLink">
-  [Back to top](#top)
-</div>
-
-**SelectSearchable.OptionCategoryHeader** renders a non-interactive category header row within the OptionList.
-
-<details>
-  <summary>Click to expand details</summary>
-
-  It wraps a native `<li>` element and is intended for visual grouping of related options.
-
-  ### Required props
-
-- No special identity prop is required. `OptionList` assigns structural ids internally.
-
-  ### Identity requirements
-
-  - React keys should be unique and stable when mapping arrays.
-  - Duplicate option values use the OptionList first-wins policy, with or without keys.
-  - Duplicate structural row identities (headers/dividers) remain invalid.
-
-  ### Controlled props (cannot be overridden)
-
-  - `role`
-  - `aria-hidden`
-  - `hidden`
-
-  The header is presentation-only and is not selectable.
-
-  ### Accessibility
-
-  - Uses `role="presentation"` so it does not participate as an option in listbox semantics.
-  - It is excluded from selection, active-descendant navigation, and option registration.
-
-  No manual ARIA wiring is required.
-
-  ### Behavior
-
-- Headers are identified internally by `OptionList`.
-  - Automatically hides when no visible options remain in its section after filtering.
-  - Serves as a visual grouping primitive for flat OptionList content.
-
-  ### Styling
-
-  Exposes `data-part='option-category-header'` for easy custom styling.
-
-</details>
-
-
-<a id="optiondivider" />
-## SelectSearchable.OptionDivider
-
-<div className="topLink">
-  [Back to top](#top)
-</div>
-
-**SelectSearchable.OptionDivider** renders a non-interactive separator row within the OptionList.
-
-<details>
-  <summary>Click to expand details</summary>
-
-  It wraps a native `<li>` element and is intended to visually separate blocks of options.
-
-  ### Required props
-
-- No special identity prop is required. `OptionList` assigns structural ids internally.
-
-  ### Controlled props (cannot be overridden)
-
-  - `role`
-  - `aria-hidden`
-  - `hidden`
-
-  The divider is presentation-only and is not selectable.
-
-  ### Accessibility
-
-  - Uses `role="separator"` with `aria-orientation="horizontal"`.
-  - It is excluded from selection, active-descendant navigation, and option registration.
-
-  No manual ARIA wiring is required.
-
-  ### Behavior
-
-- Dividers are identified internally by `OptionList`.
-  - Automatically hides when it does not separate two visible options (for example: at list edges, stacked with other dividers, or adjacent to headers).
-  - If a divider is placed directly before a header, it will follow the visibility of that header.
-  - Remains a purely visual structure element while options retain listbox semantics.
-
-  ### Styling
-
-  Exposes `data-part='option-divider'` for easy custom styling.
-
-</details>
-

@@ -167,19 +167,6 @@ describe('SelectSearchable duplicate values: first wins', () => {
     expect(document.getElementById(secondOption.id)).toBe(secondOption);
   });
 
-  it('hides a section and separator when all its options are duplicates', async () => {
-    render(<Example>
-      <S.OptionCategoryHeader>Original</S.OptionCategoryHeader>
-      <S.Option value="alice">Alice First</S.Option>
-      <S.OptionDivider data-testid="separator" />
-      <S.OptionCategoryHeader data-testid="duplicate-group">Repeated</S.OptionCategoryHeader>
-      <S.Option value="alice">Alice Second</S.Option>
-    </Example>);
-    await open();
-    expect(screen.getByTestId('duplicate-group')).not.toBeVisible();
-    expect(screen.getByTestId('separator')).not.toBeVisible();
-  });
-
   it('allows identical labels with distinct values without warnings', async () => {
     const onValueChange = vi.fn();
     render(<Example onValueChange={onValueChange}>

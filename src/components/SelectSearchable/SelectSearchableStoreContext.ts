@@ -10,18 +10,6 @@ export type SelectSearchableOptionRecord = {
   disabled?: boolean;
 };
 
-export type SelectSearchableHeaderRecord = {
-  rowId: string;
-  optionIds: string[];
-};
-
-export type SelectSearchableDividerRecord = {
-  rowId: string;
-  beforeOptionIds: string[];
-  afterOptionIds: string[];
-  nextHeaderRowId?: string;
-};
-
 type State = {
   // Identity / wiring
   labelId?: string;
@@ -67,11 +55,9 @@ type State = {
   optionListEl: HTMLElement | null;
   nativeSelectEl: HTMLSelectElement | null;
 
-  // Registered rows
+  // Registered options
   options: Map<string, SelectSearchableOptionRecord>;
   valueToId: Map<string, string>; // one retained option id per value
-  headersByRowId: Map<string, SelectSearchableHeaderRecord>;
-  dividersByRowId: Map<string, SelectSearchableDividerRecord>;
 };
 
 type Listener = () => void;
@@ -119,11 +105,9 @@ export type SelectSearchableStore = {
   setOptionListEl: (el: HTMLElement | null) => void;
   setNativeSelectEl: (el: HTMLSelectElement | null) => void;
 
-  // row registration
+  // option registration
   registerCollection: (p: {
     options: SelectSearchableOptionRecord[];
-    headers: SelectSearchableHeaderRecord[];
-    dividers: SelectSearchableDividerRecord[];
   }) => void;
   clearCollection: () => void;
 
@@ -248,8 +232,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
 
     options: new Map(),
     valueToId: new Map(),
-    headersByRowId: new Map(),
-    dividersByRowId: new Map(),
   };
 
   function emit() {
@@ -486,25 +468,15 @@ export function createSelectSearchableStore(): SelectSearchableStore {
       });
     },
 
-    registerCollection({ options: opts, headers, dividers }) {
+    registerCollection({ options: opts }) {
       setState(() => {
         const nextOptions = new Map<string, SelectSearchableOptionRecord>();
         const nextValueToId = new Map<string, string>();
         const nextOrderedIds = opts.map((o) => o.id);
-        const nextHeaders = new Map<string, SelectSearchableHeaderRecord>();
-        const nextDividers = new Map<string, SelectSearchableDividerRecord>();
 
         for (const opt of opts) {
           nextOptions.set(opt.id, opt);
           nextValueToId.set(opt.value, opt.id);
-        }
-
-        for (const header of headers) {
-          nextHeaders.set(header.rowId, header);
-        }
-
-        for (const divider of dividers) {
-          nextDividers.set(divider.rowId, divider);
         }
 
         state.options = nextOptions;
@@ -518,8 +490,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
           nextOptions,
           state.selectedSingleId,
         );
-        state.headersByRowId = nextHeaders;
-        state.dividersByRowId = nextDividers;
 
         if (state.activeDescendantId && !nextOptions.has(state.activeDescendantId)) {
           state.activeDescendantId = null;
@@ -537,8 +507,6 @@ export function createSelectSearchableStore(): SelectSearchableStore {
         state.orderedIds = [];
         state.selectedSingleId = null;
         state.selectedLabels = [];
-        state.headersByRowId = new Map();
-        state.dividersByRowId = new Map();
         state.activeDescendantId = null;
       });
     },

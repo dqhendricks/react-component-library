@@ -313,11 +313,13 @@ Trigger, one OptionList, and at most one Label, Search, and Error per Root.
   - Positions itself relative to the Trigger and automatically flips **up** or **down** based on available viewport space.
   - Clamps its maximum height to the viewport (and becomes scrollable when needed).
   - Closes when the user scrolls outside of the dropdown.
+  - Remains mounted while closed. Closed or disabled dropdowns are `inert`, preventing focus and interaction even when custom animations override visibility.
 
   ### Controlled props (cannot be overridden):
 
   - `ref`
   - `aria-hidden`
+  - `inert`
 
   The dropdown `ref` is managed by the Root for focus and interaction behavior.
 

@@ -4,6 +4,29 @@ import userEvent from '@testing-library/user-event';
 import { renderBasic } from './harness';
 
 describe('SelectSearchable (basic)', () => {
+  it('keeps the mounted dropdown inert while closed, including with animation visibility overrides', async () => {
+    const user = userEvent.setup();
+    renderBasic();
+    const trigger = screen.getByRole('button', { name: /^Select Person(?: |$)/ });
+    const dropdown = document.querySelector<HTMLElement>('[data-part="dropdown"]')!;
+    const search = dropdown.querySelector('input')!;
+    dropdown.style.visibility = 'visible';
+    dropdown.style.opacity = '0';
+    expect(dropdown).toHaveAttribute('aria-hidden', 'true');
+    expect(dropdown).toHaveAttribute('inert');
+
+    await user.click(trigger);
+    expect(dropdown).not.toHaveAttribute('inert');
+    expect(dropdown).not.toHaveAttribute('aria-hidden');
+    expect(search).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(dropdown).toHaveAttribute('inert');
+    expect(dropdown).toHaveAttribute('aria-hidden', 'true');
+    expect(search).toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
   it('renders trigger and label', () => {
     renderBasic();
 
